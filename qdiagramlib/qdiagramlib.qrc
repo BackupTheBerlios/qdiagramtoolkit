@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/qdiagram">
+        <file alias="grid.visible">resources/showgrid.png</file>
+        <file alias="grid.invisible">resources/hidegrid.png</file>
+        <file alias="zoom.out">resources/zoomout.png</file>
+        <file alias="zoom.in">resources/zoomin.png</file>
+        <file alias="cursor.default">resources/cursor.png</file>
+        <file alias="connector.straight">resources/straight.png</file>
+        <file alias="connector.straight.arrow">resources/straight_arrow_end.png</file>
+        <file alias="connector.line.no_arrows">resources/connector_line.png</file>
+        <file alias="connector.default">resources/connector_default.ico</file>
+        <file alias="line.solid">resources/line_solid.ico</file>
+        <file alias="line.dash_dot">resources/line_dash_dot.ico</file>
+        <file alias="line.dotted">resources/line_dotted.ico</file>
+        <file alias="line.dash_dot_dot">resources/line_dash_dot_dot.ico</file>
+        <file alias="line.dashed">resources/line_dashed.ico</file>
+    </qresource>
+    <qresource prefix="/diagram/arrows">
+        <file alias="start.default">resources/arrow_start_default.ico</file>
+    </qresource>
+</RCC>

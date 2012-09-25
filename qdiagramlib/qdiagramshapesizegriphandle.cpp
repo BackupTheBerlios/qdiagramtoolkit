@@ -1,0 +1,5 @@
+
+
+QDiagramShapeSizeGripHandle::~QDiagramShapeSizeGripHandle()
+{
+}
