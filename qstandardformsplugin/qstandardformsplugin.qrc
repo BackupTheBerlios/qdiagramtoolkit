@@ -1,0 +1,40 @@
+<RCC>
+    <qresource prefix="/qstandardformsplugin" lang="block">
+        <file alias="rectangle">resources/rectangle.ico</file>
+        <file alias="diamond">resources/diamond.ico</file>
+        <file alias="rectangle.rounded">resources/rounded_rectangle.ico</file>
+        <file alias="square.rounded">resources/rounded_square.ico</file>
+        <file alias="parallelogramm">resources/parallelogramm.ico</file>
+        <file alias="trapezoid">resources/trapezoid.ico</file>
+        <file alias="triangle.right_angle">resources/triangle_right_angle.ico</file>
+        <file alias="square">resources/square.ico</file>
+        <file alias="triangle.isosceles">resources/triangle_isosceles.ico</file>
+        <file alias="hexagon">resources/hexagon.ico</file>
+        <file alias="octagon">resources/octagon.ico</file>
+        <file alias="circle">resources/circle.ico</file>
+        <file alias="cross">resources/cross.ico</file>
+        <file alias="lines.line">resources/line.ico</file>
+        <file alias="line.dash_dot">resources/line_dash_dot.ico</file>
+        <file alias="line.dash_dot_dot">resources/line_dash_dot_dot.ico</file>
+        <file alias="line.dashed">resources/line_dashed.ico</file>
+        <file alias="line.dotted">resources/line_dotted.ico</file>
+        <file alias="line.solid">resources/line_solid.ico</file>
+        <file alias="connector.default">resources/connector_default.ico</file>
+        <file alias="connector.line">resources/connector_line.ico</file>
+        <file alias="connector.line.ae">resources/connector_line_arrow_end.ico</file>
+        <file alias="connector.line.as">resources/connector_line_arrows.ico</file>
+        <file alias="connector.default.ae">resources/connector_default_arrow_end.ico</file>
+        <file alias="connector.default.as">resources/connector_default_arrows.ico</file>
+    </qresource>
+    <qresource prefix="/qstandardformsplugin/arrows">
+        <file alias="start.default">resources/arrow_start_default.ico</file>
+        <file alias="start.concave">resources/arrow_start_concave.ico</file>
+        <file alias="start.double">resources/arrow_start_double.ico</file>
+        <file alias="start.small">resources/arrow_start_small.ico</file>
+    </qresource>
+    <qresource prefix="/qstandardformsplugin/eol">
+        <file alias="start.circle">resources/eol_start_circle.ico</file>
+        <file alias="start.square">resources/eol_start_square.ico</file>
+        <file alias="start.diamond">resources/eol_start_diamond.ico</file>
+    </qresource>
+</RCC>
