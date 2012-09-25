@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/logiccircuit" lang="input.digital">
+        <file alias="gate.and">resources/gate_and.ico</file>
+        <file alias="gate.nor">resources/gate_nor.ico</file>
+        <file alias="gate.not">resources/gate_not.ico</file>
+        <file alias="gate.or">resources/gate_or.ico</file>
+        <file alias="gate.xnor">resources/gate_xnor.ico</file>
+        <file alias="gate.xor">resources/gate_xor.ico</file>
+        <file alias="gate.nand">resources/gate_nand.ico</file>
+        <file alias="output.digital">resources/output.digital.ico</file>
+        <file alias="connector.default">resources/connector_default.ico</file>
+        <file alias="connector.line">resources/connector_line.ico</file>
+        <file alias="input.digital">resources/input.digital.ico</file>
+        <file alias="output.analog">resources/output.analog.ico</file>
+        <file alias="input.analog">resources/input.analog.ico</file>
+        <file alias="inlay.digital">resources/inlay.analog.ico</file>
+        <file alias="inlay.analog">resources/inlay.digital.ico</file>
+        <file alias="function.counter">resources/counter.ico</file>
+        <file alias="function.comparator">resources/comparator.ico</file>
+        <file alias="function.summation">resources/summation.ico</file>
+        <file alias="function.compare.equal">resources/compare_equal.ico</file>
+        <file alias="function.compare.greater">resources/compare_greater.ico</file>
+        <file alias="function.compare.less">resources/compare_less.ico</file>
+        <file alias="function.compare.less_or_equal">resources/compare_less_or_equal.ico</file>
+        <file alias="function.compare.greator_or_equal">resources/compare_greater_or_equal.ico</file>
+        <file alias="flipflop.asyncron">resources/flipflop.asyncron.ico</file>
+        <file alias="function.counter.operating_hours">resources/operating_hours_counter.ico</file>
+        <file alias="parameter.analog">resources/parameter_analog.ico</file>
+        <file alias="parameter.digital">resources/parameter_digital.ico</file>
+    </qresource>
+</RCC>
