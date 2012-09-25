@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/qsysmlplugin">
+        <file alias="node.initial">resources/initial_node.ico</file>
+        <file alias="node.final.activity">resources/activity_final_node.ico</file>
+        <file alias="node.final.flow">resources/flow_final_node.ico</file>
+        <file alias="node.fork">resources/fork_node.ico</file>
+        <file alias="node.join">resources/join_node.ico</file>
+        <file alias="node.decision">resources/decision_node.ico</file>
+        <file alias="node.merge">resources/merge_node.ico</file>
+        <file alias="action.accept_event">resources/accept_event_action.ico</file>
+        <file alias="action">resources/action.ico</file>
+        <file alias="action.send_signal">resources/send_signal_action.ico</file>
+        <file alias="node.fork_horizontal">resources/fork_node_horizontal.ico</file>
+        <file alias="block">resources/block.ico</file>
+    </qresource>
+</RCC>
