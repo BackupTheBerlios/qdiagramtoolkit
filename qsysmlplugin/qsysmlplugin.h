@@ -34,7 +34,7 @@ public:
 
     QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
 
-    QAbstractDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
+    QDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
 
     QStringList diagrams() const;
 

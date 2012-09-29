@@ -71,9 +71,9 @@ QAbstractDiagramGraphicsItem *QStandardFormsPlugin::createItem(const QMap<QStrin
     return item;
 }
 
-QAbstractDiagram *QStandardFormsPlugin::diagram(const QString &type, QObject *parent) const
+QDiagram *QStandardFormsPlugin::diagram(const QString &type, QObject *parent) const
 {
-    QAbstractDiagram* d = new QDiagram(parent);
+    QDiagram* d = new QDiagram(parent);
     d->addPlugin(name());
     return d;
 }

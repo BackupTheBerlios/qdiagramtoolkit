@@ -35,6 +35,7 @@ class QAbstractDiagramShapeConnectionPoint;
 class QAbstractDiagramShapeConnector;
 class QAbstractDiagramGraphicsItemFactory;
 
+class QDiagram;
 class QGraphicsScene;
 
 //! The QAbstractDiagramPlugin class provides an abstract base for custom QDiagram plugins.
@@ -55,7 +56,7 @@ public:
       */
     virtual QMap<QString,QVariant> defaultProperties(const QString & name) const = 0;
 
-    virtual QAbstractDiagram* diagram(const QString & type = "default", QObject* parent = 0) const = 0;
+    virtual QDiagram* diagram(const QString & type = "default", QObject* parent = 0) const = 0;
     /**
       *
       */

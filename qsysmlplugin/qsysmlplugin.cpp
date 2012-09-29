@@ -69,9 +69,9 @@ QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString, QVari
     return item;
 }
 
-QAbstractDiagram *QSysMLPlugin::diagram(const QString &type, QObject *parent) const
+QDiagram *QSysMLPlugin::diagram(const QString &type, QObject *parent) const
 {
-    QAbstractDiagram* d = new QDiagram(parent);
+    QDiagram* d = new QDiagram(parent);
     d->addPlugin(name());
     return d;
 }

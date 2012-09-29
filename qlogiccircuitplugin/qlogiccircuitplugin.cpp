@@ -240,9 +240,9 @@ QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &na
     return properties;
 }
 
-QAbstractDiagram* QLogicCircuitPlugin::diagram(const QString & type, QObject* parent) const
+QDiagram* QLogicCircuitPlugin::diagram(const QString & type, QObject* parent) const
 {
-	QAbstractDiagram* d = new QLogicCircuitDiagram(parent);
+	QDiagram* d = new QLogicCircuitDiagram(parent);
     d->addPlugin(name());
     return d;
 }
