@@ -293,6 +293,11 @@ void QDiagramView::setSnapToGrid(bool on)
     m_snapToGrid = on;
 }
 
+QAbstractDiagramShape* QDiagramView::shapeAt(const QPoint & pos) const
+{
+	return qgraphicsitem_cast<QAbstractDiagramShape*>(graphicsView()->itemAt(pos));
+}
+
 QSizeF QDiagramView::snapSize() const
 {
     return m_snapSize;
