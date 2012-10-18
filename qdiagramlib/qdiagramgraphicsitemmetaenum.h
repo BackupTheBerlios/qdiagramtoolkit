@@ -19,7 +19,9 @@
 #ifndef QDIAGRAMGRAPHICSITEMMETAENUM_H
 #define QDIAGRAMGRAPHICSITEMMETAENUM_H
 
-class QDiagramGraphicsItemMetaEnum
+#include "qdiagramlib_global.h"
+
+class QDIAGRAMLIBSHARED_EXPORT QDiagramGraphicsItemMetaEnum
 {
 public:
     QDiagramGraphicsItemMetaEnum();
