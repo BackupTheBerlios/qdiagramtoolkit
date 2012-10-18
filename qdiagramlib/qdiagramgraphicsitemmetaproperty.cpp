@@ -23,21 +23,24 @@ QDiagramGraphicsItemMetaProperty::QDiagramGraphicsItemMetaProperty()
 {
     m_dynamic = false;
     m_readOnly = true;
+	m_objectType = -1;
     m_type = QDiagramGraphicsItemMetaProperty::Invalid;
 }
 
-QDiagramGraphicsItemMetaProperty::QDiagramGraphicsItemMetaProperty(const QString & name, QDiagramGraphicsItemMetaProperty::Type type, bool readOnly)
+QDiagramGraphicsItemMetaProperty::QDiagramGraphicsItemMetaProperty(int objectType, const QString & name, QDiagramGraphicsItemMetaProperty::Type type, bool readOnly)
 {
     m_dynamic = false;
     m_name = name;
+	m_objectType = objectType;
     m_readOnly = readOnly;
     m_type = type;
 }
 
-QDiagramGraphicsItemMetaProperty::QDiagramGraphicsItemMetaProperty(const QString &name, Type type, const QMap<int, QString> &pairs)
+QDiagramGraphicsItemMetaProperty::QDiagramGraphicsItemMetaProperty(int objectType, const QString &name, Type type, const QMap<int, QString> &pairs)
 {
     m_dynamic = false;
     m_name = name;
+	m_objectType = objectType;
     m_readOnly = false;
     m_type = QDiagramGraphicsItemMetaProperty::Enumeration;
     if (type == Enumeration){
@@ -85,6 +88,11 @@ QStringList QDiagramGraphicsItemMetaProperty::keys() const
 QString QDiagramGraphicsItemMetaProperty::name() const
 {
     return m_name;
+}
+
+int QDiagramGraphicsItemMetaProperty::objectType() const
+{
+	return m_objectType;
 }
 
 QDiagramGraphicsItemMetaProperty::Type QDiagramGraphicsItemMetaProperty::type() const

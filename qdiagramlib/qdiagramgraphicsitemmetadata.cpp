@@ -34,7 +34,7 @@ bool QDiagramGraphicsItemMetaData::addProperty(const QString & name, QDiagramGra
             return false;
         }
     }
-    m_properties.append(QDiagramGraphicsItemMetaProperty(name, type, readOnly));
+    m_properties.append(QDiagramGraphicsItemMetaProperty(-1, name, type, readOnly));
     return true;
 }
 
@@ -46,7 +46,7 @@ bool QDiagramGraphicsItemMetaData::addProperty(const QString &name, QDiagramGrap
             return false;
         }
     }
-    m_properties.append(QDiagramGraphicsItemMetaProperty(name, type, pairs));
+    m_properties.append(QDiagramGraphicsItemMetaProperty(-1, name, type, pairs));
     return true;
 }
 

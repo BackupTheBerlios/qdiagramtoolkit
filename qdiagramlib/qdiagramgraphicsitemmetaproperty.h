@@ -90,6 +90,10 @@ public:
       * Returns this property's name.
       */
     QString name() const;
+	/**
+	 *
+	 */
+	int objectType() const;
     /**
       * Returns the storage type of the value stored in the property.
       */
@@ -97,14 +101,15 @@ public:
 private:
     friend class QDiagramGraphicsItemMetaData;
     QDiagramGraphicsItemMetaProperty();
-    QDiagramGraphicsItemMetaProperty(const QString & name, QDiagramGraphicsItemMetaProperty::Type type, bool readOnly);
-    QDiagramGraphicsItemMetaProperty(const QString & name, QDiagramGraphicsItemMetaProperty::Type type, const QMap<int,QString> & pairs);
+    QDiagramGraphicsItemMetaProperty(int objectType, const QString & name, QDiagramGraphicsItemMetaProperty::Type type, bool readOnly);
+    QDiagramGraphicsItemMetaProperty(int objectType, const QString & name, QDiagramGraphicsItemMetaProperty::Type type, const QMap<int,QString> & pairs);
 
     bool m_dynamic;
     QString m_name;
     bool m_readOnly;
     bool m_runTime;
     Type m_type;
+	int m_objectType;
     QDiagramGraphicsItemMetaEnum m_enum;
     QDiagramGraphicsItemMetaFlag m_flag;
 };
