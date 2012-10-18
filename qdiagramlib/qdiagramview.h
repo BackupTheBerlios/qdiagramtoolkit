@@ -23,6 +23,7 @@
 
 #include <QWidget>
 
+#include <qabstractdiagramshape.h>
 #include <qdiagram.h>
 #include <qdiagramconnectorstyle.h>
 #include <qdiagramgraphicsview.h>
@@ -106,6 +107,10 @@ public:
       * If @p on is true, snap to grid is enabled.
       */
     void setSnapToGrid(bool on);
+	/**
+	 * Returns the shape at position @p pos, which is in viewport coordinates. If there are several shapes at this position, this function returns the topmost shape.
+	 */
+	QAbstractDiagramShape* shapeAt(const QPoint & pos) const;
     /**
       * Returns the snap grid size.
       * @see setSnapSize()
