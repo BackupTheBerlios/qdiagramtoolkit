@@ -108,6 +108,7 @@ public:
 
     QSize sizeHint( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 public slots:
+	void commitAndClose();
     void editingFinished();
 private:
     QMap<QString,QString> m_colorNameMap;

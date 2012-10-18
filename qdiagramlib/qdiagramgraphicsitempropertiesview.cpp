@@ -99,18 +99,21 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
             return spinBox;
         }
     } else if (type() == QDiagramGraphicsItemMetaProperty::Color){
-        QComboBox* comboBox = new QComboBox(parent);
+        QComboBox* cb= new QComboBox(parent);
         QStringList colorNames = QColor::colorNames();
 
         for (int i = 0; i < colorNames.size(); ++i) {
             QColor color(colorNames[i]);
 
-            comboBox->insertItem(i, colorNames[i]);
-            comboBox->setItemData(i, color, Qt::DecorationRole);
+            cb->insertItem(i, colorNames[i]);
+            cb->setItemData(i, color, Qt::DecorationRole);
         }
-        return comboBox;
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+        return cb;
     } else if (type() == QDiagramGraphicsItemMetaProperty::Enumeration){
-        return new QComboBox(parent);
+		QComboBox* cb = new QComboBox(parent);
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+		return cb;
     } else if (type() == QDiagramGraphicsItemMetaProperty::Percent){
         QSpinBox* spinBox = new QSpinBox(parent);
         spinBox->setMaximum(0);
@@ -120,15 +123,16 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
     } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
         if (m_item == 0){
             if (m_index == 0){
-                QComboBox* comboBox = new QComboBox(parent);
+                QComboBox* cb = new QComboBox(parent);
                 QStringList colorNames = QColor::colorNames();
 
                 for (int i = 0; i < colorNames.size(); ++i) {
                     QColor color(colorNames[i]);
-                    comboBox->insertItem(i, colorNames[i]);
-                    comboBox->setItemData(i, color, Qt::DecorationRole);
+                    cb->insertItem(i, colorNames[i]);
+                    cb->setItemData(i, color, Qt::DecorationRole);
                 }
-                return comboBox;
+				QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+                return cb;
             } else if (m_index == 1){
                 QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
                 spinBox->setDecimals(2);
@@ -136,11 +140,12 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
                 spinBox->setMaximum(99.00);
                 return spinBox;
             } else if (m_index == 2){
-                QComboBox* comboBox = new QComboBox(parent);
+                QComboBox* cb = new QComboBox(parent);
                 Q_FOREACH(QDiagramLineStyle style, QDiagram::linesStyles()){
-                    comboBox->addItem(style.icon(), style.name(), style.id());
+                    cb->addItem(style.icon(), style.name(), style.id());
                 }
-                return comboBox;
+				QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+                return cb;
             }
         }
     } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
@@ -149,9 +154,13 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
             cb->setAutoFillBackground(true);
             return cb;
         } else if (name() == "color"){
-            return new QDiagramColorComboBox(parent);
+			QDiagramColorComboBox* cb = new QDiagramColorComboBox(parent);
+			QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+			return cb;
         } else if (name() == "family"){
-            return new QComboBox(parent);
+			QComboBox* cb = new QComboBox(parent);
+			QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+			return cb;
         } else if (name() == "size"){
             return new QSpinBox(parent);
         }
@@ -911,6 +920,15 @@ QSize QDiagramGraphicsItemDelegate::sizeHint(const QStyleOptionViewItem &option,
     QSize s = QStyledItemDelegate::sizeHint(option, index);
     s.setHeight(s.height() + 2);
     return s;
+}
+
+void QDiagramGraphicsItemDelegate::commitAndClose()
+{
+    QWidget* w = qobject_cast<QWidget*>(sender());
+    if (w){
+        emit commitData(w);
+		emit closeEditor(w);
+    }
 }
 
 void QDiagramGraphicsItemDelegate::editingFinished()
