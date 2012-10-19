@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include <qdiagramlinestyle.h>
+#include <qdiagramshadowstyle.h>
 #include <qdiagramshapesizegrip.h>
 #include <qdiagramtextstyle.h>
 
@@ -33,11 +34,15 @@
 QStandardBlockShape::QStandardBlockShape(const QMap<QString, QVariant> &properties, QGraphicsItem* parent) :
     QAbstractDiagramShape(properties, parent)
 {
+	setGraphicsEffect(new QGraphicsDropShadowEffect());
+	graphicsEffect()->setEnabled(false);
+
     setFlag(ItemIsMovable, true);
 
     addProperty("backgroundColor", QDiagramGraphicsItemMetaProperty::Color, false, QColor("lightgray"));
     addProperty("rotation", QDiagramGraphicsItemMetaProperty::Angle, false, properties.value("rotation", 0.0));
     addProperty("lineStyle", QDiagramGraphicsItemMetaProperty::LineStyle, false, properties.value("lineStyle"));
+	addProperty("shadow", QDiagramGraphicsItemMetaProperty::Shadow, false,  properties.value("shadow"));
     addProperty("text", QDiagramGraphicsItemMetaProperty::Text, false, properties.value("text"));
     addProperty("textStyle", QDiagramGraphicsItemMetaProperty::TextStyle, false, properties.value("textStyle"));
 
@@ -86,6 +91,21 @@ QRectF QStandardBlockShape::boundingRect() const
     QRectF r = geometry();
     r.moveTo(0, 0);
     return r;
+}
+
+QVariant QStandardBlockShape::itemPropertyHasChanged(const QString &name, const QVariant &value)
+{
+	if (name == "shadow"){
+        QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(property(name));
+		QGraphicsDropShadowEffect* e = qobject_cast<QGraphicsDropShadowEffect*>(graphicsEffect());
+		if (e){
+			e->setColor(s.color());
+			e->setBlurRadius(s.blurRadius());
+			e->setOffset(s.offsetX(), s.offsetY());
+			e->setEnabled(s.isVisible());
+		}
+	}
+    return QAbstractDiagramGraphicsItem::itemPropertyHasChanged(name, value);
 }
 
 void QStandardBlockShape::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

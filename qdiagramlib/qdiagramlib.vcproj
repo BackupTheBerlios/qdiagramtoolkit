@@ -283,6 +283,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramshadowstyle.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramshape.cpp"
 				>
 			</File>
@@ -680,6 +684,10 @@
 			</File>
 			<File
 				RelativePath=".\qdiagramreader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramshadowstyle.h"
 				>
 			</File>
 			<File

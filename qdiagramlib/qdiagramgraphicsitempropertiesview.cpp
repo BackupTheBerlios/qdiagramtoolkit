@@ -25,6 +25,7 @@
 #include "qdiagramgraphicsitemmetadata.h"
 #include "qdiagramendoflinestyle.h"
 #include "qdiagramlinestyle.h"
+#include "qdiagramshadowstyle.h"
 #include "qdiagramtextstyle.h"
 
 QMap<QString,QColor> QDiagramColorComboBox::sColorNameMap;
@@ -148,6 +149,32 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
                 return cb;
             }
         }
+    } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+		if (name() == "blurRadius"){
+			QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
+			sb->setDecimals(0);
+			QObject::connect(sb, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+			return sb;
+        } else if (name() == "color"){
+			QDiagramColorComboBox* cb = new QDiagramColorComboBox(parent);
+			QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+			return cb;
+        } else if (name() == "offsetX"){
+			QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
+			sb->setDecimals(0);
+			QObject::connect(sb, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+			return sb;
+        } else if (name() == "offsetY"){
+			QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
+			sb->setDecimals(0);
+			QObject::connect(sb, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+			return sb;
+		} else if (name() == "visible"){
+            QCheckBox* cb =  new QCheckBox(parent);
+            cb->setAutoFillBackground(true);
+			QObject::connect(cb, SIGNAL(stateChanged(int)), receiver, SLOT(commitAndClose()));
+            return cb;
+		}
     } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
         if (name() == "bold" || name() == "italic" || name() == "underline" || name() == "strikeOut"){
             QCheckBox* cb =  new QCheckBox(parent);
@@ -201,6 +228,8 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
                     } else if (index.row() == 1){
                         return QObject::tr("y");
                     }
+                } else if (m_parent->graphicsItem()->metaData()->property(m_parent->index()).type() == QDiagramGraphicsItemMetaProperty::Shadow){
+					return name();
                 }
             } else {
                 return m_item->metaData()->property(m_index).name();
@@ -237,6 +266,12 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
                     }
                 } else if (m_parent->graphicsItem()->metaData()->property(m_parent->m_index).type() == QDiagramGraphicsItemMetaProperty::Rect){
                     return value().toMap().value(name());
+                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+					QDiagramShadowStyle shadow = qvariant_cast<QDiagramShadowStyle>(value());
+                    if (name() == "color"){
+                        return QDiagramColorComboBox::colorName(shadow.color());
+                    }
+                    return shadow.value(index.row());
                 }
             } else {
                 if (type() == QDiagramGraphicsItemMetaProperty::Angle){
@@ -264,6 +299,8 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
                             .arg(value().toMap().value("y").toInt())
                             .arg(value().toMap().value("width").toInt())
                             .arg(value().toMap().value("height").toInt());
+                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+					return QString("%1").arg(value().toMap().value("visible").toString());
                 } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
                     QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
                     return QString("%1, %2, %3").arg(s.family()).arg(s.size()).arg(QDiagramColorComboBox::colorName(s.color()));
@@ -281,6 +318,11 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
                         return style.color();
                     } else if (index.row() == 2){
                         return style.icon();
+                    }
+                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+					QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+                    if (name() == "color"){
+                        return s.color();
                     }
                 } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
                     QDiagramTextStyle style = qvariant_cast<QDiagramTextStyle>(value());
@@ -324,6 +366,9 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
                     } else if (index.row() == 3){
                         return r.height();
                     }
+                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+					QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+                    return s.value(name());
                 }
             } else {
                 return m_item->property(m_item->metaData()->property(m_index).name());
@@ -446,7 +491,7 @@ bool QPropertiesModelItem::setData(const QModelIndex & index, const QVariant & v
     return false;
 }
 
-bool QPropertiesModelItem::setEditorData(QWidget *editor, const QModelIndex &index) const
+bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & index) const
 {
     if (type() == QDiagramGraphicsItemMetaProperty::Enumeration){
         QComboBox* cb = qobject_cast<QComboBox*>(editor);
@@ -454,40 +499,6 @@ bool QPropertiesModelItem::setEditorData(QWidget *editor, const QModelIndex &ind
             cb->addItem(m_item->metaData()->property(m_index).enumerator().key(i), m_item->metaData()->property(m_index).enumerator().value(i));
         }
         cb->setCurrentIndex(cb->findData(value().toInt()));
-    } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-        QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
-        if (name() == "bold"){
-            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
-            checkBox->setChecked(s.bold());
-            return true;
-        } else if (name() == "color"){
-            QDiagramColorComboBox* comboBox = qobject_cast<QDiagramColorComboBox*>(editor);
-            QColor color = qvariant_cast<QColor>(s.color());
-            comboBox->setCurrentIndex(comboBox->findData(color, int(Qt::DecorationRole)));
-            return true;
-        } else if (name() == "family"){
-            QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
-            QFontDatabase d;
-            comboBox->addItems(d.families());
-            comboBox->setCurrentIndex(comboBox->findText(s.value("family").toString()));
-            return true;
-        } else if (name() == "italic"){
-            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
-            checkBox->setChecked(s.italic());
-            return true;
-        } else if (name() == "size"){
-            QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
-            sb->setValue(s.size());
-            return true;
-        } else if (name() == "strikeOut"){
-            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
-            checkBox->setChecked(s.strikeOut());
-            return true;
-        } else if (name() == "underline"){
-            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
-            checkBox->setChecked(s.underline());
-            return true;
-        }
     } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Angle){
         QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
         spinBox->setValue(value().toDouble());
@@ -525,6 +536,61 @@ bool QPropertiesModelItem::setEditorData(QWidget *editor, const QModelIndex &ind
         QSpinBox* spinBox = qobject_cast<QSpinBox*>(editor);
         spinBox->setValue(value().toDouble());
         return true;
+    } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+		QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+        if (name() == "color"){
+            QDiagramColorComboBox* comboBox = qobject_cast<QDiagramColorComboBox*>(editor);
+            QColor color = qvariant_cast<QColor>(s.color());
+            comboBox->setCurrentIndex(comboBox->findData(color, int(Qt::DecorationRole)));
+            return true;
+		} else if (name() == "blurRadius"){
+			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
+			w->setValue(s.blurRadius());
+		} else if (name() == "offsetX"){
+			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
+			w->setValue(s.offsetX());
+		} else if (name() == "offsetY"){
+			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
+			w->setValue(s.offsetY());
+		} else if (name() == "visible"){
+            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+            checkBox->setChecked(s.isVisible());
+            return true;
+		}
+    } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
+        QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
+        if (name() == "bold"){
+            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+            checkBox->setChecked(s.bold());
+            return true;
+        } else if (name() == "color"){
+            QDiagramColorComboBox* comboBox = qobject_cast<QDiagramColorComboBox*>(editor);
+            QColor color = qvariant_cast<QColor>(s.color());
+            comboBox->setCurrentIndex(comboBox->findData(color, int(Qt::DecorationRole)));
+            return true;
+        } else if (name() == "family"){
+            QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
+            QFontDatabase d;
+            comboBox->addItems(d.families());
+            comboBox->setCurrentIndex(comboBox->findText(s.value("family").toString()));
+            return true;
+        } else if (name() == "italic"){
+            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+            checkBox->setChecked(s.italic());
+            return true;
+        } else if (name() == "size"){
+            QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
+            sb->setValue(s.size());
+            return true;
+        } else if (name() == "strikeOut"){
+            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+            checkBox->setChecked(s.strikeOut());
+            return true;
+        } else if (name() == "underline"){
+            QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
+            checkBox->setChecked(s.underline());
+            return true;
+        }
     }
     return false;
 }
@@ -579,6 +645,30 @@ bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *mod
     } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Percent){
         QSpinBox* spinBox = qobject_cast<QSpinBox*>(editor);
         model->setData(index, spinBox->value());
+        return true;
+    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Shadow){
+        QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+		if (name() == "blurRadius"){
+			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
+			s.setBlurRadius(w->value());
+            model->setData(index, QVariant::fromValue(s));
+		} else if (name() == "color"){
+            QDiagramColorComboBox* comboBox = qobject_cast<QDiagramColorComboBox*>(editor);
+            s.setColor(qvariant_cast<QColor>(comboBox->currentColor()));
+            model->setData(index, QVariant::fromValue(s));
+		} else if (name() == "offsetX"){
+			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
+			s.setOffsetX(w->value());
+            model->setData(index, QVariant::fromValue(s));
+		} else if (name() == "offsetY"){
+			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
+			s.setOffsetY(w->value());
+            model->setData(index, QVariant::fromValue(s));
+		} else if (name() == "visible"){
+            QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
+			s.setVisible(cb->isChecked());
+			model->setData(index, QVariant::fromValue(s));
+		}
         return true;
     } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::TextStyle){
         QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
@@ -666,29 +756,34 @@ void QPropertiesModel::buildModel(QAbstractDiagramGraphicsItem* item)
     beginResetModel();
     delete r;
     r = new QPropertiesModelItem(item);
-    QPropertiesModelItem* mParent;
+    QPropertiesModelItem* p;
     for(int iProperty = 0; iProperty < item->metaData()->propertyCount(); iProperty++){
-        mParent = new QPropertiesModelItem(item, iProperty, r);
+        p = new QPropertiesModelItem(item, iProperty, r);
         if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::TextStyle){
             QDiagramTextStyle s;
             for (int i = 0; i < s.propertyCount(); i++){
-                new QPropertiesModelItem(s.key(i), mParent);
+                new QPropertiesModelItem(s.key(i), p);
             }
         } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-            new QPropertiesModelItem("style", mParent);
-            new QPropertiesModelItem("width", mParent);
+            new QPropertiesModelItem("style", p);
+            new QPropertiesModelItem("width", p);
         } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-            new QPropertiesModelItem(0, 0, mParent);
-            new QPropertiesModelItem(0, 1, mParent);
-            new QPropertiesModelItem(0, 2, mParent);
+            new QPropertiesModelItem(0, 0, p);
+            new QPropertiesModelItem(0, 1, p);
+            new QPropertiesModelItem(0, 2, p);
         } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::Rect){
-            new QPropertiesModelItem("x", mParent);
-            new QPropertiesModelItem("y", mParent);
-            new QPropertiesModelItem("width", mParent);
-            new QPropertiesModelItem("height", mParent);
+            new QPropertiesModelItem("x", p);
+            new QPropertiesModelItem("y", p);
+            new QPropertiesModelItem("width", p);
+            new QPropertiesModelItem("height", p);
         } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::Point){
-            new QPropertiesModelItem(0, 0, mParent);
-            new QPropertiesModelItem(0, 1, mParent);
+            new QPropertiesModelItem(0, 0, p);
+            new QPropertiesModelItem(0, 1, p);
+        } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::Shadow){
+            QDiagramShadowStyle s;
+            for (int i = 0; i < s.propertyCount(); i++){
+                new QPropertiesModelItem(s.key(i), p);
+            }
         }
     }
     endResetModel();
@@ -737,9 +832,11 @@ Qt::ItemFlags QPropertiesModel::flags(const QModelIndex &index) const
             } else {
                 if (modelItem->type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
                     flags |= Qt::ItemIsEditable;
-                } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-                    flags |= Qt::ItemIsEditable;
                 } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::LineStyle){
+                    flags |= Qt::ItemIsEditable;
+                } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::Shadow){
+                    flags |= Qt::ItemIsEditable;
+                } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::TextStyle){
                     flags |= Qt::ItemIsEditable;
                 }
             }

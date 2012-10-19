@@ -34,6 +34,7 @@ public:
       */
     QPainterPath shape() const;
 protected:
+	QVariant itemPropertyHasChanged(const QString &name, const QVariant &value);
     void paintText(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 };
 
