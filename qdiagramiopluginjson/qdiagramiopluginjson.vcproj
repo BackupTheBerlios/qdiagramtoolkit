@@ -104,8 +104,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy qdiagramiojson.dll to ..\qdiagramdraw\debug\plugins\diagram\formats"
-				CommandLine="copy  &quot;$(TargetPath)&quot; &quot;..\qdiagramdraw\debug\plugins\diagram\formats&quot;"
+				Description=""
+				CommandLine=""
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
@@ -198,8 +198,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy qdiagramiojson.dll to ..\qdiagramdraw\debug\plugins\diagram\formats"
-				CommandLine="copy  &quot;$(TargetPath)&quot; &quot;..\qdiagramdraw\debug\plugins\diagram\formats&quot;"
+				Description=""
+				CommandLine=""
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
