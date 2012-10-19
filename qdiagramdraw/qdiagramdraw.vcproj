@@ -23,6 +23,7 @@
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
+			BuildLogFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\build_log_$(InputName).htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -108,11 +109,12 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="release\"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)\build"
+			IntermediateDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)\build"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
+			BuildLogFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\build_log_$(InputName).htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -166,7 +168,7 @@
 				IgnoreImportLibrary="true"
 				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
 				AdditionalDependencies="$(QTDIR)\lib\qtmain.lib $(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\qdiagramlib.lib $(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\qlogiccircuitsim.lib $(QTDIR)\lib\QtSql4.lib $(QTDIR)\lib\QtGui4.lib $(QTDIR)\lib\QtCore4.lib"
-				OutputFile="$(OutDir)\qdiagramdraw.exe"
+				OutputFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(QTDIR)\lib,$(QTDIR)\lib,C:/Users/Martin/Documents/Entwicklung/qdiagram/qdiagramdraw/../qdiagramlib/release/,C:/Users/Martin/Documents/Entwicklung/qdiagram/qdiagramdraw/../qlogiccircuitsim/release/"
@@ -310,14 +312,6 @@
 				RelativePath=".\GeneratedFiles\ui_mainwindow.h"
 				>
 			</File>
-			<File
-				RelativePath=".\GeneratedFiles\ui_sysmldiagramtoolbox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GeneratedFiles\ui_sysmldiagramwindow.h"
-				>
-			</File>
 			<Filter
 				Name="Debug"
 				Filter="cpp;moc"
@@ -413,58 +407,6 @@
 			</File>
 			<File
 				RelativePath="mainwindow.ui"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Uic&apos;ing $(InputFileName)..."
-						CommandLine="&quot;$(QTDIR)\bin\uic.exe&quot; -o &quot;.\GeneratedFiles\ui_$(InputName).h&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="$(QTDIR)\bin\uic.exe"
-						Outputs="&quot;.\GeneratedFiles\ui_$(InputName).h&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Uic&apos;ing $(InputFileName)..."
-						CommandLine="&quot;$(QTDIR)\bin\uic.exe&quot; -o &quot;.\GeneratedFiles\ui_$(InputName).h&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="$(QTDIR)\bin\uic.exe"
-						Outputs="&quot;.\GeneratedFiles\ui_$(InputName).h&quot;"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="sysmldiagramtoolbox.ui"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Uic&apos;ing $(InputFileName)..."
-						CommandLine="&quot;$(QTDIR)\bin\uic.exe&quot; -o &quot;.\GeneratedFiles\ui_$(InputName).h&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="$(QTDIR)\bin\uic.exe"
-						Outputs="&quot;.\GeneratedFiles\ui_$(InputName).h&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Uic&apos;ing $(InputFileName)..."
-						CommandLine="&quot;$(QTDIR)\bin\uic.exe&quot; -o &quot;.\GeneratedFiles\ui_$(InputName).h&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="$(QTDIR)\bin\uic.exe"
-						Outputs="&quot;.\GeneratedFiles\ui_$(InputName).h&quot;"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="sysmldiagramwindow.ui"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

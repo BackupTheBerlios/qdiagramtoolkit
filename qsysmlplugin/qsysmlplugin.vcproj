@@ -23,6 +23,7 @@
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
+			BuildLogFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\build_log_$(InputName).htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -104,18 +105,18 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description=""
 				CommandLine=""
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="release\"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)\build"
+			IntermediateDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)\build"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
+			BuildLogFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\build_log_$(InputName).htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -167,8 +168,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="qdiagramlib.lib $(QTDIR)\lib\QtScript4.lib $(QTDIR)\lib\QtSvg4.lib $(QTDIR)\lib\QtXml4.lib $(QTDIR)\lib\QtGui4.lib $(QTDIR)\lib\QtCore4.lib"
-				OutputFile="$(OutDir)\qsysmlplugin.dll"
+				AdditionalDependencies="$(QTDIR)\lib\QtScript4.lib $(QTDIR)\lib\QtSvg4.lib $(QTDIR)\lib\QtXml4.lib $(QTDIR)\lib\QtGui4.lib $(QTDIR)\lib\QtCore4.lib"
+				OutputFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\plugins\diagram\$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(QTDIR)\lib,$(QTDIR)\lib,C:/Users/Martin/Documents/Entwicklung/qdiagram/qsysmlplugin/../qdiagramlib/release/"
@@ -197,8 +198,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy qsysmlplugin.dll to ..\qdiagramdraw\debug\plugins\diagram"
-				CommandLine="copy  &quot;$(TargetPath)&quot; &quot;..\qdiagramdraw\debug\plugins\diagram&quot;"
+				Description=""
+				CommandLine=""
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>

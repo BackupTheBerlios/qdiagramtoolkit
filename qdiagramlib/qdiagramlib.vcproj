@@ -18,10 +18,10 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)\build"
+			IntermediateDirectory="$(ProjectDir)GeneratedFiles\$(ConfigurationName)\build"
 			ConfigurationType="2"
-			BuildLogFile="$(SolutionDir)bin\$(ConfigurationName)\build_log_$(InputName).htm"
+			BuildLogFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\build_log_$(InputName).htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -61,7 +61,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="qtmain.lib QtCore4.lib QtGui4.lib QtXml4.lib QtScript4.lib"
-				OutputFile="$(SolutionDir)bin\$(ConfigurationName)\$(ProjectName).dll"
+				OutputFile="$(SolutionDir)bin\$(PlatformName)\$(ConfigurationName)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="$(QTDIR)\lib"
 				GenerateDebugInformation="false"
 				SubSystem="2"
