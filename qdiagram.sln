@@ -1,0 +1,97 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qdiagramlib", "qdiagramlib\qdiagramlib.vcproj", "{AF858270-EE07-45F5-84A5-52E29E08333E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qlogiccircuitsim", "qlogiccircuitsim\qlogiccircuitsim.vcproj", "{981C0761-AB7F-30AB-877A-40529726437B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{FE04C9B2-9E96-4603-A722-4A2A19DD0189}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qlogiccircuitplugin", "qlogiccircuitplugin\qlogiccircuitplugin.vcproj", "{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qstandardformsplugin", "qstandardformsplugin\qstandardformsplugin.vcproj", "{497F50B7-1927-3125-AF8C-778AB3B273D3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF858270-EE07-45F5-84A5-52E29E08333E} = {AF858270-EE07-45F5-84A5-52E29E08333E}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qsysmlplugin", "qsysmlplugin\qsysmlplugin.vcproj", "{B622CBBC-9061-389B-9A70-8A8D45CC7A30}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF858270-EE07-45F5-84A5-52E29E08333E} = {AF858270-EE07-45F5-84A5-52E29E08333E}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{31149CFE-C73C-48AC-92C0-2D984E640C4B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qdiagramdraw", "qdiagramdraw\qdiagramdraw.vcproj", "{8BFE2F90-87C9-3D49-B4A7-37CF0FB695DC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{981C0761-AB7F-30AB-877A-40529726437B} = {981C0761-AB7F-30AB-877A-40529726437B}
+		{AF858270-EE07-45F5-84A5-52E29E08333E} = {AF858270-EE07-45F5-84A5-52E29E08333E}
+		{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0} = {F0584DA3-354F-4C6E-B5A4-74023AA2F0B0}
+		{497F50B7-1927-3125-AF8C-778AB3B273D3} = {497F50B7-1927-3125-AF8C-778AB3B273D3}
+		{B622CBBC-9061-389B-9A70-8A8D45CC7A30} = {B622CBBC-9061-389B-9A70-8A8D45CC7A30}
+		{7F4926FD-0CC8-3254-A4D8-E393772526A6} = {7F4926FD-0CC8-3254-A4D8-E393772526A6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "designerplugin", "designerplugin\designerplugin.vcproj", "{0ABD165F-A735-3C1C-AC6B-BE33C5BD4AAD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF858270-EE07-45F5-84A5-52E29E08333E} = {AF858270-EE07-45F5-84A5-52E29E08333E}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jsonformatiohandler", "qdiagramiopluginjson\qdiagramiopluginjson.vcproj", "{7F4926FD-0CC8-3254-A4D8-E393772526A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iohandler", "iohandler", "{33FA8E34-47A6-42CD-B823-82DB7FBFB928}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF858270-EE07-45F5-84A5-52E29E08333E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AF858270-EE07-45F5-84A5-52E29E08333E}.Debug|Win32.Build.0 = Debug|Win32
+		{AF858270-EE07-45F5-84A5-52E29E08333E}.Release|Win32.ActiveCfg = Release|Win32
+		{AF858270-EE07-45F5-84A5-52E29E08333E}.Release|Win32.Build.0 = Release|Win32
+		{981C0761-AB7F-30AB-877A-40529726437B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{981C0761-AB7F-30AB-877A-40529726437B}.Debug|Win32.Build.0 = Debug|Win32
+		{981C0761-AB7F-30AB-877A-40529726437B}.Release|Win32.ActiveCfg = Release|Win32
+		{981C0761-AB7F-30AB-877A-40529726437B}.Release|Win32.Build.0 = Release|Win32
+		{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0}.Debug|Win32.Build.0 = Debug|Win32
+		{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0}.Release|Win32.ActiveCfg = Release|Win32
+		{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0}.Release|Win32.Build.0 = Release|Win32
+		{497F50B7-1927-3125-AF8C-778AB3B273D3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{497F50B7-1927-3125-AF8C-778AB3B273D3}.Debug|Win32.Build.0 = Debug|Win32
+		{497F50B7-1927-3125-AF8C-778AB3B273D3}.Release|Win32.ActiveCfg = Release|Win32
+		{497F50B7-1927-3125-AF8C-778AB3B273D3}.Release|Win32.Build.0 = Release|Win32
+		{B622CBBC-9061-389B-9A70-8A8D45CC7A30}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B622CBBC-9061-389B-9A70-8A8D45CC7A30}.Debug|Win32.Build.0 = Debug|Win32
+		{B622CBBC-9061-389B-9A70-8A8D45CC7A30}.Release|Win32.ActiveCfg = Release|Win32
+		{B622CBBC-9061-389B-9A70-8A8D45CC7A30}.Release|Win32.Build.0 = Release|Win32
+		{8BFE2F90-87C9-3D49-B4A7-37CF0FB695DC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8BFE2F90-87C9-3D49-B4A7-37CF0FB695DC}.Debug|Win32.Build.0 = Debug|Win32
+		{8BFE2F90-87C9-3D49-B4A7-37CF0FB695DC}.Release|Win32.ActiveCfg = Release|Win32
+		{8BFE2F90-87C9-3D49-B4A7-37CF0FB695DC}.Release|Win32.Build.0 = Release|Win32
+		{0ABD165F-A735-3C1C-AC6B-BE33C5BD4AAD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0ABD165F-A735-3C1C-AC6B-BE33C5BD4AAD}.Debug|Win32.Build.0 = Debug|Win32
+		{0ABD165F-A735-3C1C-AC6B-BE33C5BD4AAD}.Release|Win32.ActiveCfg = Release|Win32
+		{0ABD165F-A735-3C1C-AC6B-BE33C5BD4AAD}.Release|Win32.Build.0 = Release|Win32
+		{7F4926FD-0CC8-3254-A4D8-E393772526A6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7F4926FD-0CC8-3254-A4D8-E393772526A6}.Debug|Win32.Build.0 = Debug|Win32
+		{7F4926FD-0CC8-3254-A4D8-E393772526A6}.Release|Win32.ActiveCfg = Release|Win32
+		{7F4926FD-0CC8-3254-A4D8-E393772526A6}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{981C0761-AB7F-30AB-877A-40529726437B} = {31149CFE-C73C-48AC-92C0-2D984E640C4B}
+		{AF858270-EE07-45F5-84A5-52E29E08333E} = {31149CFE-C73C-48AC-92C0-2D984E640C4B}
+		{F0584DA3-354F-4C6E-B5A4-74023AA2F0B0} = {FE04C9B2-9E96-4603-A722-4A2A19DD0189}
+		{497F50B7-1927-3125-AF8C-778AB3B273D3} = {FE04C9B2-9E96-4603-A722-4A2A19DD0189}
+		{B622CBBC-9061-389B-9A70-8A8D45CC7A30} = {FE04C9B2-9E96-4603-A722-4A2A19DD0189}
+		{0ABD165F-A735-3C1C-AC6B-BE33C5BD4AAD} = {FE04C9B2-9E96-4603-A722-4A2A19DD0189}
+		{7F4926FD-0CC8-3254-A4D8-E393772526A6} = {33FA8E34-47A6-42CD-B823-82DB7FBFB928}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		QtVersion = 4.8.2
+	EndGlobalSection
+EndGlobal
