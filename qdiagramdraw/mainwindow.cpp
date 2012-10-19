@@ -6,6 +6,7 @@
 #include <QClipboard>
 #include <QFile>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMdiSubWindow>
 #include <QMenu>
 #include <QMessageBox>
@@ -47,16 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	    qDebug() << QDiagramPluginLoader::load("Logic Circuit")->diagrams();
 
     qDebug() << "QDiagramIO" << QDiagramReader::supportedDiagramFormats();
-
-//    QSysMLProjectModel* mProject = new QSysMLProjectModel(this);
-
-//    ui->diagramShapeToolBox->addShapes(QDiagramPluginLoader::load("Logic Circuit"));
-//    ui->diagramShapeToolBox->addShapes(QDiagramPluginLoader::load("Standard Forms"));
-//    ui->projectTreeView->setModel(mProject);
-
-//    SysMLDiagramWindow* mWindow = new SysMLDiagramWindow();
-//    mWindow->setDiagram(mProject->loadDiagram("{d4d34e3f-da7e-4acc-b02a-20a2ce4165ee}"));
-//    ui->mdiArea->addSubWindow(mWindow);
 
     updateWindowMenu();
 }
@@ -129,14 +120,23 @@ void MainWindow::diagramViewContextMenuRequested(const QPoint & point, const QPo
 {
     QDiagramView* view = qobject_cast<QDiagramView*>(sender());
     if (view){
+		QList<QAction*> actions;
+		QAbstractDiagramShape* shape = view->shapeAt(point);
         QList<QGraphicsItem*> items = view->graphicsView()->items(point);
         QMenu menu;
+		if (shape){
+			actions = shape->createActions(&menu);
+		}
         if (items.isEmpty()){
             menu.addAction(ui->pasteAction);
         } else if (items.size() == 1){
             menu.addAction(ui->cutAction);
             menu.addAction(ui->copyAction);
             menu.addAction(ui->pasteAction);
+			if (!actions.isEmpty()){
+				menu.addSeparator();
+				menu.addActions(actions);
+			}
         } else {
 
         }
@@ -144,7 +144,10 @@ void MainWindow::diagramViewContextMenuRequested(const QPoint & point, const QPo
         menu.addAction(ui->refreshAction);
 
         ui->pasteAction->setData(scenePos);
-        menu.exec(view->graphicsView()->viewport()->mapToGlobal(point));
+        QAction* a = menu.exec(view->graphicsView()->viewport()->mapToGlobal(point));
+		if (a && shape){
+			shape->triggerAction(a->objectName(), a->data());
+		}
     }
 }
 
@@ -161,25 +164,33 @@ void MainWindow::exitActionTriggered()
 
 void  MainWindow::newActionTriggered()
 {
-    DiagramWindow* w = new DiagramWindow();
-    QDiagram* d = new QDiagram(this);
-    connect(d, SIGNAL(itemRestored(QAbstractDiagramGraphicsItem*)), this, SLOT(diagramItemAdded(QAbstractDiagramGraphicsItem*)));
-    //d->addPlugin("Standard Forms");
-    d->addPlugin("Logic Circuit");
-    //d->addPlugin("SysML");
-    d->setTitle("101");
+	QMap<QString,QStringList> types;
+	Q_FOREACH(QString n, QDiagramPluginLoader::plugins()){
+		QAbstractDiagramPlugin* p = QDiagramPluginLoader::plugin(n);
+		types[n] = p->diagrams();
+	}
 
-    d->addItemContextMenuAction(ui->cutAction);
-    d->addItemContextMenuAction(ui->copyAction);
-    d->addItemContextMenuAction(ui->pasteAction);
-    w->setDiagram(d);
-    connect(w->diagramView(), SIGNAL(graphicsViewContextMenuRequested(QPoint,QPointF)), this, SLOT(diagramViewContextMenuRequested(QPoint,QPointF)));
+	bool ok;
+	QString pn = QInputDialog::getItem(this, tr("Select Plugin"), tr("Name"), types.keys(), 0, false, &ok);
+	if (!ok){
+		return;
+	}
+	QString dn = QInputDialog::getItem(this, tr("Select Diagram"), tr("Name"), types.value(pn), 0, false, &ok);
+	if (!ok){
+		return;
+	}
+	QAbstractDiagramPlugin* p = QDiagramPluginLoader::plugin(pn);
+	QDiagram* d = p->diagram(dn);
+	connect(d, SIGNAL(itemRestored(QAbstractDiagramGraphicsItem*)), this, SLOT(diagramItemAdded(QAbstractDiagramGraphicsItem*)));
 
-    ui->mdiArea->addSubWindow(w);
-    w->show();
-    if (ui->mdiArea->subWindowList().size() == 1){
-        w->showMaximized();
-    }
+	DiagramWindow* w = new DiagramWindow();
+	w->setDiagram(d);
+	ui->mdiArea->addSubWindow(w);
+	connect(w->diagramView(), SIGNAL(graphicsViewContextMenuRequested(QPoint,QPointF)), this, SLOT(diagramViewContextMenuRequested(QPoint,QPointF)));
+	w->show();
+	if (ui->mdiArea->subWindowList().size() == 1){
+		w->showMaximized();
+	}
 }
 
 void MainWindow::openActionTriggered()
@@ -234,6 +245,11 @@ void MainWindow::saveActionTriggered()
     CALL_ACTION(save())
 }
 
+void MainWindow::saveAsImageActionTriggered()
+{
+    CALL_ACTION(saveAsImage())
+}
+
 void MainWindow::selectionChanged()
 {
     QDiagram* diagram = activeDiagram();
@@ -268,6 +284,7 @@ void MainWindow::subWindowActivated( QMdiSubWindow* window )
     ui->printAction->setEnabled(window != 0);
     ui->printPreviewAction->setEnabled(window != 0);
     ui->saveAction->setEnabled(window != 0);
+	ui->saveAsImageAction->setEnabled(window != 0);
     if (window == 0){
         return;
     }

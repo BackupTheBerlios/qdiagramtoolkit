@@ -28,6 +28,8 @@ public slots:
 
     void save();
 
+	void saveAsImage();
+
     void undo();
 
     void redo();

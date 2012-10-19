@@ -3,7 +3,10 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QImage>
+#include <QImageWriter>
 #include <QMessageBox>
+#include <QSvgGenerator>
 
 #include <qdiagramwriter.h>
 
@@ -71,6 +74,34 @@ void DiagramWindow::save()
             }
         }
     }
+}
+
+void DiagramWindow::saveAsImage()
+{
+    QString dir;
+    QString filter;
+	QStringList formats;
+	Q_FOREACH(QByteArray f, QImageWriter::supportedImageFormats()){
+		formats.append("*." + f);
+	}
+	formats.append("*.svg");
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as Image"), dir, tr("Image Formats (%1)").arg(formats.join(", ")), &filter);
+    if (!fileName.isEmpty()){
+		QFileInfo fileInfo(fileName);
+		if (fileInfo.suffix() == "svg"){
+			QSvgGenerator generator;
+			generator.setFileName(fileName);
+			QPainter p(&generator);
+			diagram()->scene()->render(&p);
+			p.end();
+		} else {
+			QImage image(diagram()->scene()->sceneRect().size().toSize(), QImage::Format_ARGB32_Premultiplied);
+			QPainter p(&image);
+			diagram()->scene()->render(&p);
+			p.end();
+			image.save(fileName);
+		}
+	}
 }
 
 void DiagramWindow::setDiagram(QDiagram* diagram)

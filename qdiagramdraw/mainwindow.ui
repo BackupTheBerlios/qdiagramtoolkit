@@ -127,7 +127,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QDiagramGraphicsItemPropertiesView" name="propertiesView" native="true"/>
+      <widget class="QDiagramGraphicsItemPropertiesView" name="propertiesView"/>
      </item>
     </layout>
    </widget>
@@ -372,9 +372,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QUndoView</class>
+   <class>QDiagramShapeToolBox</class>
    <extends>QWidget</extends>
-   <header>qundoview.h</header>
+   <header>qdiagramshapetoolbox.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -384,9 +384,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QDiagramShapeToolBox</class>
+   <class>QUndoView</class>
    <extends>QWidget</extends>
-   <header>qdiagramshapetoolbox.h</header>
+   <header>qundoview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -641,12 +641,28 @@
    <slot>closeAllSubWindows()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>690</x>
-     <y>400</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>690</x>
      <y>400</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveAsImageAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveAsImageActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
     </hint>
    </hints>
   </connection>
@@ -664,5 +680,6 @@
   <slot>copyActionTriggered()</slot>
   <slot>pasteActionTriggered()</slot>
   <slot>openActionTriggered()</slot>
+  <slot>saveAsImageActionTriggered()</slot>
  </slots>
 </ui>

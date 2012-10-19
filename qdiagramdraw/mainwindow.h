@@ -47,6 +47,7 @@ public slots:
     void redoStackCanRedoChanged ( bool canRedo );
 
     void saveActionTriggered();
+	void saveAsImageActionTriggered();
     void selectionChanged();
     void simulatorActionTriggered();
     void subWindowActivated( QMdiSubWindow* window );
