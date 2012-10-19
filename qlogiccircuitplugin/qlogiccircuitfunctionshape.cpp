@@ -20,6 +20,9 @@
 #include "qlogiccircuitfunctionshape.h"
 #include "qlogiccircuitfunctionshape_p.h"
 
+#include <qdiagramgraphicsitemmetaenum.h>
+#include <qdiagramgraphicsitemmetadata.h>
+
 #define BASE_SIZE 13.0
 #define GATE_CP_SIZE 8.0
 
@@ -140,6 +143,27 @@ QRectF QLogicCircuitFunctionShape::boundingRect() const
     return QRectF(0, 0, geometry().width(), geometry().height());
 }
 
+QList<QAction*> QLogicCircuitFunctionShape::createActions(QWidget* parent)
+{
+	QAction* a;
+	QList<QAction*> l;
+	QMenu* m = new QMenu(QObject::tr("Mode"), parent);
+	if (property("function") == "comparator" || property("function") == "computation"){
+		int index = metaData()->indexOfProperty("mode");
+        for (int i = 0; i < metaData()->property(index).enumerator().keys(); i++){
+			a = new QAction(metaData()->property(index).enumerator().key(i), parent);
+			QVariantMap p;
+			p["mode"] = metaData()->property(index).enumerator().value(i);
+			a->setData(p);
+			a->setCheckable(true);
+			a->setChecked(property("mode") == metaData()->property(index).enumerator().value(i));
+			m->addAction(a);
+        }
+		l << m->menuAction();
+	}
+	return l;
+}
+
 void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(option);
@@ -204,4 +228,16 @@ QPainterPath QLogicCircuitFunctionShape::shape() const
         mPath.lineTo(geometry().width(), geometry().height() / 2);
     }
     return mPath;
+}
+
+void QLogicCircuitFunctionShape::triggerAction(const QString & name, const QVariant & data)
+{
+	Q_UNUSED(name);
+	if (!data.isNull()){
+		QMapIterator<QString, QVariant> it(data.toMap());
+		while(it.hasNext()){
+			it.next();
+			setProperty(it.key(), it.value());
+		}
+	}
 }

@@ -117,6 +117,48 @@ QRectF QLogicCircuitGateShape::boundingRect() const
     return  QRectF(0, 0, geometry().width(), geometry().height());
 }
 
+QList<QAction*> QLogicCircuitGateShape::createActions(QWidget* parent)
+{
+	QAction* a;
+	QList<QAction*> l;
+	QVariantMap p;
+
+	if (property("gateType") != "not"){
+		a = new QAction(QObject::tr("2 Inputs"), parent);
+		a->setObjectName("2i");
+		a->setCheckable(true);
+		a->setChecked(property("inputs").toInt() == 2);
+		p["inputs"] = 2;
+		a->setData(p);
+		l << a;
+
+		a = new QAction(QObject::tr("4 Inputs"), parent);
+		a->setObjectName("4i");
+		a->setCheckable(true);
+		a->setChecked(property("inputs").toInt() == 4);
+		p["inputs"] = 4;
+		a->setData(p);
+		l << a;
+
+		a = new QAction(QObject::tr("6 Inputs"), parent);
+		a->setObjectName("6i");
+		a->setCheckable(true);
+		a->setChecked(property("inputs").toInt() == 6);
+		p["inputs"] = 6;
+		a->setData(p);
+		l << a;
+
+		a = new QAction(QObject::tr("8 Inputs"), parent);
+		a->setObjectName("8i");
+		a->setCheckable(true);
+		a->setChecked(property("inputs").toInt() == 8);
+		p["inputs"] = 8;
+		a->setData(p);
+		l << a;
+	}
+	return l;
+}
+
 QPoint QLogicCircuitGateShape::hotSpot() const
 {
     return QPoint(0, geometry().height() / (property("inputs").toInt() * 2));
@@ -251,4 +293,15 @@ QPainterPath QLogicCircuitGateShape::shape() const
     p.lineTo(geometry().width(), geometry().height() / 2);
 
     return p;
+}
+
+void QLogicCircuitGateShape::triggerAction(const QString & name, const QVariant & data)
+{
+	if (!name.isEmpty() && !data.isNull()){
+		QMapIterator<QString, QVariant> it(data.toMap());
+		while(it.hasNext()){
+			it.next();
+			setProperty(it.key(), it.value());
+		}
+	}
 }

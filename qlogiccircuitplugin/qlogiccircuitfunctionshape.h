@@ -40,11 +40,15 @@ public:
 
     QRectF boundingRect() const;
 
+	QList<QAction*> createActions(QWidget* parent);
+
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     /**
       * Returns the shape of this item as a QPainterPath in local coordinates.
       */
     QPainterPath shape() const;
+
+	void triggerAction(const QString & name, const QVariant & data);
 };
 
 #endif // QLOGICCIRCUITFUNCTIONSHAPE_H

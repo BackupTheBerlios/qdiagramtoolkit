@@ -34,6 +34,8 @@ public:
 
     QRectF boundingRect() const;
 
+	QList<QAction*> createActions(QWidget* parent);
+
     QPoint hotSpot() const;
 
 	QList<QAbstractDiagramShapeConnector*> inputs() const;
@@ -43,6 +45,8 @@ public:
       * Returns the shape of this item as a QPainterPath in local coordinates.
       */
     QPainterPath shape() const;
+
+	void triggerAction(const QString & name, const QVariant & data);
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
