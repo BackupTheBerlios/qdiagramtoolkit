@@ -177,7 +177,7 @@ QPainterPath QStandardBlockShape::shape() const
     } else if (property("shape").toString() == "rectangle" || property("shape").toString() == "square"){
         p.addRect(boundingRect());
     } else if (property("shape") == "square.rounded" || property("shape") == "rectangle.rounded"){
-        p.addRoundedRect(geometry(), property("radius").toDouble(), property("radius").toDouble());
+        p.addRoundedRect(boundingRect(), property("radius").toDouble(), property("radius").toDouble());
     } else if (property("shape").toString() == "diamond"){
         p.moveTo(0, boundingRect().center().y());
         p.lineTo(boundingRect().center().x(), 0);
