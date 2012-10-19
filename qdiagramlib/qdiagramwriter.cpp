@@ -30,14 +30,15 @@ static QDiagramIOHandler* createWriteHandler(QIODevice *device, const QByteArray
     QStringList filters;
     QDir dir;
 
-    filters << "*.*";
+    filters << "*.dll";
     dir.setPath(QApplication::applicationDirPath() + "/plugins/diagram/formats");
     dir.setFilter(QDir::Files);
 
     // Check if the device is a file and if so, get the file suffix
     if (device && format.isEmpty()){
         if (QFile* file = qobject_cast<QFile *>(device)){
-            if (!(f = QFileInfo(file->fileName()).suffix().toLower().toLatin1()).isEmpty()) {
+            if (!(f = QFileInfo(file->fileName()).suffix().toLower().toLatin1()).isEmpty()){
+				// TODO ??
             }
         }
     }
@@ -61,6 +62,7 @@ static QDiagramIOHandler* createWriteHandler(QIODevice *device, const QByteArray
                 if (p && p->keys().contains(f)){
                     if (p->capabilities(device, f).testFlag(QDiagramIOPlugin::CanWrite)){
                         handler = p->create(device, f);
+						break;
                     }
                 }
             }
