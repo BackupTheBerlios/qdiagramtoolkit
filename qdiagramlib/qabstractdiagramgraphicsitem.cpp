@@ -102,6 +102,11 @@ void QAbstractDiagramGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEve
     menu.exec(event->screenPos());
 }
 
+QList<QAction*> QAbstractDiagramGraphicsItem::createActions(QWidget* parent)
+{
+	return QList<QAction*>();
+}
+
 QBrush QAbstractDiagramGraphicsItem::brush(const QString & attrs)
 {
     QBrush mBrush;
@@ -547,6 +552,17 @@ void QAbstractDiagramGraphicsItem::setBrush( const QBrush & brush )
         mAttrs << "style:solid";
     }
     setProperty("brush", mAttrs.join(";"));
+}
+
+void QAbstractDiagramGraphicsItem::triggerAction(QAction* action)
+{
+	Q_UNUSED(action);
+}
+
+void QAbstractDiagramGraphicsItem::triggerAction(const QString & name, const QVariant & data)
+{
+	Q_UNUSED(name);
+	Q_UNUSED(data);
 }
 
 void QAbstractDiagramGraphicsItem::updateSizeGripHandles()

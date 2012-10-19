@@ -79,6 +79,8 @@ public:
       * This pure virtual function defines the outer bounds of the item as a rectangle; all painting must be restricted to inside an item's bounding rect.
       */
     QRectF boundingRect() const = 0;
+
+	virtual QList<QAction*> createActions(QWidget* parent);
     /**
       * Returns the diagram containing this item.
       */
@@ -134,6 +136,10 @@ public:
       * If the property is not defined using addStaticProperty, and therefore not listed in the meta-data, it is added as a dynamic property and false is returned.
       */
     bool setProperty(const QString & name, const QVariant & value);
+
+	virtual void triggerAction(QAction* action);
+
+	virtual void triggerAction(const QString & name, const QVariant & data);
     /**
       * Returns the type of the QAbstractDiagramGraphicsItem as an int.
       */
