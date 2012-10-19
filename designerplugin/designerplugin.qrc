@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/qdiagramdesignerplugin">
+        <file alias="qdiagramview">resources/qdiagramview.ico</file>
+        <file alias="qdiagramshapetoolbox">resources/qdiagramshapetoolbox.ico</file>
+        <file alias="shapes">resources/shapes.ico</file>
+    </qresource>
+</RCC>
