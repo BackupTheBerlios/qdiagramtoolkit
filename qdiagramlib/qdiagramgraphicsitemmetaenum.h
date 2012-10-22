@@ -21,6 +21,8 @@
 
 #include "qdiagramlib_global.h"
 
+#include <QMap>
+
 class QDIAGRAMLIBSHARED_EXPORT QDiagramGraphicsItemMetaEnum
 {
 public:
