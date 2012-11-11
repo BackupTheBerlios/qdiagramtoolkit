@@ -24,6 +24,8 @@ public:
 
     void setDiagram(QDiagram* diagram);
 public slots:
+	void group();
+
     void print(QPrinter* printer);
 
     void save();
@@ -31,6 +33,8 @@ public slots:
 	void saveAsImage();
 
     void undo();
+
+	void ungroup();
 
     void redo();
 private slots:

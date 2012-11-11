@@ -29,7 +29,7 @@
 
 QString QSysMLPlugin::name() const
 {
-    return "SysML";
+	return QSysMLPlugin::staticName();
 }
 
 QList<QDiagramConnectorStyle> QSysMLPlugin::connectors() const
@@ -42,29 +42,26 @@ QList<QDiagramConnectorStyle> QSysMLPlugin::connectors() const
     return mStyles;
 }
 
-QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
+QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
 {
     QAbstractDiagramGraphicsItem* item = 0;
     if (!properties.contains("uuid")){
         return 0;
     }
-    if (properties.value("itemType") == "connector"){
+    if (metaData.value("itemType") == "connector"){
 //        item = new QStandardShapeConnector(properties);
-    } else if (properties.value("itemType") == "line"){
+    } else if (metaData.value("itemType") == "line"){
 //        props["p1"] = QPointF(properties.value("x").toDouble(), properties.value("y").toDouble());
 //        props["p2"] = props.value("p1").toPointF() + QPointF(100, 100);
 //        item = new QStandardLine(props);
-    } else if (properties.value("itemType") == "shape"){
-        if (properties.value("shape") == "action"){
+    } else if (metaData.value("itemType") == "shape"){
+        if (metaData.value("itemClass") == "action"){
             item = new QSysMLAction(properties);
-        } else if (properties.value("shape") == "block"){
+        } else if (metaData.value("itemClass") == "block"){
             item = new QSysMLBlock(properties);
-        } else if (properties.value("shape") == "node"){
+        } else if (metaData.value("itemClass") == "node"){
             item = new QSysMLNode(properties);
         }
-    }
-    if (item){
-        scene->addItem(item);
     }
     return item;
 }
@@ -182,61 +179,56 @@ QAbstractDiagramShape *QSysMLPlugin::restoreShape(const QString &uuid, const QSt
     return 0;
 }
 
+QVariantMap QSysMLPlugin::metaData(const QString & name) const
+{
+	QVariantMap m;
+	m["plugin"] = QSysMLPlugin::staticName();
+    if (name == "action"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "action";
+    } else if (name == "block"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "block";
+    } else if (name == "node.decision"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    } else if (name == "node.initial"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    } else if (name == "node.final.activity"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    } else if (name == "node.fork.horizontal"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    } else if (name == "node.fork"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    }
+
+	return m;
+}
+
 QMap<QString, QVariant> QSysMLPlugin::defaultProperties(const QString & name) const
 {
     QMap<QString, QVariant> properties;
-    properties["plugin"] = this->name();
-    QVariantMap p;
-    p["x"] = 0;
-    p["y"] = 0;
-    p["width"] = 78;
-    p["height"] = 78;
     if (name == "action"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "action";
         properties["actionType"] = "default";
-        p["width"] = 78;
-        p["height"] = 52;
     } else if (name == "block"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "block";
         properties["blockType"] = "default";
-        p["width"] = 78;
-        p["height"] = 65;
     } else if (name == "node.decision"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "node";
         properties["nodeType"] = "decision";
-        p["width"] = 39;
-        p["height"] = 39;
     } else if (name == "node.initial"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "node";
         properties["nodeType"] = "initial";
-        p["width"] = 39;
-        p["height"] = 39;
     } else if (name == "node.final.activity"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "node";
         properties["nodeType"] = "final.activity";
-        p["width"] = 39;
-        p["height"] = 39;
     } else if (name == "node.fork.horizontal"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "node";
         properties["nodeType"] = "fork";
-        p["width"] = 78;
-        p["height"] = 39;
         properties["alignment"] = Qt::Horizontal;
     } else if (name == "node.fork"){
-        properties["itemType"] = "shape";
-        properties["shape"] = "node";
         properties["nodeType"] = "fork";
-        p["width"] = 78;
-        p["height"] = 39;
         properties["alignment"] = Qt::Horizontal;
     }
-    properties["geometry"] = p;
     return properties;
 }
 
@@ -270,6 +262,11 @@ QStringList QSysMLPlugin::shapes(const QString & group, QAbstractDiagram *diagra
         s.append(bl);
     }
     return s;
+}
+
+QString QSysMLPlugin::staticName()
+{
+	return "SysML";
 }
 
 QString QSysMLPlugin::title(const QString & name) const

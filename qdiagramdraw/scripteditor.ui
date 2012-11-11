@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ScriptEditor</class>
+ <widget class="QDialog" name="ScriptEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Run Script...</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/Actions/Run Script</normaloff>:/Actions/Run Script</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>File</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="scriptChangedLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>:/icons/script.unchanged</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Name:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fileNameLabel">
+        <property name="text">
+         <string>new.js</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="editorPage">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Script</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QSplitter" name="splitter_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <widget class="ScriptCodeEdit" name="scriptTextEdit"/>
+             <widget class="QPlainTextEdit" name="outputTextEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Preview</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QDiagramView" name="diagramView">
+         <property name="interactive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="executePushButton">
+       <property name="text">
+        <string>&amp;Execute</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="scriptPushButton">
+       <property name="text">
+        <string>&amp;Script</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closePushButton">
+       <property name="text">
+        <string>&amp;Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <action name="runScriptAction">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/actions/script.run</normaloff>:/actions/script.run</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Run</string>
+   </property>
+  </action>
+  <action name="runScriptInDebuggerAction">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/actions/script.debug</normaloff>:/actions/script.debug</iconset>
+   </property>
+   <property name="text">
+    <string>Run in &amp;Debugger</string>
+   </property>
+  </action>
+  <action name="openScriptAction">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/actions/script.open</normaloff>:/actions/script.open</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="saveScriptAction">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/actions/script.save</normaloff>:/actions/script.save</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="abortScriptAction">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/actions/script.abort</normaloff>:/actions/script.abort</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Abort</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QDiagramView</class>
+   <extends>QWidget</extends>
+   <header>qdiagramview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScriptCodeEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>scriptcodeedit.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="qdiagramdraw.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>closePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ScriptEditor</receiver>
+   <slot>closePushButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>558</x>
+     <y>529</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>303</x>
+     <y>276</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scriptTextEdit</sender>
+   <signal>textChanged()</signal>
+   <receiver>ScriptEditor</receiver>
+   <slot>scriptTextEditTextChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>374</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>511</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>buttonClicked(QAbstractButton*)</slot>
+  <slot>scriptTextEditTextChanged()</slot>
+  <slot>closePushButtonClicked()</slot>
+ </slots>
+</ui>

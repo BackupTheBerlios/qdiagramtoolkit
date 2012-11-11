@@ -216,6 +216,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qlogiccircuitvalueshape.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -347,6 +351,14 @@
 			</File>
 			<File
 				RelativePath=".\qlogiccircuitshapeconnector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qlogiccircuitvalueshape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qlogiccircuitvalueshape_p.h"
 				>
 			</File>
 			<File
@@ -896,7 +908,7 @@
 						Name="VCCustomBuildTool"
 						Description="Rcc&apos;ing $(InputFileName)..."
 						CommandLine="&quot;$(QTDIR)\bin\rcc.exe&quot; -name &quot;$(InputName)&quot; -no-compress &quot;$(InputPath)&quot; -o .\GeneratedFiles\qrc_$(InputName).cpp&#x0D;&#x0A;"
-						AdditionalDependencies="$(InputPath);.\resources\gate_and.ico;.\resources\gate_nor.ico;.\resources\gate_not.ico;.\resources\gate_or.ico;.\resources\gate_xnor.ico;.\resources\gate_xor.ico;.\resources\gate_nand.ico;.\resources\output.digital.ico;.\resources\connector_default.ico;.\resources\connector_line.ico;.\resources\input.digital.ico;.\resources\output.analog.ico;.\resources\input.analog.ico;.\resources\inlay.analog.ico;.\resources\inlay.digital.ico;.\resources\counter.ico;.\resources\comparator.ico;.\resources\summation.ico;.\resources\compare_equal.ico;.\resources\compare_greater.ico;.\resources\compare_less.ico;.\resources\compare_less_or_equal.ico;.\resources\compare_greater_or_equal.ico;.\resources\flipflop.asyncron.ico;.\resources\operating_hours_counter.ico;.\resources\parameter_analog.ico;.\resources\parameter_digital.ico"
+						AdditionalDependencies="$(InputPath);.\resources\gate_and.ico;.\resources\gate_nor.ico;.\resources\gate_not.ico;.\resources\gate_or.ico;.\resources\gate_xnor.ico;.\resources\gate_xor.ico;.\resources\gate_nand.ico;.\resources\output.digital.ico;.\resources\connector_default.ico;.\resources\connector_line.ico;.\resources\input.digital.ico;.\resources\output.analog.ico;.\resources\input.analog.ico;.\resources\inlay.analog.ico;.\resources\inlay.digital.ico;.\resources\counter.ico;.\resources\comparator.ico;.\resources\summation.ico;.\resources\compare_equal.ico;.\resources\compare_greater.ico;.\resources\compare_less.ico;.\resources\compare_less_or_equal.ico;.\resources\compare_greater_or_equal.ico;.\resources\flipflop.asyncron.ico;.\resources\operating_hours_counter.ico;.\resources\parameter_analog.ico;.\resources\parameter_digital.ico;.\resources\timer.ico;.\resources\value_analog.ico"
 						Outputs=".\GeneratedFiles\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -907,13 +919,53 @@
 						Name="VCCustomBuildTool"
 						Description="Rcc&apos;ing $(InputFileName)..."
 						CommandLine="&quot;$(QTDIR)\bin\rcc.exe&quot; -name &quot;$(InputName)&quot; -no-compress &quot;$(InputPath)&quot; -o .\GeneratedFiles\qrc_$(InputName).cpp&#x0D;&#x0A;"
-						AdditionalDependencies="$(InputPath);.\resources\gate_and.ico;.\resources\gate_nor.ico;.\resources\gate_not.ico;.\resources\gate_or.ico;.\resources\gate_xnor.ico;.\resources\gate_xor.ico;.\resources\gate_nand.ico;.\resources\output.digital.ico;.\resources\connector_default.ico;.\resources\connector_line.ico;.\resources\input.digital.ico;.\resources\output.analog.ico;.\resources\input.analog.ico;.\resources\inlay.analog.ico;.\resources\inlay.digital.ico;.\resources\counter.ico;.\resources\comparator.ico;.\resources\summation.ico;.\resources\compare_equal.ico;.\resources\compare_greater.ico;.\resources\compare_less.ico;.\resources\compare_less_or_equal.ico;.\resources\compare_greater_or_equal.ico;.\resources\flipflop.asyncron.ico;.\resources\operating_hours_counter.ico;.\resources\parameter_analog.ico;.\resources\parameter_digital.ico"
+						AdditionalDependencies="$(InputPath);.\resources\gate_and.ico;.\resources\gate_nor.ico;.\resources\gate_not.ico;.\resources\gate_or.ico;.\resources\gate_xnor.ico;.\resources\gate_xor.ico;.\resources\gate_nand.ico;.\resources\output.digital.ico;.\resources\connector_default.ico;.\resources\connector_line.ico;.\resources\input.digital.ico;.\resources\output.analog.ico;.\resources\input.analog.ico;.\resources\inlay.analog.ico;.\resources\inlay.digital.ico;.\resources\counter.ico;.\resources\comparator.ico;.\resources\summation.ico;.\resources\compare_equal.ico;.\resources\compare_greater.ico;.\resources\compare_less.ico;.\resources\compare_less_or_equal.ico;.\resources\compare_greater_or_equal.ico;.\resources\flipflop.asyncron.ico;.\resources\operating_hours_counter.ico;.\resources\parameter_analog.ico;.\resources\parameter_digital.ico;.\resources\timer.ico;.\resources\value_analog.ico"
 						Outputs=".\GeneratedFiles\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\resources\summation.ico"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\resources\timer.ico"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\resources\value_analog.ico"
 				>
 				<FileConfiguration
 					Name="Release|Win32"

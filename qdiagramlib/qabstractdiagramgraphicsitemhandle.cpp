@@ -28,13 +28,13 @@ QAbstractDiagramGraphicsItemHandle::QAbstractDiagramGraphicsItemHandle(QGraphics
 
 QPointF QAbstractDiagramGraphicsItemHandle::alignToGrid( const QPointF & pos ) const
 {
-    QPointF mPos(pos);
-    QAbstractDiagramScene* mScene = qobject_cast<QAbstractDiagramScene*>(scene());
-    if (mScene && mScene->isSnapToGridEnabled()){
-        mPos.setX(mScene->gridSize().width() * (int)(mPos.x() / mScene->gridSize().width()));
-        mPos.setY(mScene->gridSize().height() * (int)(mPos.y() / mScene->gridSize().height()));
+    QPointF p(pos);
+    QAbstractDiagramScene* s = qobject_cast<QAbstractDiagramScene*>(scene());
+    if (s && s->isSnapToGridEnabled()){
+        p.setX(s->gridSize().width() * (int)(p.x() / s->gridSize().width()));
+        p.setY(s->gridSize().height() * (int)(p.y() / s->gridSize().height()));
     }
-    return mPos;
+    return p;
 }
 
 QPointF QAbstractDiagramGraphicsItemHandle::alignToGrid(qreal x, qreal y) const

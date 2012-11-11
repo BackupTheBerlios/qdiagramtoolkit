@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/qlogiccircuitsim">
+        <file alias="control.pause">resources/control_pause_blue.ico</file>
+        <file alias="control.play">resources/control_play_blue.ico</file>
+        <file alias="control.stop">resources/control_stop_blue.ico</file>
+    </qresource>
+</RCC>

@@ -26,12 +26,14 @@
 #include <QGraphicsItem>
 #include <QPen>
 
-#include <qdiagramgraphicsitemmetaproperty.h>
+#include <qdiagramtoolkit.h>
+#include <qdiagrammetaproperty.h>
+#include <qdiagramproperty.h>
 
 class QAbstractDiagramShapeConnector;
 class QAbstractDiagram;
 
-class QDiagramGraphicsItemMetaData;
+class QDiagramMetaData;
 
 //! The QAbstractDiagramGraphicsItem class is the base of all diagram graphics item.
 /**
@@ -55,7 +57,7 @@ public:
     /**
       * Constructs a QAbstractDiagramGraphicsItem with the given @p uuid and @p type.
       */
-    explicit QAbstractDiagramGraphicsItem(const QString & uuid, const QString & type, QGraphicsItem* parent = 0);
+    explicit QAbstractDiagramGraphicsItem(const QString & uuid, const QString & pluginName, const QString & itemType, const QString & itemClass, QGraphicsItem* parent = 0);
     /**
       * Destroys the QAbstractDiagramGraphicsItem.
       */
@@ -79,6 +81,15 @@ public:
       * This pure virtual function defines the outer bounds of the item as a rectangle; all painting must be restricted to inside an item's bounding rect.
       */
     QRectF boundingRect() const = 0;
+	/**
+	 *
+	 */
+	void bringForward();
+	/**
+	 * Brings the shape to the front.
+	 * @see sendToBack()
+	 */
+	void bringToFront();
 
 	virtual QList<QAction*> createActions(QWidget* parent);
     /**
@@ -96,7 +107,7 @@ public:
     /**
       * Returns a pointer to the meta-data of this object.
       */
-    QDiagramGraphicsItemMetaData* metaData() const;
+    QDiagramMetaData* metaData() const;
     /**
       *
       */
@@ -116,7 +127,7 @@ public:
     /**
       * Returns the property specified by the given @p name.
       */
-    QVariant property(const QString & name) const;
+	QDiagramProperty property(const QString & name) const;
 
     virtual void restoreFromProperties(const QVariantMap & properties);
 
@@ -136,6 +147,15 @@ public:
       * If the property is not defined using addStaticProperty, and therefore not listed in the meta-data, it is added as a dynamic property and false is returned.
       */
     bool setProperty(const QString & name, const QVariant & value);
+	/**
+	 * Sends the shape one level backward.
+	 */
+	void sendBackward();
+	/**
+	 * Sends the item to the back.
+	 * @see bringToFront()
+	 */
+	void sendToBack();
 
 	virtual void triggerAction(QAction* action);
 
@@ -159,13 +179,15 @@ public:
 protected:
 //    QAbstractDiagramGraphicsItem(const QString & diagramShape, QGraphicsItem* parent = 0);
 
-    void addProperty(const QString & name, QDiagramGraphicsItemMetaProperty::Type type, bool readOnly, const QVariant & value = QVariant());
+    void addProperty(const QString & name, QDiagramToolkit::PropertyType type, bool readOnly, const QVariant & value = QVariant());
 
-    void addProperty(const QString & name, QDiagramGraphicsItemMetaProperty::Type type, const QMap<int, QString> &enums, const QVariant & value = QVariant());
+    void addProperty(const QString & name, QDiagramToolkit::PropertyType type, const QMap<int, QString> &enums, const QVariant & value = QVariant());
 
     QBrush brush() const;
 
     virtual void contextMenuEvent( QGraphicsSceneContextMenuEvent* event );
+
+	void initGeometry(qreal width, qreal height);
     /**
       * This virtual function is called by QAbstractDiagramShape to notify custom items that the position has changed.
       * The @p value argument is the new position (the same as pos()), and QAbstractDiagramShape ignores the return value for this notification (i.e., a read-only notification).
@@ -191,6 +213,10 @@ protected:
 
     void setBrush( const QBrush & brush );
 protected:
+	/**
+	 * Sets the 
+	 */
+	void changeGeometry(const QRectF & r);
     /**
       * This virtual function is called by QAbstractDiagramShape to notify custom items that the position changes.
       * The @p value argument is the new position (i.e., a QPointF).
@@ -203,20 +229,32 @@ protected:
 	virtual void restoreProperties(const QVariantMap & p);
     virtual void updateSizeGripHandles();
 private:
+	friend class QDiagramProperty;
+	friend class QDiagramChangePropertyCommand;
+	bool changeProperty(const QString & name, const QVariant & value);
+
     QVariant itemChange(GraphicsItemChange change, const QVariant & value);
 
+	QVariant propertyValue(int index) const;
+
     QBrush brush(const QString & attrs);
-    void initMetaData(const QString & uuid, const QString & type);
+    void initMetaData(const QString & uuid, const QString & pluginName, const QString & itemType, const QString & itemClass);
     QPen pen(const QString & attrs);
 
     QList<QAction*> m_actions;
     bool m_blockUndoCommands;
-    QDiagramGraphicsItemMetaData* m_metadata;
+    QDiagramMetaData* m_metadata;
 
     QBrush m_brush;
     QMap<QString,QVariant> m_properties;
+//	QMap<int, QDiagramPropertyValue> m_values;
+	QVariantMap m_dynamicProperties;
+
     QString m_name;
     QPen m_pen;
 };
+
+Q_DECLARE_METATYPE(QAbstractDiagramGraphicsItem*)
+Q_DECLARE_METATYPE(QList<QAbstractDiagramGraphicsItem*>)
 
 #endif // QABSTRACTDIAGRAMGRAPHICSITEM_H

@@ -40,7 +40,7 @@ SOURCES += qdiagram.cpp \
     qabstractdiagramplugin.cpp \
     qdiagramshapestyle.cpp \
     qdiagramgraphicsitemmetadata.cpp \
-    qdiagramgraphicsitemmetaproperty.cpp \
+    qdiagrammetaproperty.h.cpp \
     qdiagramshapesizegrip.cpp \
     qdiagramlinestyle.cpp \
     qdiagramlineitempositionhandle.cpp \
@@ -83,8 +83,8 @@ HEADERS += qdiagram.h\
     qdiagramconnectorstyle.h \
     qabstractdiagramplugin.h \
     qdiagramshapestyle.h \
-    qdiagramgraphicsitemmetadata.h \
-    qdiagramgraphicsitemmetaproperty.h \
+    qdiagrammetadata.h \
+    qdiagrammetaproperty.h.h \
     qdiagramgraphicsitempropertiesview_p.h \
     qdiagramshapesizegrip.h \
     qdiagramlinestyle.h \

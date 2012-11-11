@@ -28,7 +28,7 @@ public:
     sdAbstractDiagramShapeConnectionPoint()
     {
         index = -1;
-        orientation = QAbstractDiagramShapeConnectionPoint::North;
+        orientation = QDiagramToolkit::North;
         shape = 0;
     }
 
@@ -48,13 +48,13 @@ public:
 
     QList<QAbstractDiagramShapeConnectionPoint::Connection> connections;
     int index;
-    QAbstractDiagramShapeConnectionPoint::Orientation orientation;
+    QDiagramToolkit::ConnectionPointOrientation orientation;
     QRectF rect;
     QAbstractDiagramShape* shape;
 
 };
 
-QAbstractDiagramShapeConnectionPoint::QAbstractDiagramShapeConnectionPoint(QAbstractDiagramShape* shape, const QString & id, QAbstractDiagramShapeConnectionPoint::Orientation orientation, int maxConnections) :
+QAbstractDiagramShapeConnectionPoint::QAbstractDiagramShapeConnectionPoint(QAbstractDiagramShape* shape, const QString & id, QDiagramToolkit::ConnectionPointOrientation orientation, int maxConnections) :
     QGraphicsItem(shape)
 {
     m_dir = QAbstractDiagramShapeConnectionPoint::InOut;
@@ -118,6 +118,28 @@ QList<QAbstractDiagramShapeConnectionPoint::Connection> QAbstractDiagramShapeCon
     return m_connections;
 }
 
+QAbstractDiagramShapeConnector* QAbstractDiagramShapeConnectionPoint::connector(int index) const
+{
+	if (index < m_connections.size()){
+		return m_connections.at(index).connector;
+	}
+	return 0;
+}
+
+QList<QAbstractDiagramShapeConnector*> QAbstractDiagramShapeConnectionPoint::connectors() const
+{
+	QList<QAbstractDiagramShapeConnector*> l;
+	Q_FOREACH(QAbstractDiagramShapeConnectionPoint::Connection c, m_connections){
+		l << c.connector;
+	}
+	return l;
+}
+
+int QAbstractDiagramShapeConnectionPoint::count() const
+{
+	return m_connections.size();
+}
+
 QPointF QAbstractDiagramShapeConnectionPoint::diagramPos() const
 {
     return scenePos() + boundingRect().center();
@@ -143,7 +165,7 @@ QString QAbstractDiagramShapeConnectionPoint::name() const
     return m_name;
 }
 
-QAbstractDiagramShapeConnectionPoint::Orientation QAbstractDiagramShapeConnectionPoint::orientation() const
+QDiagramToolkit::ConnectionPointOrientation QAbstractDiagramShapeConnectionPoint::orientation() const
 {
     return m_orientation;
 }

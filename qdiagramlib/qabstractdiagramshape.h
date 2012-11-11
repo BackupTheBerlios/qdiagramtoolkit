@@ -63,11 +63,16 @@ public:
     /**
       * Returns a list of connection points matching the given @p orientation.
       */
-    QList<QAbstractDiagramShapeConnectionPoint*> connectionPoints(QAbstractDiagramShapeConnectionPoint::Orientation orientation) const;
+    QList<QAbstractDiagramShapeConnectionPoint*> connectionPoints(QDiagramToolkit::ConnectionPointOrientation orientation) const;
     /**
       * Returns a list of connectors connected with this shape.
       */
     QList<QAbstractDiagramShapeConnector*> connectors() const;
+	/**
+	 * Returns the shape's focus rectangle. The default implementation returns the bounding rectangle (boundingRect()).
+	 * @see paintFocus()
+	 */
+	virtual QRectF focusRect() const;
     /**
       * Returns true if the @p connector is allowed to connect. Otherwise false.
       * The default implementation return true.
@@ -100,7 +105,7 @@ protected:
     /**
       * Constructs a diagram shape with the given @p properties.
       */
-    QAbstractDiagramShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
+	QAbstractDiagramShape(const QString & plugin, const QString & itemClass, const QVariantMap & properties, QGraphicsItem* parent = 0);
     /**
       * Adds the given size grid @p handle to the shape.
       */
@@ -137,5 +142,8 @@ private:
     QList<QAbstractDiagramShapeConnectionPoint*> m_connectionPoints;
     QList<QDiagramShapeSizeGripHandle*> m_handles;
 };
+
+Q_DECLARE_METATYPE(QAbstractDiagramShape*)
+Q_DECLARE_METATYPE(QList<QAbstractDiagramShape*>)
 
 #endif // QABSTRACTDIAGRAMSHAPE_H

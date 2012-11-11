@@ -14,6 +14,9 @@
         <file alias="line.dotted">resources/line_dotted.ico</file>
         <file alias="line.dash_dot_dot">resources/line_dash_dot_dot.ico</file>
         <file alias="line.dashed">resources/line_dashed.ico</file>
+        <file alias="color.select">resources/color_wheel.ico</file>
+        <file alias="layer.locked">resources/layer_locked.ico</file>
+        <file alias="layer.unlocked">resources/layer_unlocked.ico</file>
     </qresource>
     <qresource prefix="/diagram/arrows">
         <file alias="start.default">resources/arrow_start_default.ico</file>

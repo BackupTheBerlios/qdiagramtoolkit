@@ -20,17 +20,20 @@
 #include "qlogiccircuitfunctionshape.h"
 #include "qlogiccircuitfunctionshape_p.h"
 
-#include <qdiagramgraphicsitemmetaenum.h>
-#include <qdiagramgraphicsitemmetadata.h>
+#include <qdiagrammetaenum.h>
+#include <qdiagrammetadata.h>
+
+#include "qlogiccircuitplugin.h"
 
 #define BASE_SIZE 13.0
 #define GATE_CP_SIZE 8.0
 
 
 QLogicCircuitFunctionInputConnectionPoint::QLogicCircuitFunctionInputConnectionPoint(QAbstractDiagramShape* shape, const QString & id, int index, int maxConnections) :
-    QAbstractDiagramShapeConnectionPoint(shape, id, QAbstractDiagramShapeConnectionPoint::West, maxConnections)
+    QAbstractDiagramShapeConnectionPoint(shape, id, QDiagramToolkit::West, maxConnections)
 {
     m_index = index;
+    setDirection(QAbstractDiagramShapeConnectionPoint::In);
     updatePosition();
 }
 
@@ -49,20 +52,17 @@ void QLogicCircuitFunctionInputConnectionPoint::paint(QPainter *painter, const Q
 
 void QLogicCircuitFunctionInputConnectionPoint::updatePosition()
 {
-    int offset;
-    if (parentShape()->property("function") == "comparator"){
+    int offset = 0;
+    if (parentShape()->property("function").toString() == "comparator"){
+        offset = parentShape()->geometry().height() / 4;
+	} else if (parentShape()->property("function").toString() == "timer"){
         offset = parentShape()->geometry().height() / 4;
     }
-//    if (parentShape()->property("inputs").toInt() == 1){
-//        setRect(QRectF(0, parentShape()->boundingRect().center().y() - GATE_CP_SIZE / 2, GATE_CP_SIZE, GATE_CP_SIZE));
-//    } else {
-//        setRect(QRectF(0, GATE_BASE_SIZE + (m_index * GATE_BASE_SIZE * 2) - GATE_CP_SIZE / 2, GATE_CP_SIZE, GATE_CP_SIZE));
-//    }
     setRect(QRectF(0, offset + (offset * 2 * m_index) - GATE_CP_SIZE / 2, GATE_CP_SIZE, GATE_CP_SIZE));
 }
 
 QLogicCircuitFunctionOutputConnectionPoint::QLogicCircuitFunctionOutputConnectionPoint(QAbstractDiagramShape* shape, const QString & id, int maxConnections) :
-    QAbstractDiagramShapeConnectionPoint(shape, id, QAbstractDiagramShapeConnectionPoint::East, maxConnections)
+    QAbstractDiagramShapeConnectionPoint(shape, id, QDiagramToolkit::East, maxConnections)
 {
     updatePosition();
 }
@@ -92,43 +92,51 @@ QLogicCircuitFunctionShape::QLogicCircuitFunctionShape(QGraphicsItem *parent) :
 }
 
 QLogicCircuitFunctionShape::QLogicCircuitFunctionShape(const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "function", properties, parent)
 {
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
 
-    addProperty("function", QDiagramGraphicsItemMetaProperty::String, true, properties.value("function").toString());
+    addProperty("function", QDiagramToolkit::String, true, properties.value("function").toString());
 
     if (properties.value("function").toString() == "comparator"){
         QMap<int,QString> pairs;
         pairs[0] = "equal";
         pairs[1] = "less";
         pairs[2] = "greater";
-        addProperty("mode", QDiagramGraphicsItemMetaProperty::Enumeration, pairs, properties.value("mode", 0));
+        addProperty("mode", QDiagramToolkit::Enumeration, pairs, properties.value("mode", 0));
 
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "x", 0, 1));
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "y", 1, 1));
         addConnectionPoint(new QLogicCircuitFunctionOutputConnectionPoint(this, "out"));
     } else if (properties.value("function").toString() == "counter"){
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "enable", 0, 1));
-        addProperty("unit", QDiagramGraphicsItemMetaProperty::String, false, properties.value("unit"));
-        addProperty("digits", QDiagramGraphicsItemMetaProperty::String, false, properties.value("digits"));
+        addProperty("unit", QDiagramToolkit::String, false, properties.value("unit"));
+        addProperty("digits", QDiagramToolkit::String, false, properties.value("digits"));
         addConnectionPoint(new QLogicCircuitFunctionOutputConnectionPoint(this, "out"));
     } else if (properties.value("function").toString() == "computation"){
         QMap<int,QString> pairs;
         pairs[0] = "addtion";
         pairs[1] = "subtraction";
         pairs[2] = "division";
-        addProperty("mode", QDiagramGraphicsItemMetaProperty::Enumeration, pairs, properties.value("mode", 0));
+        addProperty("mode", QDiagramToolkit::Enumeration, pairs, properties.value("mode", 0));
 
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "x", 0, 1));
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "y", 1, 1));
         addConnectionPoint(new QLogicCircuitFunctionOutputConnectionPoint(this, "out"));
     } else if (properties.value("function").toString() == "operatingHoursCounter"){
-        addProperty("unit", QDiagramGraphicsItemMetaProperty::String, true, "h");
-        addProperty("digits", QDiagramGraphicsItemMetaProperty::Int, false, properties.value("digits"));
+        addProperty("unit", QDiagramToolkit::String, true, "h");
+        addProperty("digits", QDiagramToolkit::Int, false, properties.value("digits"));
+        addConnectionPoint(new QLogicCircuitFunctionOutputConnectionPoint(this, "out"));
+    } else if (properties.value("function").toString() == "timer"){
+        QMap<int,QString> pairs;
+        pairs[0] = "delay";
+        addProperty("mode", QDiagramToolkit::Enumeration, pairs, properties.value("mode", 0));
+        addProperty("time", QDiagramToolkit::Int, false, "sec");
+        addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "trigger", 0, 1));
+        addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "parameter", 1, 1));
         addConnectionPoint(new QLogicCircuitFunctionOutputConnectionPoint(this, "out"));
     }
     restoreProperties(properties);
@@ -156,7 +164,7 @@ QList<QAction*> QLogicCircuitFunctionShape::createActions(QWidget* parent)
 			p["mode"] = metaData()->property(index).enumerator().value(i);
 			a->setData(p);
 			a->setCheckable(true);
-			a->setChecked(property("mode") == metaData()->property(index).enumerator().value(i));
+			a->setChecked(property("mode").value() == metaData()->property(index).enumerator().value(i));
 			m->addAction(a);
         }
 		l << m->menuAction();
@@ -193,6 +201,10 @@ void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGrap
         painter->drawRect(mRect);
     } else if (property("function").toString() == "computation"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "S");
+    } else if (property("function").toString() == "timer"){
+		QString t = QString("T%1\n%2sec").arg(property("mode").toString()).arg(property("time").toString());
+        painter->drawText(boundingRect(), Qt::AlignHCenter, t);
+		painter->drawText(BASE_SIZE + 5, BASE_SIZE * 3, "P");
     }
     paintConnectionPoints(painter, option, widget);
     paintFocus(painter, option, widget);
@@ -200,34 +212,42 @@ void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGrap
 
 QPainterPath QLogicCircuitFunctionShape::shape() const
 {
-    QPainterPath mPath;
+    QPainterPath p;
     int offset = geometry().height() / 4;
-    mPath.addRect(offset, 0, geometry().width() - offset * 2, geometry().height());
+    p.addRect(offset, 0, geometry().width() - offset * 2, geometry().height());
 
     if (property("function").toString() == "comparator"){
-        mPath.moveTo(0, BASE_SIZE);
-        mPath.lineTo(BASE_SIZE, BASE_SIZE);
-        mPath.moveTo(0, BASE_SIZE * 3);
-        mPath.lineTo(BASE_SIZE, BASE_SIZE * 3);
+        p.moveTo(0, BASE_SIZE);
+        p.lineTo(BASE_SIZE, BASE_SIZE);
+        p.moveTo(0, BASE_SIZE * 3);
+        p.lineTo(BASE_SIZE, BASE_SIZE * 3);
 
-        mPath.moveTo(boundingRect().right() - BASE_SIZE, boundingRect().center().y());
-        mPath.lineTo(boundingRect().right(), boundingRect().center().y());
+        p.moveTo(boundingRect().right() - BASE_SIZE, boundingRect().center().y());
+        p.lineTo(boundingRect().right(), boundingRect().center().y());
     } else if (property("function").toString() == "counter" || property("function").toString() == "operatingHoursCounter"){
-        mPath.moveTo(0, BASE_SIZE);
-        mPath.lineTo(BASE_SIZE, BASE_SIZE);
+        p.moveTo(0, BASE_SIZE);
+        p.lineTo(BASE_SIZE, BASE_SIZE);
 
-        mPath.moveTo(boundingRect().right() - BASE_SIZE, boundingRect().center().y());
-        mPath.lineTo(boundingRect().right(), boundingRect().center().y());
+        p.moveTo(boundingRect().right() - BASE_SIZE, boundingRect().center().y());
+        p.lineTo(boundingRect().right(), boundingRect().center().y());
     } else if (property("function").toString() == "computation"){
-        mPath.moveTo(0, offset);
-        mPath.lineTo(offset, offset);
-        mPath.moveTo(0, geometry().height() - offset);
-        mPath.lineTo(offset, geometry().height() - offset);
+        p.moveTo(0, offset);
+        p.lineTo(offset, offset);
+        p.moveTo(0, geometry().height() - offset);
+        p.lineTo(offset, geometry().height() - offset);
 
-        mPath.moveTo(geometry().width() - offset, geometry().height() / 2);
-        mPath.lineTo(geometry().width(), geometry().height() / 2);
+        p.moveTo(geometry().width() - offset, geometry().height() / 2);
+        p.lineTo(geometry().width(), geometry().height() / 2);
+	} else if (property("function").toString() == "timer"){
+        p.moveTo(0, BASE_SIZE);
+        p.lineTo(BASE_SIZE, BASE_SIZE);
+        p.moveTo(0, BASE_SIZE * 3);
+        p.lineTo(BASE_SIZE, BASE_SIZE * 3);
+
+        p.moveTo(boundingRect().right() - BASE_SIZE, boundingRect().center().y());
+        p.lineTo(boundingRect().right(), boundingRect().center().y());
     }
-    return mPath;
+    return p;
 }
 
 void QLogicCircuitFunctionShape::triggerAction(const QString & name, const QVariant & data)

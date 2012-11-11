@@ -47,14 +47,14 @@ QDiagramShape::QDiagramShape(QGraphicsItem* parent) :
     setAcceptHoverEvents(true);
     setBoundingRect(0,0,100,50);
 
-    initConnectionPoint(QDiagramShapeConnectionPoint::North, QAbstractDiagramShapeConnectionPoint::North);
-    initConnectionPoint(QDiagramShapeConnectionPoint::NorthEast, QAbstractDiagramShapeConnectionPoint::North);
-    initConnectionPoint(QDiagramShapeConnectionPoint::East, QAbstractDiagramShapeConnectionPoint::East);
-    initConnectionPoint(QDiagramShapeConnectionPoint::SouthEast, QAbstractDiagramShapeConnectionPoint::South);
-    initConnectionPoint(QDiagramShapeConnectionPoint::South, QAbstractDiagramShapeConnectionPoint::South);
-    initConnectionPoint(QDiagramShapeConnectionPoint::SouthWest, QAbstractDiagramShapeConnectionPoint::South);
-    initConnectionPoint(QDiagramShapeConnectionPoint::West, QAbstractDiagramShapeConnectionPoint::West);
-    initConnectionPoint(QDiagramShapeConnectionPoint::NorthWest, QAbstractDiagramShapeConnectionPoint::North);
+    initConnectionPoint(QDiagramShapeConnectionPoint::North, QDiagramToolkit::North);
+    initConnectionPoint(QDiagramShapeConnectionPoint::NorthEast, QDiagramToolkit::North);
+    initConnectionPoint(QDiagramShapeConnectionPoint::East, QDiagramToolkit::East);
+    initConnectionPoint(QDiagramShapeConnectionPoint::SouthEast, QDiagramToolkit::South);
+    initConnectionPoint(QDiagramShapeConnectionPoint::South, QDiagramToolkit::South);
+    initConnectionPoint(QDiagramShapeConnectionPoint::SouthWest, QDiagramToolkit::South);
+    initConnectionPoint(QDiagramShapeConnectionPoint::West, QDiagramToolkit::West);
+    initConnectionPoint(QDiagramShapeConnectionPoint::NorthWest, QDiagramToolkit::North);
 }
 
 //QDiagramShape::QDiagramShape(const QString & uuid, const QString & shape, QGraphicsItem* parent) :
@@ -63,21 +63,21 @@ QDiagramShape::QDiagramShape(QGraphicsItem* parent) :
 //    setAcceptHoverEvents(true);
 //    setBoundingRect(0,0,100,50);
 
-//    initConnectionPoint(QDiagramShapeConnectionPoint::North, QAbstractDiagramShapeConnectionPoint::North);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::NorthEast, QAbstractDiagramShapeConnectionPoint::North);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::East, QAbstractDiagramShapeConnectionPoint::East);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::SouthEast, QAbstractDiagramShapeConnectionPoint::South);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::South, QAbstractDiagramShapeConnectionPoint::South);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::SouthWest, QAbstractDiagramShapeConnectionPoint::South);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::West, QAbstractDiagramShapeConnectionPoint::West);
-//    initConnectionPoint(QDiagramShapeConnectionPoint::NorthWest, QAbstractDiagramShapeConnectionPoint::North);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::North, QDiagramToolkit::North);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::NorthEast, QDiagramToolkit::North);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::East, QDiagramToolkit::East);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::SouthEast, QDiagramToolkit::South);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::South, QDiagramToolkit::South);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::SouthWest, QDiagramToolkit::South);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::West, QDiagramToolkit::West);
+//    initConnectionPoint(QDiagramShapeConnectionPoint::NorthWest, QDiagramToolkit::North);
 //}
 
 QDiagramShape::~QDiagramShape()
 {
 }
 
-void QDiagramShape::initConnectionPoint(QDiagramShapeConnectionPoint::Position position, QAbstractDiagramShapeConnectionPoint::Orientation orientation)
+void QDiagramShape::initConnectionPoint(QDiagramShapeConnectionPoint::Position position, QDiagramToolkit::ConnectionPointOrientation orientation)
 {
     // TODO
 //    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, connectionPoints()){

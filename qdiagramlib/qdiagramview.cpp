@@ -56,6 +56,8 @@ QDiagramView::QDiagramView(QWidget *parent) :
     connect(ui->diagramGraphicsView, SIGNAL(zoomChanged(int)), this, SLOT(zoomChanged(int)));
     connect(ui->zoomInToolButton, SIGNAL(clicked()), ui->diagramGraphicsView, SLOT(zoomIn()));
     connect(ui->zoomOutToolButton, SIGNAL(clicked()), ui->diagramGraphicsView, SLOT(zoomOut()));
+
+	setAlignment(Qt::AlignLeft | Qt::AlignTop);
 }
 
 QDiagramView::~QDiagramView()
@@ -260,9 +262,6 @@ void QDiagramView::setDiagram(QDiagram *diagram)
 	}
     m_diagram = diagram;
     ui->diagramGraphicsView->setScene(m_diagram->scene());
-//    ui->diagramGraphicsView->horizontalScrollBar()->setValue(0);
-//    ui->diagramGraphicsView->verticalScrollBar()->setValue(0);
-//    connect(ui->diagramGraphicsView, SIGNAL(connectItems(QDiagramShape*,QDiagramShape*)), cDiagram->scene(), SLOT(connectItems(QDiagramShape*,QDiagramShape*)));
     // Clear current mode selection menu
 	delete ui->modePushButton->menu();
 	ui->modePushButton->setMenu(0);
@@ -280,6 +279,7 @@ void QDiagramView::setDiagram(QDiagram *diagram)
 
 void QDiagramView::setInteractive(bool allowed)
 {
+	ui->modePushButton->setVisible(allowed);
     ui->diagramGraphicsView->setInteractive(allowed);
 }
 

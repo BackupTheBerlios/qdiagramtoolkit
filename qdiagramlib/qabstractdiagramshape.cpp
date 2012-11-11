@@ -20,8 +20,8 @@
 #include "qabstractdiagramshape.h"
 
 #include "qabstractdiagramshapeconnectionpoint.h"
-#include "qdiagramgraphicsitemmetadata.h"
-#include "qdiagramgraphicsitemmetaproperty.h"
+#include "qdiagrammetadata.h"
+#include "QDiagramMetaProperty.h"
 #include "qdiagramshapeconnector.h"
 #include "qdiagramgraphicsscene.h"
 
@@ -35,11 +35,9 @@ QAbstractDiagramShape::QAbstractDiagramShape(QGraphicsItem* parent) :
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
-QAbstractDiagramShape::QAbstractDiagramShape(const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), "shape", parent)
+QAbstractDiagramShape::QAbstractDiagramShape(const QString & plugin, const QString & itemClass, const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
+    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), plugin, "shape", itemClass, parent)
 {
-    addProperty("plugin", QDiagramGraphicsItemMetaProperty::String, true, properties.value("plugin").toString());
-    addProperty("shape", QDiagramGraphicsItemMetaProperty::String, true, properties.value("shape").toString());
     m_connectionPointsVisible = false;
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
@@ -60,15 +58,15 @@ QAbstractDiagramShape::~QAbstractDiagramShape()
 
 void QAbstractDiagramShape::addConnection(QAbstractDiagramGraphicsItem::ConnectorDirection direction, QAbstractDiagramShapeConnector* connector)
 {
-    Q_FOREACH(ConnectionData mData, m_connections){
-        if (mData.connector == connector){
+    Q_FOREACH(ConnectionData d, m_connections){
+        if (d.connector == connector){
             return;
         }
     }
-    ConnectionData mData;
-    mData.direction = direction;
-    mData.connector = connector;
-    m_connections.append(mData);
+    ConnectionData d;
+    d.direction = direction;
+    d.connector = connector;
+    m_connections.append(d);
 }
 
 void QAbstractDiagramShape::addConnectionPoint(QAbstractDiagramShapeConnectionPoint* point)
@@ -83,9 +81,9 @@ void QAbstractDiagramShape::addConnectionPoint(QAbstractDiagramShapeConnectionPo
 
 QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShape::connectionPoint(const QString & id) const
 {
-    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, m_connectionPoints){
-        if (mPoint->id() == id){
-            return mPoint;
+    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, m_connectionPoints){
+        if (p->id() == id){
+            return p;
         }
     }
     return 0;
@@ -93,9 +91,9 @@ QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShape::connectionPoint(con
 
 QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShape::connectionPoint(const QPointF & pos) const
 {
-    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, m_connectionPoints){
-        if (mPoint->rect().contains(pos)){
-            return mPoint;
+    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, m_connectionPoints){
+        if (p->rect().contains(pos)){
+            return p;
         }
     }
     return 0;
@@ -106,15 +104,15 @@ QList<QAbstractDiagramShapeConnectionPoint*> QAbstractDiagramShape::connectionPo
     return m_connectionPoints;
 }
 
-QList<QAbstractDiagramShapeConnectionPoint *> QAbstractDiagramShape::connectionPoints(QAbstractDiagramShapeConnectionPoint::Orientation orientation) const
+QList<QAbstractDiagramShapeConnectionPoint *> QAbstractDiagramShape::connectionPoints(QDiagramToolkit::ConnectionPointOrientation orientation) const
 {
-    QList<QAbstractDiagramShapeConnectionPoint*> list;
-    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* point, m_connectionPoints){
-        if (point->orientation() == orientation){
-            list.append(point);
+    QList<QAbstractDiagramShapeConnectionPoint*> l;
+    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* cp, m_connectionPoints){
+        if (cp->orientation() == orientation){
+            l.append(cp);
         }
     }
-    return list;
+    return l;
 }
 
 QList<QAbstractDiagramShapeConnector *> QAbstractDiagramShape::connectors() const
@@ -130,6 +128,11 @@ QList<QAbstractDiagramShapeConnector *> QAbstractDiagramShape::connectors() cons
     return l;
 }
 
+QRectF QAbstractDiagramShape::focusRect() const
+{
+	return boundingRect();
+}
+
 bool QAbstractDiagramShape::isConnectionAllowed(QAbstractDiagramShapeConnector* connector) const
 {
     Q_UNUSED(connector);
@@ -141,7 +144,7 @@ void QAbstractDiagramShape::restoreFromProperties(const QVariantMap & properties
 	blockUndoCommands(true);
 	for (int i = 0; i < metaData()->propertyCount(); i++){
 		if (properties.contains(metaData()->property(i).name())){
-			if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Rect){
+			if (metaData()->property(i).type() == QDiagramToolkit::Rect){
 				if (properties[metaData()->property(i).name()].canConvert(QVariant::Map)){
 					QRectF r;
 					QVariantMap m = properties.value(metaData()->property(i).name()).toMap();
@@ -171,8 +174,8 @@ QVariant QAbstractDiagramShape::itemPositionHasChanged( const QVariant & value )
 QVariant QAbstractDiagramShape::itemSelectedHasChanged( const QVariant & value )
 {
     update();
-    Q_FOREACH(QDiagramShapeSizeGripHandle* handle, m_handles){
-        handle->setVisible(value.toBool());
+    Q_FOREACH(QDiagramShapeSizeGripHandle* h, m_handles){
+        h->setVisible(value.toBool());
     }
     return value;
 }
@@ -180,8 +183,8 @@ QVariant QAbstractDiagramShape::itemSelectedHasChanged( const QVariant & value )
 void QAbstractDiagramShape::paintConnectionPoints(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if (connectionPointsAreVisible()){
-        Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, connectionPoints()){
-            mPoint->paint(painter, option, widget);
+        Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, connectionPoints()){
+            p->paint(painter, option, widget);
         }
     }
 }
@@ -194,10 +197,10 @@ void QAbstractDiagramShape::paintFocus(QPainter* painter, const QStyleOptionGrap
     painter->save();
     if (isSelected()){
         painter->setBrush(Qt::NoBrush);
-        QPen mPen(selectionColor());
-        mPen.setStyle(Qt::DotLine);
-        painter->setPen(mPen);
-        painter->drawRect(boundingRect());
+        QPen p(selectionColor());
+        p.setStyle(Qt::DotLine);
+        painter->setPen(p);
+        painter->drawRect(focusRect());
     }
     painter->restore();
 }
@@ -216,8 +219,8 @@ void QAbstractDiagramShape::setConnectionPointsVisible(bool visible)
     if (visible != m_connectionPointsVisible){
         updateConnectionPoints();
         m_connectionPointsVisible = visible;
-        Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, m_connectionPoints){
-            mPoint->setVisible(m_connectionPointsVisible);
+        Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, m_connectionPoints){
+            p->setVisible(m_connectionPointsVisible);
         }
         update();
     }
@@ -235,15 +238,15 @@ bool QAbstractDiagramShape::connectionPointsAreVisible() const
 
 void QAbstractDiagramShape::updateConnectedItems()
 {
-    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, m_connectionPoints){
-        mPoint->updateConnectors();
+    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, m_connectionPoints){
+        p->updateConnectors();
     }
 }
 
 void QAbstractDiagramShape::updateConnectionPoints()
 {
-    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* mPoint, m_connectionPoints){
-        mPoint->updatePosition();
+    Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, m_connectionPoints){
+        p->updatePosition();
     }
 }
 

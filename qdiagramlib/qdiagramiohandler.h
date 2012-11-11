@@ -25,6 +25,7 @@
 
 class QIODevice;
 class QAbstractDiagram;
+class QDiagram;
 
 //! The QDiagramIOHandler class defines the common diagram I/O interface for all diagram formats.
 class QDIAGRAMLIBSHARED_EXPORT QDiagramIOHandler
@@ -58,7 +59,7 @@ public:
       * Read a diagram from the device, and returns a new instance of QAbstractDiagram. Returns a null pointer if the read fails.
       * @see canRead()
       */
-    virtual QAbstractDiagram* read(QObject* parent = 0) = 0;
+    virtual QDiagram* read(QObject* parent = 0) = 0;
     /**
       * Sets the device of the QDiagramIOHandler to device. The diagram handler will use this device when reading and writing diagramss.
       * @see device()
@@ -75,11 +76,12 @@ public:
       * The default implementation does nothing, and simply returns false.
       */
     virtual bool write(QAbstractDiagram* diagram);
+protected:
+	void setErrorString(const QString & text);
 private:
-    bool writeJson(QAbstractDiagram* diagram);
-
     QIODevice* m_dev;
     QByteArray m_format;
+	QString m_errorString;
 };
 
 #endif // QDIAGRAMIOHANDLER_H

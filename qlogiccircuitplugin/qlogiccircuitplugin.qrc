@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/logiccircuit" lang="input.digital">
+    <qresource prefix="/logiccircuit">
         <file alias="gate.and">resources/gate_and.ico</file>
         <file alias="gate.nor">resources/gate_nor.ico</file>
         <file alias="gate.not">resources/gate_not.ico</file>
@@ -27,5 +27,7 @@
         <file alias="function.counter.operating_hours">resources/operating_hours_counter.ico</file>
         <file alias="parameter.analog">resources/parameter_analog.ico</file>
         <file alias="parameter.digital">resources/parameter_digital.ico</file>
+        <file alias="function.timer">resources/timer.ico</file>
+        <file alias="value.analog">resources/value_analog.ico</file>
     </qresource>
 </RCC>

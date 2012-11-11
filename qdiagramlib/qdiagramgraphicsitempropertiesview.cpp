@@ -22,10 +22,10 @@
 #include "ui_qdiagramgraphicsitempropertiesview.h"
 
 #include "qdiagram.h"
-#include "qdiagramgraphicsitemmetadata.h"
+#include "qdiagrammetadata.h"
 #include "qdiagramendoflinestyle.h"
 #include "qdiagramlinestyle.h"
-#include "qdiagramshadowstyle.h"
+#include "QDiagramGraphicsItemShadow.h"
 #include "qdiagramtextstyle.h"
 
 QMap<QString,QColor> QDiagramColorComboBox::sColorNameMap;
@@ -49,6 +49,11 @@ QPropertiesModelItem::QPropertiesModelItem(QAbstractDiagramGraphicsItem* item, i
     for (int i = 0; i < colorNames.size(); ++i) {
         m_colorNameMap[colorNames.at(i)] = QColor(colorNames.at(i));
     }
+	if (item){
+		for (int i = 0; i < item->metaData()->property(index).propertyCount(); i++){
+			new QPropertiesModelItem(item->metaData()->property(index).property(i).name(), item->metaData()->property(index).property(i).type(), this);
+		}
+	}
 }
 
 QPropertiesModelItem::QPropertiesModelItem(const QString &name, QPropertiesModelItem *parent)
@@ -60,6 +65,18 @@ QPropertiesModelItem::QPropertiesModelItem(const QString &name, QPropertiesModel
     if (m_parent != 0){
         m_parent->m_children.append(this);
     }
+}
+
+QPropertiesModelItem::QPropertiesModelItem(const QString & name, QDiagramToolkit::PropertyType type, QPropertiesModelItem* parent)
+{
+    m_index = -1;
+    m_item = 0;
+    m_name = name;
+    m_parent = parent;
+    if (m_parent != 0){
+        m_parent->m_children.append(this);
+    }
+	m_type = type;
 }
 
 QPropertiesModelItem::~QPropertiesModelItem()
@@ -82,14 +99,33 @@ int QPropertiesModelItem::childCount() const
 
 QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex & index, const QStyledItemDelegate* receiver) const
 {
-    if (type() == QDiagramGraphicsItemMetaProperty::Angle){
-        QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-        spinBox->setDecimals(2);
-        spinBox->setMaximum(0.00);
-        spinBox->setMaximum(359.99);
-        spinBox->setSuffix(QObject::tr(" deg"));
-        return spinBox;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
+    if (type() == QDiagramToolkit::Alignment){
+	} else if (type() == QDiagramToolkit::Angle){
+        QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
+        sb->setDecimals(1);
+        sb->setMaximum(0.00);
+        sb->setMaximum(359.9);
+        sb->setSuffix(QObject::tr(" deg"));
+        return sb;
+	} else if (type() == QDiagramToolkit::Bool){
+		QCheckBox* cb =  new QCheckBox(parent);
+		cb->setAutoFillBackground(true);
+		QObject::connect(cb, SIGNAL(toggled(bool)), receiver, SLOT(commitAndClose()));
+		return cb;
+	} else if (type() == QDiagramToolkit::BrushStyle){
+		QComboBox* cb = new QComboBox(parent);
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+		return cb;
+    } else if (type() == QDiagramToolkit::Color){
+		QDiagramColorEditor* ce = new QDiagramColorEditor(parent);
+		QObject::connect(ce, SIGNAL(colorEdited()), receiver, SLOT(commitAndClose()));
+		return ce;
+    } else if (type() == QDiagramToolkit::Double){
+		QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
+        sb->setMaximum(99999.99);
+		QObject::connect(sb, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+		return sb;
+	} else if (type() == QDiagramToolkit::EndOfLineStyle){
         if (name() == "style"){
             return new QDiagramEndOfLineStyleComboBox(graphicsItem()->diagram()->endOfLineStyles(), parent);
         } else if (name() == "width"){
@@ -99,29 +135,34 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
             spinBox->setMaximum(99.00);
             return spinBox;
         }
-    } else if (type() == QDiagramGraphicsItemMetaProperty::Color){
-        QComboBox* cb= new QComboBox(parent);
-        QStringList colorNames = QColor::colorNames();
-
-        for (int i = 0; i < colorNames.size(); ++i) {
-            QColor color(colorNames[i]);
-
-            cb->insertItem(i, colorNames[i]);
-            cb->setItemData(i, color, Qt::DecorationRole);
-        }
-		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
-        return cb;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::Enumeration){
+    } else if (type() == QDiagramToolkit::Enumeration){
 		QComboBox* cb = new QComboBox(parent);
 		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
 		return cb;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::Percent){
+    } else if (type() == QDiagramToolkit::Font){
+    } else if (type() == QDiagramToolkit::FontFamily){
+		QFontComboBox* cb = new QFontComboBox(parent);
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+		return cb;
+    } else if (type() == QDiagramToolkit::Int){
+        QSpinBox* sb = new QSpinBox(parent);
+		QObject::connect(sb, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+		return sb;
+    } else if (type() == QDiagramToolkit::Pen){
+		QDiagramColorComboBox* cb = new QDiagramColorComboBox(parent);
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+		return cb;
+    } else if (type() == QDiagramToolkit::PenStyle){
+		QComboBox* cb = new QComboBox(parent);
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+		return cb;
+    } else if (type() == QDiagramToolkit::Percent){
         QSpinBox* spinBox = new QSpinBox(parent);
         spinBox->setMaximum(0);
         spinBox->setMaximum(100);
         spinBox->setSuffix(QObject::tr(" %"));
         return spinBox;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
+    } else if (type() == QDiagramToolkit::LineStyle){
         if (m_item == 0){
             if (m_index == 0){
                 QComboBox* cb = new QComboBox(parent);
@@ -149,7 +190,7 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
                 return cb;
             }
         }
-    } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
+    } else if (type() == QDiagramToolkit::Shadow){
 		if (name() == "blurRadius"){
 			QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
 			sb->setDecimals(0);
@@ -175,7 +216,17 @@ QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionV
 			QObject::connect(cb, SIGNAL(stateChanged(int)), receiver, SLOT(commitAndClose()));
             return cb;
 		}
-    } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
+    } else if (type() == QDiagramToolkit::String){
+		QLineEdit* w = new QLineEdit(parent);
+		QObject::connect(w, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+		QObject::connect(w, SIGNAL(textEdited(QString)), receiver, SLOT(editingFinished()));
+		return w;
+    } else if (type() == QDiagramToolkit::Text){
+		QLineEdit* w = new QLineEdit(parent);
+		QObject::connect(w, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
+		QObject::connect(w, SIGNAL(textEdited(QString)), receiver, SLOT(editingFinished()));
+		return w;
+    } else if (type() == QDiagramToolkit::TextStyle){
         if (name() == "bold" || name() == "italic" || name() == "underline" || name() == "strikeOut"){
             QCheckBox* cb =  new QCheckBox(parent);
             cb->setAutoFillBackground(true);
@@ -199,144 +250,123 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 {
     if (role == Qt::DisplayRole){
         if (index.column() == 0){
-            if (m_item == 0){
-                if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-                    return name();
-                } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-                    if (index.row() == 0){
-                        return QObject::tr("color");
-                    } else if (index.row() == 1){
-                        return QObject::tr("width");
-                    } else if (index.row() == 2){
-                        return QObject::tr("itemType");
-                    }
-                } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-                    return name();
-                } else if (m_parent->graphicsItem()->metaData()->property(m_parent->index()).type() == QDiagramGraphicsItemMetaProperty::Rect){
-                    if (index.row() == 0){
-                        return QObject::tr("x");
-                    } else if (index.row() == 1){
-                        return QObject::tr("y");
-                    } else if (index.row() == 2){
-                        return QObject::tr("width");
-                    } else if (index.row() == 3){
-                        return QObject::tr("height");
-                    }
-                } else if (m_parent->graphicsItem()->metaData()->property(m_parent->index()).type() == QDiagramGraphicsItemMetaProperty::Point){
-                    if (index.row() == 0){
-                        return QObject::tr("x");
-                    } else if (index.row() == 1){
-                        return QObject::tr("y");
-                    }
-                } else if (m_parent->graphicsItem()->metaData()->property(m_parent->index()).type() == QDiagramGraphicsItemMetaProperty::Shadow){
-					return name();
-                }
-            } else {
-                return m_item->metaData()->property(m_index).name();
-            }
+			return name();
         } else if (index.column() == 1){
-            if (m_item == 0){
-                if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-                    QDiagramTextStyle style = qvariant_cast<QDiagramTextStyle>(value());
-                    if (name() == "color"){
-                        return QDiagramColorComboBox::colorName(style.color());
-                    }
-                    return style.value(index.row());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-                    QDiagramEndOfLineStyle style = qvariant_cast<QDiagramEndOfLineStyle>(value());
-                    if (index.row() == 0){
-                        return style.caption();
-                    } else if (index.row() == 1){
-                        return style.width();
-                    }
-                } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-                    QDiagramLineStyle style = qvariant_cast<QDiagramLineStyle>(value());
-                    if (index.row() == 0){
-                        return m_colorNameMap.key(style.color().name());
-                    } else if (index.row() == 1){
-                        return style.width();
-                    } else if (index.row() == 2){
-                        return style.title();
-                    }
-                } else if (m_parent->graphicsItem()->metaData()->property(m_parent->m_index).type() == QDiagramGraphicsItemMetaProperty::Point){
-                    if (index.row() == 0){
-                        return m_parent->m_item->property(m_parent->m_item->metaData()->property(m_parent->m_index).name()).toPointF().x();
-                    } else if (index.row() == 1){
-                        return m_parent->m_item->property(m_parent->m_item->metaData()->property(m_parent->m_index).name()).toPointF().y();
-                    }
-                } else if (m_parent->graphicsItem()->metaData()->property(m_parent->m_index).type() == QDiagramGraphicsItemMetaProperty::Rect){
-                    return value().toMap().value(name());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
-					QDiagramShadowStyle shadow = qvariant_cast<QDiagramShadowStyle>(value());
-                    if (name() == "color"){
-                        return QDiagramColorComboBox::colorName(shadow.color());
-                    }
-                    return shadow.value(index.row());
-                }
-            } else {
-                if (type() == QDiagramGraphicsItemMetaProperty::Angle){
-                    return QString(QObject::tr("%1 deg")).arg(value().toDouble());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Color){
-                    QColor color = qvariant_cast<QColor>(value());
-                    return m_colorNameMap.key(color, QObject::tr("<invalid>"));
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Enumeration){
-                    return m_item->metaData()->property(m_index).enumerator().key(value().toInt());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-                    QDiagramEndOfLineStyle style = qvariant_cast<QDiagramEndOfLineStyle>(value());
-                    return QString("%1, %2").arg(style.caption()).arg(style.width());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-                    QDiagramLineStyle style = qvariant_cast<QDiagramLineStyle>(value());
-                    return QString("%1, %2, %3").arg(m_colorNameMap.key(style.color()))
-                            .arg(style.width())
-                            .arg(style.title());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Percent){
-                        return QString("%1 %").arg(value().toDouble());
-                } else if (m_item->metaData()->property(m_index).type() == QDiagramGraphicsItemMetaProperty::Point){
-                    return QString("(%1, %2)").arg(m_item->property(m_item->metaData()->property(m_index).name()).toPointF().x()).arg(m_item->property(m_item->metaData()->property(m_index).name()).toPointF().y());
-                } else if (m_item->metaData()->property(m_index).type() == QDiagramGraphicsItemMetaProperty::Rect){
-                    return QString("(%1, %2) %3 x %4")
-                            .arg(value().toMap().value("x").toInt())
-                            .arg(value().toMap().value("y").toInt())
-                            .arg(value().toMap().value("width").toInt())
-                            .arg(value().toMap().value("height").toInt());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
-					return QString("%1").arg(value().toMap().value("visible").toString());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-                    QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
-                    return QString("%1, %2, %3").arg(s.family()).arg(s.size()).arg(QDiagramColorComboBox::colorName(s.color()));
-                } else {
-                    return m_item->property(m_item->metaData()->property(m_index).name());
-                }
-            }
-        }
+			if (type() == QDiagramToolkit::Angle){
+				return value().toString();
+			} else if (type() == QDiagramToolkit::Bool){
+				return value().toBool()?QObject::tr("enabled"):QObject::tr("disabled");
+			} else if (type() == QDiagramToolkit::Brush){
+				return QDiagramProperty::toString(qdiagramproperty_cast<QBrush>(property()).style());
+			} else if (type() == QDiagramToolkit::BrushStyle){
+				return property().toString();
+			} else if (type() == QDiagramToolkit::Color){
+				QColor c = qdiagramproperty_cast<QColor>(property());
+				return QDiagramColorComboBox::colorName(c);
+			} else if (type() == QDiagramToolkit::Double){
+				return value().toDouble();
+			} else if (type() == QDiagramToolkit::Enumeration){
+				return graphicsItem()->metaData()->property(m_index).enumerator().key(value().toInt());
+			} else if (type() == QDiagramToolkit::Font){				
+				// TODO QFont f = QDiagramMetaData::toFont(value(true).toMap());
+				QFont f = qdiagramproperty_cast<QFont>(property());
+				return QString("%1").arg(f.family());
+			} else if (type() == QDiagramToolkit::FontFamily){
+				return value().toString();
+			} else if (type() == QDiagramToolkit::Int){
+				return value().toString();
+			} else if (type() == QDiagramToolkit::LineStyle){
+				QDiagramLineStyle s = qdiagramproperty_cast<QDiagramLineStyle>(property());
+				return QString("%1 %2").arg(QDiagramColorComboBox::colorName(s.color())).arg(s.width());
+			} else if (type() == QDiagramToolkit::Point){
+				return QString("%1, %2")
+					.arg(value(true).toMap().value("x").toInt())
+					.arg(value(true).toMap().value("y").toInt());
+			} else if (type() == QDiagramToolkit::PenStyle){
+				if (property().toPenStyle() == Qt::SolidLine){
+					return QObject::tr("solid");
+				} else if (property().toPenStyle() == Qt::DashDotDotLine){
+					return QObject::tr("dash dot dot");
+				} else if (property().toPenStyle() == Qt::DashDotLine){
+					return QObject::tr("dash dot");
+				} else if (property().toPenStyle() == Qt::DashLine){
+					return QObject::tr("dashed");
+				}
+				return QObject::tr("none");
+			} else if (type() == QDiagramToolkit::Percent){
+				return QString("%1%").arg(value().toInt());
+			} else if (type() == QDiagramToolkit::Rect){
+				return QString("(%1, %2) %3 x %4")
+					.arg(value(true).toMap().value("x").toInt())
+					.arg(value(true).toMap().value("y").toInt())
+					.arg(value(true).toMap().value("width").toInt())
+					.arg(value(true).toMap().value("height").toInt());
+			} else if (type() == QDiagramToolkit::String){
+				return value().toString();
+			} else if (type() == QDiagramToolkit::Text){
+				return value().toString();
+			} else if (type() == QDiagramToolkit::UUID){
+				return graphicsItem()->uuid();
+			}
+		}
     } else if (role == Qt::DecorationRole){
         if (index.column() == 1){
+			if (type() == QDiagramToolkit::Brush){
+				return qdiagramproperty_cast<QBrush>(property()).color();
+			} else if (type() == QDiagramToolkit::Color){
+				return QColor(value().toString());
+			} else if(type() == QDiagramToolkit::LineStyle){
+				if (property().toPenStyle() == Qt::SolidLine){
+					return QIcon(":/qdiagram/line.solid");
+				} else if (property().toPenStyle() == Qt::DashDotDotLine){
+					return QIcon(":/qdiagram/line.dash_dot_dot");
+				} else if (property().toPenStyle() == Qt::DashDotLine){
+					return QIcon(":/qdiagram/line.dash_dot");
+				} else if (property().toPenStyle() == Qt::DashLine){
+					return QIcon(":/qdiagram/line.dashed");
+				}
+			} else if(type() == QDiagramToolkit::PenStyle){
+				if (property().toPenStyle() == Qt::SolidLine){
+					return QIcon(":/qdiagram/line.solid");
+				} else if (property().toPenStyle() == Qt::DashDotDotLine){
+					return QIcon(":/qdiagram/line.dash_dot_dot");
+				} else if (property().toPenStyle() == Qt::DashDotLine){
+					return QIcon(":/qdiagram/line.dash_dot");
+				} else if (property().toPenStyle() == Qt::DashLine){
+					return QIcon(":/qdiagram/line.dashed");
+				}
+			}
             if (m_item == 0){
-                if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
+                if (type() == QDiagramToolkit::LineStyle){
                     QDiagramLineStyle style = qvariant_cast<QDiagramLineStyle>(value());
                     if (index.row() == 0){
                         return style.color();
                     } else if (index.row() == 2){
                         return style.icon();
                     }
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
-					QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+				} else if (type() == QDiagramToolkit::Pen){
+					QPen p = qdiagramproperty_cast<QPen>(graphicsItem()->property(m_parent->name()));
+                    if (name() == "color"){
+                        return p.color();
+                    }
+                } else if (type() == QDiagramToolkit::Shadow){
+					QDiagramGraphicsItemShadow s = qvariant_cast<QDiagramGraphicsItemShadow>(value());
                     if (name() == "color"){
                         return s.color();
                     }
-                } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
+                } else if (type() == QDiagramToolkit::TextStyle){
                     QDiagramTextStyle style = qvariant_cast<QDiagramTextStyle>(value());
                     if (name() == "color"){
                         return style.color();
                     }
                 }
             } else {
-                if (type() == QDiagramGraphicsItemMetaProperty::Color){
+                if (type() == QDiagramToolkit::Color){
                     return qvariant_cast<QColor>(value());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
+                } else if (type() == QDiagramToolkit::EndOfLineStyle){
                         QDiagramEndOfLineStyle s = qvariant_cast<QDiagramEndOfLineStyle>(value());
                         return s.icon();
-                } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
+                } else if (type() == QDiagramToolkit::LineStyle){
 //                    QDiagramLineStyle style = qvariant_cast<QDiagramLineStyle>(value());
 //                    if (style.isValid()){
 //                        return style.color();
@@ -346,33 +376,13 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
         }
     } else if (role == Qt::EditRole){
         if (index.column() == 1){
-            if (m_item == 0){
-                if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-                    QDiagramTextStyle style = qvariant_cast<QDiagramTextStyle>(value());
-                    return style.value(index.row());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-                    QDiagramEndOfLineStyle s = qvariant_cast<QDiagramEndOfLineStyle>(value());
-                    return s.value(name());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-                    return m_parent->m_item->property(m_parent->m_item->metaData()->property(m_parent->m_index).name());
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Rect){
-                    QRectF r = m_parent->m_item->property(m_parent->m_item->metaData()->property(m_parent->m_index).name()).toRectF();
-                    if (index.row() == 0){
-                        return r.left();
-                    } else if (index.row() == 1){
-                        return r.top();
-                    } else if (index.row() == 2){
-                        return r.width();
-                    } else if (index.row() == 3){
-                        return r.height();
-                    }
-                } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
-					QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
-                    return s.value(name());
-                }
-            } else {
-                return m_item->property(m_item->metaData()->property(m_index).name());
-            }
+			if (type() == QDiagramToolkit::Bool){
+				return value().toBool();
+			} else if (type() == QDiagramToolkit::Color){
+				return qvariant_cast<QColor>(value());
+			} else if (type() == QDiagramToolkit::Int){
+				return value().toInt();
+			}
         }
     } else if (role == QPropertiesModel::MetaTypeRole){
         if (m_item == 0){
@@ -387,10 +397,45 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 Qt::ItemFlags QPropertiesModelItem::flags() const
 {
     Qt::ItemFlags f;
-    if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-        if (m_item == 0){
-
-        }
+	f |= Qt::ItemIsSelectable;
+	f |= Qt::ItemIsEnabled;
+	if (m_item == 0){
+		if (m_parent->graphicsItem()->metaData()->property(m_parent->index()).isReadOnly()){
+			return f;
+		}
+	} else {
+		if (m_item->metaData()->property(m_index).isReadOnly()){
+			return f;
+		}
+	}
+	if (type() == QDiagramToolkit::Angle){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Bool){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::BrushStyle){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Color){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Double){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Enumeration){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::FontFamily){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Int){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::LineStyle){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::PenStyle){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Percent){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::String){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Text){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::TextStyle){
+		f |= Qt::ItemIsEditable;
     }
     return f;
 }
@@ -408,6 +453,11 @@ int QPropertiesModelItem::index() const
     return m_index;
 }
 
+bool QPropertiesModelItem::isChild() const
+{
+	return m_index == -1;
+}
+
 QString QPropertiesModelItem::name() const
 {
     if (m_index == -1){
@@ -418,9 +468,19 @@ QString QPropertiesModelItem::name() const
 
 bool QPropertiesModelItem::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const QStyleOptionViewItemV4 &opt4)
 {
-    QStyleOptionViewItemV4 o(opt4);
     if (index.column() == 1){
-        if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Angle){
+		if (type() == QDiagramToolkit::Bool){
+	        QStyle* style = opt4.widget ? opt4.widget->style() : QApplication::style();
+
+		    style->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, painter, opt4.widget);
+			QStyleOptionButton so;
+			so.rect = opt4.rect;
+			so.state |= index.data(Qt::EditRole).toBool() ? QStyle::State_On : QStyle::State_Off;
+			so.state |= QStyle::State_Enabled;
+			style->drawControl(QStyle::CE_CheckBox, &so, painter);
+  			return true;
+		}
+        if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Angle){
 //            o.text = "";
 //            QStyle *style = o.widget ? o.widget->style() : QApplication::style();
 //            style->drawControl(QStyle::CE_ItemViewItem, &o, painter, o.widget);
@@ -439,7 +499,7 @@ bool QPropertiesModelItem::paint(QPainter *painter, const QStyleOptionViewItem &
 
 //            painter->drawText(o.rect, o.displayAlignment, QString(QObject::tr("%1 deg")).arg(index.data().toDouble()));
 //            return true;
-        } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Percent){
+        } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Percent){
 //            o.text = "";
 //            QStyle *style = o.widget ? o.widget->style() : QApplication::style();
 //            style->drawControl(QStyle::CE_ItemViewItem, &o, painter, o.widget);
@@ -469,6 +529,16 @@ QPropertiesModelItem* QPropertiesModelItem::parent() const
     return m_parent;
 }
 
+QDiagramProperty QPropertiesModelItem::property() const
+{
+	if (m_item){
+	    return m_item->property(m_item->metaData()->property(m_index).name());
+	}
+	QDiagramProperty p = m_parent->m_item->property(m_parent->m_item->metaData()->property(m_parent->m_index).name());
+	return p.property(m_name);
+	//return QDiagramProperty();
+}
+
 int QPropertiesModelItem::row() const
 {
     if (m_parent){
@@ -493,22 +563,51 @@ bool QPropertiesModelItem::setData(const QModelIndex & index, const QVariant & v
 
 bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & index) const
 {
-    if (type() == QDiagramGraphicsItemMetaProperty::Enumeration){
+	if (type() == QDiagramToolkit::Angle){
+        QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+		spinBox->setValue(qdiagramproperty_cast<double>(property()));
+        return true;
+	} else if (type() == QDiagramToolkit::Bool){
+		QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
+		cb->setChecked(value().toBool());
+		return true;
+	} else if (type() == QDiagramToolkit::BrushStyle){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		QDiagramPropertyEnumMap::const_iterator it;
+		QDiagramPropertyEnumMap m = QDiagramProperty::enumValues(QDiagramToolkit::BrushStyle);
+		for (it = m.begin(); it != m.end(); ++it){
+			cb->addItem(it.value(), it.key());
+		}
+		cb->setCurrentIndex(cb->findData(property().toBrushStyle()));
+		return true;
+	} else if (type() == QDiagramToolkit::Color){
+		QDiagramColorEditor* ce = qobject_cast<QDiagramColorEditor*>(editor);
+		ce->setColor(qvariant_cast<QColor>(value()));
+		return true;
+	} else if (type() == QDiagramToolkit::Double){
+        QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+		spinBox->setValue(qdiagramproperty_cast<double>(property()));
+        return true;
+	} else if (type() == QDiagramToolkit::Enumeration){
         QComboBox* cb = qobject_cast<QComboBox*>(editor);
         for (int i = 0; i < m_item->metaData()->property(m_index).enumerator().keys(); i++){
             cb->addItem(m_item->metaData()->property(m_index).enumerator().key(i), m_item->metaData()->property(m_index).enumerator().value(i));
         }
         cb->setCurrentIndex(cb->findData(value().toInt()));
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Angle){
+	} else if (type() == QDiagramToolkit::FontFamily){
+		QFontComboBox* cb = qobject_cast<QFontComboBox*>(editor);
+// TODO		cb->setCurrentFont(QDiagramMetaData::toFont(value(true).toMap()));
+		cb->setCurrentFont(qdiagramproperty_cast<QFont>(property()));
+		return true;
+	} else if (type() == QDiagramToolkit::Int){
+		QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
+		sb->setValue(value().toInt());
+		return true;
+    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Angle){
         QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
         spinBox->setValue(value().toDouble());
         return true;
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Color){
-        QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
-        QColor color = qvariant_cast<QColor>(value());
-        comboBox->setCurrentIndex(comboBox->findData(color, int(Qt::DecorationRole)));
-        return true;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
+    } else if (type() == QDiagramToolkit::EndOfLineStyle){
         QDiagramEndOfLineStyle s = qvariant_cast<QDiagramEndOfLineStyle>(value());
         if (name() == "style"){
             QDiagramEndOfLineStyleComboBox* cb = qobject_cast<QDiagramEndOfLineStyleComboBox*>(editor);
@@ -518,7 +617,10 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
             sb->setValue(s.width());
         }
         return true;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
+	} else if (type() == QDiagramToolkit::Enumeration){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		cb->setCurrentIndex(cb->findData(value()));
+    } else if (type() == QDiagramToolkit::LineStyle){
         QDiagramLineStyle style = qvariant_cast<QDiagramLineStyle>(value());
         if (m_index == 0){
             QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
@@ -532,12 +634,21 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
             QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
             comboBox->setCurrentIndex(comboBox->findData(style.id()));
         }
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Percent){
+	} else if (type() == QDiagramToolkit::PenStyle){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		cb->addItem(QIcon(":/qdiagram/line.solid"), QObject::tr("solid"), Qt::SolidLine);
+		cb->addItem(QIcon(":/qdiagram/line.dash_dot_dot"), QObject::tr("dash dot dot"), Qt::DashDotDotLine);
+		cb->addItem(QIcon(":/qdiagram/line.dash_dot"), QObject::tr("dash dot"), Qt::DashDotLine);
+		cb->addItem(QIcon(":/qdiagram/line.dashed"), QObject::tr("dashed"), Qt::DashLine);
+		cb->addItem(QObject::tr("none"), Qt::NoPen);
+		cb->setCurrentIndex(cb->findData(property().toPenStyle()));
+		return true;
+    } else if (type() == QDiagramToolkit::Percent){
         QSpinBox* spinBox = qobject_cast<QSpinBox*>(editor);
         spinBox->setValue(value().toDouble());
         return true;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::Shadow){
-		QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+    } else if (type() == QDiagramToolkit::Shadow){
+		QDiagramGraphicsItemShadow s = qvariant_cast<QDiagramGraphicsItemShadow>(value());
         if (name() == "color"){
             QDiagramColorComboBox* comboBox = qobject_cast<QDiagramColorComboBox*>(editor);
             QColor color = qvariant_cast<QColor>(s.color());
@@ -557,7 +668,11 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
             checkBox->setChecked(s.isVisible());
             return true;
 		}
-    } else if (type() == QDiagramGraphicsItemMetaProperty::TextStyle){
+    } else if (type() == QDiagramToolkit::String){
+		QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+		le->setText(property().toString());
+		return true;
+    } else if (type() == QDiagramToolkit::TextStyle){
         QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
         if (name() == "bold"){
             QCheckBox* checkBox = qobject_cast<QCheckBox*>(editor);
@@ -597,15 +712,27 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
 
 bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Angle){
+    if (type() == QDiagramToolkit::Angle){
         QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
         model->setData(index, spinBox->value());
         return true;
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Color){
-        QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
-        model->setData(index, qvariant_cast<QColor>(comboBox->itemData(comboBox->currentIndex(), Qt::DecorationRole)));
+	} else if (type() == QDiagramToolkit::Bool){
+		QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
+        model->setData(index, cb->isChecked());
         return true;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
+	} else if (type() == QDiagramToolkit::BrushStyle){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		model->setData(index, static_cast<Qt::BrushStyle>(cb->itemData(cb->currentIndex()).toInt()));
+		return true;
+    } else if (type() == QDiagramToolkit::Color){
+		QDiagramColorEditor* ce = qobject_cast<QDiagramColorEditor*>(editor);
+        model->setData(index, ce->color());
+        return true;
+	} else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Double){
+        QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+        model->setData(index, spinBox->value());
+        return true;
+    } else if (type() == QDiagramToolkit::EndOfLineStyle){
         QDiagramEndOfLineStyleComboBox* cb = qobject_cast<QDiagramEndOfLineStyleComboBox*>(editor);
         QDiagramEndOfLineStyle currentStyle = qvariant_cast<QDiagramEndOfLineStyle>(value());
         if (name() == "style"){
@@ -618,11 +745,19 @@ bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *mod
             model->setData(index, QVariant::fromValue(currentStyle));
         }
         return true;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::Enumeration){
+    } else if (type() == QDiagramToolkit::Enumeration){
         QComboBox* cb = qobject_cast<QComboBox*>(editor);
         model->setData(index, cb->itemData(cb->currentIndex()));
         return true;
-    } else if (type() == QDiagramGraphicsItemMetaProperty::LineStyle){
+    } else if (type() == QDiagramToolkit::FontFamily){
+		QFontComboBox* cb = qobject_cast<QFontComboBox*>(editor);
+		model->setData(index, cb->currentFont().family());
+		return true;
+	} else if (type() == QDiagramToolkit::Int){
+		QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
+        model->setData(index, sb->value());
+        return true;
+    } else if (type() == QDiagramToolkit::LineStyle){
         QDiagramLineStyle style = qvariant_cast<QDiagramLineStyle>(value());
         if (m_index == 0){
             QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
@@ -642,12 +777,16 @@ bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *mod
             }
         }
         return true;
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Percent){
+	} else if (type() == QDiagramToolkit::PenStyle){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		model->setData(index, static_cast<Qt::PenStyle>(cb->itemData(cb->currentIndex()).toInt()));
+		return true;
+    } else if (type() == QDiagramToolkit::Percent){
         QSpinBox* spinBox = qobject_cast<QSpinBox*>(editor);
         model->setData(index, spinBox->value());
         return true;
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::Shadow){
-        QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(value());
+    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Shadow){
+        QDiagramGraphicsItemShadow s = qvariant_cast<QDiagramGraphicsItemShadow>(value());
 		if (name() == "blurRadius"){
 			QDoubleSpinBox* w = qobject_cast<QDoubleSpinBox*>(editor);
 			s.setBlurRadius(w->value());
@@ -670,7 +809,15 @@ bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *mod
 			model->setData(index, QVariant::fromValue(s));
 		}
         return true;
-    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramGraphicsItemMetaProperty::TextStyle){
+	} else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::String){
+		QLineEdit* w = qobject_cast<QLineEdit*>(editor);
+		model->setData(index, w->text());
+        return true;
+	} else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Text){
+		QLineEdit* w = qobject_cast<QLineEdit*>(editor);
+		model->setData(index, w->text());
+        return true;
+    } else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::TextStyle){
         QDiagramTextStyle s = qvariant_cast<QDiagramTextStyle>(value());
         if (name() == "bold"){
             QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
@@ -709,27 +856,40 @@ bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *mod
 void QPropertiesModelItem::setValue(const QVariant &value)
 {
     if (m_item == 0){
-        m_parent->setValue(value);
+		QVariantMap m = graphicsItem()->property(graphicsItem()->metaData()->property(m_parent->m_index).name()).toMap();
+		if (m.isEmpty()){
+			graphicsItem()->setProperty(graphicsItem()->metaData()->property(m_parent->m_index).name(), value);
+		} else {
+			property().setValue(value);
+			//m[name()] = value;
+			//graphicsItem()->setProperty(graphicsItem()->metaData()->property(m_parent->m_index).name(), m);
+		}
     } else {
         m_item->setProperty(m_item->metaData()->property(m_index).name(), value);
     }
 }
 
-QDiagramGraphicsItemMetaProperty::Type QPropertiesModelItem::type() const
+QDiagramToolkit::PropertyType QPropertiesModelItem::type() const
 {
     if (m_item == 0){
+		return m_type;
         return m_parent->m_item->metaData()->property(m_parent->m_index).type();
     } else {
         return m_item->metaData()->property(m_index).type();
     }
 }
 
-QVariant QPropertiesModelItem::value() const
+QVariant QPropertiesModelItem::value(bool parent) const
 {
-    if (m_item == 0){
-        return m_parent->value();
+	if (m_item == 0){
+		if (!parent){
+			QVariantMap m = graphicsItem()->property(graphicsItem()->metaData()->property(m_parent->m_index).name()).toMap();
+			return m.value(m_name);
+		} else {
+			return graphicsItem()->property(m_parent->name()).value();
+		}
     }    
-    return m_item->property(m_item->metaData()->property(m_index).name());
+    return m_item->property(m_item->metaData()->property(m_index).name()).value();
 }
 
 
@@ -759,32 +919,6 @@ void QPropertiesModel::buildModel(QAbstractDiagramGraphicsItem* item)
     QPropertiesModelItem* p;
     for(int iProperty = 0; iProperty < item->metaData()->propertyCount(); iProperty++){
         p = new QPropertiesModelItem(item, iProperty, r);
-        if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-            QDiagramTextStyle s;
-            for (int i = 0; i < s.propertyCount(); i++){
-                new QPropertiesModelItem(s.key(i), p);
-            }
-        } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-            new QPropertiesModelItem("style", p);
-            new QPropertiesModelItem("width", p);
-        } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-            new QPropertiesModelItem(0, 0, p);
-            new QPropertiesModelItem(0, 1, p);
-            new QPropertiesModelItem(0, 2, p);
-        } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::Rect){
-            new QPropertiesModelItem("x", p);
-            new QPropertiesModelItem("y", p);
-            new QPropertiesModelItem("width", p);
-            new QPropertiesModelItem("height", p);
-        } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::Point){
-            new QPropertiesModelItem(0, 0, p);
-            new QPropertiesModelItem(0, 1, p);
-        } else if (item->metaData()->property(iProperty).type() == QDiagramGraphicsItemMetaProperty::Shadow){
-            QDiagramShadowStyle s;
-            for (int i = 0; i < s.propertyCount(); i++){
-                new QPropertiesModelItem(s.key(i), p);
-            }
-        }
     }
     endResetModel();
 }
@@ -794,7 +928,6 @@ void QPropertiesModel::reset()
     beginResetModel();
     delete r;
     r = new QPropertiesModelItem(0);
-
     endResetModel();
 }
 
@@ -819,30 +952,18 @@ QVariant QPropertiesModel::data(const QModelIndex & index, int role) const
 
 Qt::ItemFlags QPropertiesModel::flags(const QModelIndex &index) const
 {
-    Qt::ItemFlags flags;
+    Qt::ItemFlags f;
     if (index.isValid()){
-        flags |= Qt::ItemIsSelectable;
-        flags |= Qt::ItemIsEnabled;
+        f |= Qt::ItemIsSelectable;
+        f |= Qt::ItemIsEnabled;
         if (index.column() == 1){
-            QPropertiesModelItem* modelItem = static_cast<QPropertiesModelItem*>(index.internalPointer());
-            if (modelItem->parent() == r){
-                if (modelItem->graphicsItem()->metaData() && !modelItem->graphicsItem()->metaData()->property(modelItem->index()).isReadOnly()){
-                    flags |= Qt::ItemIsEditable;
-                }
-            } else {
-                if (modelItem->type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-                    flags |= Qt::ItemIsEditable;
-                } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-                    flags |= Qt::ItemIsEditable;
-                } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::Shadow){
-                    flags |= Qt::ItemIsEditable;
-                } else if (modelItem->type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-                    flags |= Qt::ItemIsEditable;
-                }
-            }
+            QPropertiesModelItem* i = static_cast<QPropertiesModelItem*>(index.internalPointer());
+			if (i){
+				return i->flags();
+			}
         }
     }
-    return flags;
+    return f;
 }
 
 QVariant QPropertiesModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -898,17 +1019,17 @@ QModelIndex QPropertiesModel::parent(const QModelIndex &index) const
 
 int QPropertiesModel::rowCount(const QModelIndex & parent) const
 {
-    QPropertiesModelItem* mParent;
+    QPropertiesModelItem* i;
     if (parent.column() > 0){
         return 0;
     }
 
     if (!parent.isValid()){
-        mParent = r;
+        i = r;
     } else {
-        mParent = static_cast<QPropertiesModelItem*>(parent.internalPointer());
+        i = static_cast<QPropertiesModelItem*>(parent.internalPointer());
     }
-    return mParent->childCount();
+    return i->childCount();
 }
 
 bool QPropertiesModel::setData(const QModelIndex & index, const QVariant & value, int role)
@@ -942,6 +1063,13 @@ QDiagramGraphicsItemPropertiesView::~QDiagramGraphicsItemPropertiesView()
 void QDiagramGraphicsItemPropertiesView::clear()
 {
     m_model->reset();
+}
+
+void QDiagramGraphicsItemPropertiesView::propertyViewClicked(const QModelIndex & index)
+{
+	if (index.column() == 1){
+		ui->propertyView->edit(index);
+	}
 }
 
 void QDiagramGraphicsItemPropertiesView::showProperties(QList<QAbstractDiagramGraphicsItem*> items)
@@ -1050,8 +1178,16 @@ QDiagramColorComboBox::QDiagramColorComboBox(QWidget *parent) :
 
 QString QDiagramColorComboBox::colorName(const QColor &color)
 {
+	if (!color.isValid()){
+		return QObject::tr("<invalid>");
+	}
     initColorMap();
-    return sColorNameMap.key(color, QObject::tr("<invalid>"));
+	QMap<QString,QColor>::Iterator it;
+	QList<QString> l = sColorNameMap.keys(color);
+	if (l.size() > 0){
+		return l.at(0);
+	}
+    return QObject::tr("<custom>");
 }
 
 QStringList QDiagramColorComboBox::colorNames()
@@ -1084,4 +1220,70 @@ QDiagramEndOfLineStyleComboBox::QDiagramEndOfLineStyleComboBox(const QList<QDiag
     Q_FOREACH(QDiagramEndOfLineStyle style, styles){
         addItem(style.icon(), style.caption(), style.id());
     }
+}
+
+QDiagramColorEditor::QDiagramColorEditor(QWidget* parent) :
+	QWidget(parent)
+{
+	QHBoxLayout* l = new QHBoxLayout();
+	m_comboBox = new QComboBox(this);
+    QStringList colorNames = QColor::colorNames();
+
+    for (int i = 0; i < colorNames.size(); ++i) {
+        QColor color(colorNames[i]);
+        m_comboBox->insertItem(i, colorNames[i]);
+        m_comboBox->setItemData(i, color, Qt::DecorationRole);
+    }
+	int i = m_comboBox->count();
+	m_comboBox->insertItem(i, tr("<custom>"));
+	connect(m_comboBox, SIGNAL(activated(int)), this, SLOT(comboBoxActivated(int)));
+
+	m_toolButton = new QPushButton(this);
+	m_toolButton->setIcon(QIcon(":/qdiagram/color.select"));
+	m_toolButton->setFlat(true);
+	connect(m_toolButton, SIGNAL(clicked()), this, SLOT(toolButtonClicked()));
+	l->addWidget(m_comboBox);
+	l->addWidget(m_toolButton);
+	l->setContentsMargins(0, 0, 0, 0);
+	l->setSpacing(0);
+	setLayout(l);
+
+	setFocusPolicy(Qt::StrongFocus);
+}
+
+QDiagramColorEditor::~QDiagramColorEditor()
+{
+}
+
+QColor QDiagramColorEditor::color() const
+{
+	return m_color;
+//	return qvariant_cast<QColor>(m_comboBox->itemData(comboBox->currentIndex(), Qt::DecorationRole));
+}
+
+void QDiagramColorEditor::comboBoxActivated(int index)
+{
+	m_color = qvariant_cast<QColor>(m_comboBox->itemData(index, Qt::DecorationRole));
+	emit colorEdited();
+}
+
+void QDiagramColorEditor::setColor(const QColor & color)
+{
+	m_color = color;
+	int i = m_comboBox->findData(color, int(Qt::DecorationRole));
+	if (i == -1){
+		i = m_comboBox->findText(tr("<custom>"));
+	}
+	m_comboBox->setCurrentIndex(i);
+}
+
+void QDiagramColorEditor::toolButtonClicked()
+{
+	QColor c = qvariant_cast<QColor>(m_comboBox->itemData(m_comboBox->currentIndex(), Qt::DecorationRole));
+	QColor newColor = QColorDialog::getColor(c.isValid()?c:m_color, this);
+	if (newColor.isValid()){
+		m_color = newColor;
+		setColor(newColor);
+	}
+	emit colorEdited();
 }

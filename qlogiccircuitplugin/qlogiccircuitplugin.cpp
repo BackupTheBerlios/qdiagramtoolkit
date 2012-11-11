@@ -29,6 +29,7 @@
 #include "qlogiccircuitoutputshape.h"
 #include "qlogiccircuitparametershape.h"
 #include "qlogiccircuitshapeconnector.h"
+#include "qlogiccircuitvalueshape.h"
 
 QList<QDiagramConnectorStyle> QLogicCircuitPlugin::connectors() const
 {
@@ -38,31 +39,33 @@ QList<QDiagramConnectorStyle> QLogicCircuitPlugin::connectors() const
     return mStyles;
 }
 
-QAbstractDiagramGraphicsItem* QLogicCircuitPlugin::createItem(const QMap<QString,QVariant> & properties, QGraphicsScene* scene)
+QAbstractDiagramGraphicsItem* QLogicCircuitPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties, QGraphicsScene* scene)
 {
     QAbstractDiagramGraphicsItem* item = 0;
     if (!properties.contains("uuid")){
         return 0;
     }
-    if (properties.value("itemType") == "shape"){
-        if (properties.value("shape") == "flipflop"){
+    if (metaData.value("itemType") == "shape"){
+        if (metaData.value("itemClass") == "flipflop"){
             item = new QLogicCircuitFlipFlopShape(properties);
-        } else if (properties.value("shape") == "function"){
+        } else if (metaData.value("itemClass") == "function"){
             item = new QLogicCircuitFunctionShape(properties);
-        } else if (properties.value("shape") == "gate"){
+        } else if (metaData.value("itemClass") == "gate"){
             item = new QLogicCircuitGateShape(properties);
-        } else if (properties.value("shape") == "input"){
+        } else if (metaData.value("itemClass") == "input"){
             item = new QLogicCircuitInputShape(properties);
-        } else if (properties.value("shape") == "output"){
+        } else if (metaData.value("itemClass") == "output"){
             item = new QLogicCircuitOutputShape(properties);
-        } else if (properties.value("shape") == "parameter"){
+        } else if (metaData.value("itemClass") == "parameter"){
             item = new QLogicCircuitParameterShape(properties);
+        } else if (metaData.value("itemClass") == "value"){
+            item = new QLogicCircuitValueShape(properties);
         }
-    } else if (properties.value("itemType") == "connector"){
+    } else if (metaData.value("itemType") == "connector"){
         item = new QLogicCircuitShapeConnector(properties);
     }
     if (item && scene){
-        scene->addItem(item);
+//        scene->addItem(item);
     }
     return item;
 }
@@ -70,10 +73,7 @@ QAbstractDiagramGraphicsItem* QLogicCircuitPlugin::createItem(const QMap<QString
 QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &name) const
 {
     QMap<QString, QVariant> properties;
-    properties["plugin"] = this->name();
-    properties["itemType"] = "shape";
     if (name == "flipflop.asyncron"){
-        properties["shape"] = "flipflop";
         properties["function"] = "comparator";
 		QVariantMap p;
 		p["x"] = 0;
@@ -82,7 +82,6 @@ QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &na
 		p["height"] = 52;
         properties["geometry"] = p;
     } else if (name == "function.comparator"){
-        properties["shape"] = "function";
         properties["function"] = "comparator";
         properties["equal"] = "equal";
 		QVariantMap p;
@@ -92,7 +91,6 @@ QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &na
 		p["height"] = 52;
         properties["geometry"] = p;
     } else if (name == "function.computation"){
-        properties["shape"] = "function";
         properties["function"] = "computation";
 		QVariantMap p;
 		p["x"] = 0;
@@ -101,7 +99,6 @@ QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &na
 		p["height"] = 52;
         properties["geometry"] = p;
     } else if (name == "function.counter"){
-        properties["shape"] = "function";
         properties["function"] = "counter";
         QVariantMap p;
         p["x"] = 0;
@@ -110,7 +107,6 @@ QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &na
         p["height"] = 52;
         properties["geometry"] = p;
     } else if (name == "function.counter.operating_hours"){
-        properties["shape"] = "function";
         properties["function"] = "operatingHoursCounter";
         properties["digits"] = 5;
         QVariantMap p;
@@ -119,124 +115,47 @@ QMap<QString, QVariant> QLogicCircuitPlugin::defaultProperties(const QString &na
         p["width"] = 78;
         p["height"] = 52;
         properties["geometry"] = p;
+    } else if (name == "function.timer"){
+        properties["shape"] = "function";
+        properties["function"] = "timer";
+        properties["mode"] = "delay";
+        properties["time"] = 5;
+        QVariantMap p;
+        p["x"] = 0;
+        p["y"] = 0;
+        p["width"] = 78;
+        p["height"] = 52;
+        properties["geometry"] = p;
     } else if (name == "gate.and"){
-        properties["shape"] = "gate";
         properties["gateType"] = "and";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "gate.or"){
-        properties["shape"] = "gate";
         properties["gateType"] = "or";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "gate.nand"){
-        properties["shape"] = "gate";
         properties["gateType"] = "nand";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "gate.nor"){
-        properties["shape"] = "gate";
         properties["gateType"] = "nor";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "gate.not"){
-        properties["shape"] = "gate";
         properties["gateType"] = "not";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "gate.xnor"){
-        properties["shape"] = "gate";
         properties["gateType"] = "xnor";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "gate.xor"){
-        properties["shape"] = "gate";
         properties["gateType"] = "xor";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 78;
-		p["height"] = 52;
-        properties["geometry"] = p;
     } else if (name == "input.analog"){
-        properties["shape"] = "input";
         properties["signalType"] = "analog";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 182;
-		p["height"] = 26;
-        properties["geometry"] = p;
     } else if (name == "input.digital"){
-        properties["shape"] = "input";
         properties["signalType"] = "digital";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 182;
-		p["height"] = 26;
-        properties["geometry"] = p;
     } else if (name == "output.analog"){
-        properties["shape"] = "output";
         properties["signalType"] = "analog";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 182;
-		p["height"] = 26;
-        properties["geometry"] = p;
     } else if (name == "output.digital"){
-        properties["shape"] = "output";
         properties["signalType"] = "digital";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 182;
-		p["height"] = 26;
-        properties["geometry"] = p;
     } else if (name == "parameter.analog"){
-        properties["shape"] = "parameter";
         properties["signalType"] = "analog";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 182;
-		p["height"] = 26;
-        properties["geometry"] = p;
     } else if (name == "parameter.digital"){
-        properties["shape"] = "parameter";
         properties["signalType"] = "digital";
-		QVariantMap p;
-		p["x"] = 0;
-		p["y"] = 0;
-		p["width"] = 182;
-		p["height"] = 26;
-        properties["geometry"] = p;
+    } else if (name == "value.analog"){
+        properties["signalType"] = "analog";
     }
+	properties["zlevel"] = 0;
     return properties;
 }
 
@@ -294,6 +213,8 @@ QIcon QLogicCircuitPlugin::icon(const QString & name) const
         return QIcon(":/logiccircuit/function.counter.operating_hours");
     } else if (name == "function.computation"){
         return QIcon(":/logiccircuit/function.summation");
+    } else if (name == "function.timer"){
+        return QIcon(":/logiccircuit/function.timer");
     } else if (name == "gate.and"){
         return QIcon(":/logiccircuit/gate.and");
     } else if (name == "gate.nand"){
@@ -320,6 +241,8 @@ QIcon QLogicCircuitPlugin::icon(const QString & name) const
         return QIcon(":/logiccircuit/parameter.digital");
     } else if (name == "parameter.analog"){
         return QIcon(":/logiccircuit/parameter.analog");
+    } else if (name == "value.analog"){
+        return QIcon(":/logiccircuit/value.analog");
     }
     return QIcon();
 }
@@ -329,9 +252,60 @@ QList<QDiagramLineStyle> QLogicCircuitPlugin::lineStyles() const
     return QList<QDiagramLineStyle>();
 }
 
+QVariantMap QLogicCircuitPlugin::metaData(const QString & name) const
+{
+	QVariantMap m;
+
+	m["plugin"] = QLogicCircuitPlugin::staticName();
+    m["itemType"] = "shape";
+    if (name == "flipflop.asyncron"){
+        m["itemClass"] = "flipflop";
+    } else if (name == "function.comparator"){
+        m["itemClass"] = "function";
+    } else if (name == "function.computation"){
+        m["itemClass"] = "function";
+    } else if (name == "function.counter"){
+        m["itemClass"] = "function";
+    } else if (name == "function.counter.operating_hours"){
+        m["itemClass"] = "function";
+    } else if (name == "function.timer"){
+        m["itemClass"] = "function";
+    } else if (name == "gate.and"){
+        m["itemClass"] = "gate";
+    } else if (name == "gate.or"){
+        m["itemClass"] = "gate";
+    } else if (name == "gate.nand"){
+        m["itemClass"] = "gate";
+    } else if (name == "gate.nor"){
+        m["itemClass"] = "gate";
+    } else if (name == "gate.not"){
+        m["itemClass"] = "gate";
+    } else if (name == "gate.xnor"){
+        m["itemClass"] = "gate";
+    } else if (name == "gate.xor"){
+        m["itemClass"] = "gate";
+    } else if (name == "input.analog"){
+        m["itemClass"] = "input";
+    } else if (name == "input.digital"){
+        m["itemClass"] = "input";
+    } else if (name == "output.analog"){
+        m["itemClass"] = "output";
+    } else if (name == "output.digital"){
+        m["itemClass"] = "output";
+    } else if (name == "parameter.analog"){
+        m["itemClass"] = "parameter";
+    } else if (name == "parameter.digital"){
+        m["itemClass"] = "parameter";
+    } else if (name == "value.analog"){
+        m["itemClass"] = "value";
+    }
+
+	return m;
+}
+
 QString QLogicCircuitPlugin::name() const
 {
-    return "Logic Circuit";
+	return QLogicCircuitPlugin::staticName();
 }
 
 QAbstractDiagramShape* QLogicCircuitPlugin::restoreShape(const QString & uuid, const QString & style, const QMap<QString,QVariant> & properties, QGraphicsScene* scene)
@@ -357,8 +331,10 @@ QStringList QLogicCircuitPlugin::shapes(const QString & group, QAbstractDiagram 
     functions << "function.comparator"
                << "function.counter"
                << "function.counter.operating_hours"
-               << "function.computation";
-    gates << "gate.and"
+               << "function.computation"
+               << "function.timer";
+
+	gates << "gate.and"
            << "gate.or"
            << "gate.nand"
            << "gate.nor"
@@ -372,7 +348,8 @@ QStringList QLogicCircuitPlugin::shapes(const QString & group, QAbstractDiagram 
                    << "input.analog"
                    << "output.analog"
 				   << "parameter.analog"
-				   << "parameter.digital";
+				   << "parameter.digital"
+				   << "value.analog";
 
     if (group == QObject::tr("Functions")){
         return functions;
@@ -384,6 +361,11 @@ QStringList QLogicCircuitPlugin::shapes(const QString & group, QAbstractDiagram 
         return inputsOutputs;
     }
     return functions + gates + inputsOutputs;
+}
+
+QString QLogicCircuitPlugin::staticName()
+{
+    return "Logic Circuit";
 }
 
 QString QLogicCircuitPlugin::title(const QString & name) const
@@ -398,6 +380,8 @@ QString QLogicCircuitPlugin::title(const QString & name) const
         return QObject::tr("Operating Hours Counter");
     } else if (name == "function.computation"){
         return QObject::tr("Computation");
+    } else if (name == "function.timer"){
+        return QObject::tr("Timer");
     } else if (name == "gate.and"){
         return QObject::tr("AND");
     } else if (name == "gate.nand"){
@@ -424,6 +408,8 @@ QString QLogicCircuitPlugin::title(const QString & name) const
         return QObject::tr("Parameter (analog)");
     } else if (name == "parameter.digital"){
         return QObject::tr("Parameter (digital)");
+    } else if (name == "value.analog"){
+        return QObject::tr("Value (analog)");
     }
     return name;
 }

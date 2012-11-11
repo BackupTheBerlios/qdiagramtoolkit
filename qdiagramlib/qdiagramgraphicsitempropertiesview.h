@@ -57,6 +57,8 @@ signals:
     void propertyChanged(const QString & name, const QVariant & value);
 public slots:
     void showProperties(QList<QAbstractDiagramGraphicsItem*> items);
+private slots:
+	void propertyViewClicked(const QModelIndex & index);
 private:
     QPropertiesModel* m_model;
     Ui::QDiagramGraphicsItemPropertiesView* ui;

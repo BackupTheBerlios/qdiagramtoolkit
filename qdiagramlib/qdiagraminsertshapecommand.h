@@ -31,7 +31,7 @@ public:
     /**
       * Constructs a QDiagramInsertShapeCommand.
       */
-    QDiagramInsertShapeCommand(QAbstractDiagram* diagram, const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin = "default", QUndoCommand* parent = 0 );
+	QDiagramInsertShapeCommand(QAbstractDiagram* diagram, const QString & uuid, const QVariantMap & metaData, const QVariantMap & properties, QUndoCommand* parent = 0);
     /**
       * Returns the id of this command.
       */

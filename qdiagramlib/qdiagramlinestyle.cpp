@@ -19,12 +19,21 @@
 #include "stdafx.h"
 #include "qdiagramlinestyle.h"
 
+#include "qdiagramproperty.h"
+
 QDiagramLineStyle::QDiagramLineStyle()
 {
+	addProperty("pen", QDiagramToolkit::Pen, QVariant::fromValue(QColor(Qt::black)));
+	addProperty("color", QDiagramToolkit::Color, QVariant::fromValue(QColor(Qt::black)));
+	addProperty("width", QDiagramToolkit::Double, 1.0);
+	addProperty("style", QDiagramToolkit::PenStyle, QDiagramProperty::fromVariant(QDiagramToolkit::PenStyle, Qt::SolidLine));
 }
 
 QDiagramLineStyle::QDiagramLineStyle(const QString &plugin, const QString &name, const QString &title, const QPen &pen, const QIcon &icon)
 {
+	addProperty("pen", QDiagramToolkit::Pen, QVariant::fromValue(pen));
+	addProperty("color", QDiagramToolkit::Color, QVariant::fromValue(QColor(Qt::black)));
+	addProperty("width", QDiagramToolkit::Double, 1.0);
     m_icon = icon;
     m_name = name;
     m_pen = pen;
@@ -38,7 +47,8 @@ QDiagramLineStyle::~QDiagramLineStyle()
 
 QColor QDiagramLineStyle::color() const
 {
-    return m_pen.color();
+	return qvariant_cast<QColor>(value("color"));
+    //return m_pen.color();
 }
 
 QIcon QDiagramLineStyle::icon() const
@@ -61,9 +71,10 @@ QString QDiagramLineStyle::name() const
     return m_name;
 }
 
-QPen QDiagramLineStyle::pen() const
+Qt::PenStyle QDiagramLineStyle::penStyle() const
 {
-    return m_pen;
+	QDiagramProperty p(QDiagramToolkit::PenStyle, property("style"));
+	return p.toPenStyle();
 }
 
 QString QDiagramLineStyle::plugin() const
@@ -88,7 +99,8 @@ QString QDiagramLineStyle::title() const
 
 qreal QDiagramLineStyle::width() const
 {
-    return m_pen.widthF();
+	return property("width").toDouble();
+//    return m_pen.widthF();
 }
 
 QDebug operator<<(QDebug dbg, const QDiagramLineStyle &s)

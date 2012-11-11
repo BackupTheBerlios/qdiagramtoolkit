@@ -23,30 +23,34 @@
 #include <math.h>
 
 #include <qdiagramlinestyle.h>
-#include <qdiagramshadowstyle.h>
+#include <QDiagramGraphicsItemShadow.h>
 #include <qdiagramshapesizegrip.h>
 #include <qdiagramtextstyle.h>
+
+#include "qstandardformsplugin.h"
 
 #define CP_SIZE 8
 #define CP_HALFSIZE 4
 #define PI 3.14159265
 
-QStandardBlockShape::QStandardBlockShape(const QMap<QString, QVariant> &properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(properties, parent)
+QStandardBlockShape::QStandardBlockShape(const QString & itemClass, const QMap<QString, QVariant> &properties, QGraphicsItem* parent) :
+QAbstractDiagramShape(QStandardFormsPlugin::staticName(), itemClass, properties, parent)
 {
+	initGeometry(78, 78);
 	setGraphicsEffect(new QGraphicsDropShadowEffect());
 	graphicsEffect()->setEnabled(false);
 
     setFlag(ItemIsMovable, true);
 
-    addProperty("backgroundColor", QDiagramGraphicsItemMetaProperty::Color, false, QColor("lightgray"));
-    addProperty("rotation", QDiagramGraphicsItemMetaProperty::Angle, false, properties.value("rotation", 0.0));
-    addProperty("lineStyle", QDiagramGraphicsItemMetaProperty::LineStyle, false, properties.value("lineStyle"));
-	addProperty("shadow", QDiagramGraphicsItemMetaProperty::Shadow, false,  properties.value("shadow"));
-    addProperty("text", QDiagramGraphicsItemMetaProperty::Text, false, properties.value("text"));
-    addProperty("textStyle", QDiagramGraphicsItemMetaProperty::TextStyle, false, properties.value("textStyle"));
+    addProperty("background", QDiagramToolkit::Brush, false, properties.value("background"));
+    addProperty("rotation", QDiagramToolkit::Angle, false, properties.value("rotation", 0.0));
+    addProperty("lineStyle", QDiagramToolkit::LineStyle, false, properties.value("lineStyle"));
+    addProperty("pen", QDiagramToolkit::Pen, false, properties.value("pen"));
+	addProperty("shadow", QDiagramToolkit::Shadow, false,  properties.value("shadow"));
+    addProperty("text", QDiagramToolkit::Text, false, properties.value("text"));
+    addProperty("font", QDiagramToolkit::Font, false, properties.value("font"));
 
-    if (property("shape") == "rectangle"){
+    if (metaData()->itemClass() == "rectangle"){
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c1", QStandardBlockShapeConnectionPoint::Top));
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c2", QStandardBlockShapeConnectionPoint::TopRight));
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c3", QStandardBlockShapeConnectionPoint::Right));
@@ -56,8 +60,8 @@ QStandardBlockShape::QStandardBlockShape(const QMap<QString, QVariant> &properti
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c7", QStandardBlockShapeConnectionPoint::Left));
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c8", QStandardBlockShapeConnectionPoint::TopLeft));
     }
-    if (property("shape") == "circle"){
-        addProperty("thickness", QDiagramGraphicsItemMetaProperty::Percent, false, properties.value("ratio", 50.0));
+    if (metaData()->itemClass() == "circle"){
+        addProperty("thickness", QDiagramToolkit::Percent, false, properties.value("ratio", 50.0));
 
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c1", QStandardBlockShapeConnectionPoint::Top));
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c2", QStandardBlockShapeConnectionPoint::Right));
@@ -65,13 +69,13 @@ QStandardBlockShape::QStandardBlockShape(const QMap<QString, QVariant> &properti
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c4", QStandardBlockShapeConnectionPoint::Left));
     }
     if (properties.value("shape") == "rectangle.rounded" || properties.value("shape") == "square.rounded"){
-        addProperty("radius", QDiagramGraphicsItemMetaProperty::Double, false, properties.value("radius", 10.0));
+        addProperty("radius", QDiagramToolkit::Double, false, properties.value("radius", 10.0));
     }
-    if (property("shape") == "hexagon" || property("shape") == "parallelogramm" || property("shape") == "trapezoid"){
-        addProperty("angle", QDiagramGraphicsItemMetaProperty::Double, false, properties.value("angle", 10.0));
+    if (metaData()->itemClass() == "hexagon" || metaData()->itemClass() == "parallelogramm" || metaData()->itemClass() == "trapezoid"){
+        addProperty("angle", QDiagramToolkit::Double, false, properties.value("angle", 10.0));
     }
-    if (property("shape") == "cross" || property("shape") == "octagon"){
-        addProperty("ratio", QDiagramGraphicsItemMetaProperty::Percent, false, properties.value("ratio", 50.0));
+    if (metaData()->itemClass() == "cross" || metaData()->itemClass() == "octagon"){
+        addProperty("ratio", QDiagramToolkit::Percent, false, properties.value("ratio", 50.0));
     }
 
     addSizeGripHandle(new QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHandle::Left, this));
@@ -96,7 +100,7 @@ QRectF QStandardBlockShape::boundingRect() const
 QVariant QStandardBlockShape::itemPropertyHasChanged(const QString &name, const QVariant &value)
 {
 	if (name == "shadow"){
-        QDiagramShadowStyle s = qvariant_cast<QDiagramShadowStyle>(property(name));
+		QDiagramGraphicsItemShadow s = qdiagramproperty_cast<QDiagramGraphicsItemShadow>(property(name));
 		QGraphicsDropShadowEffect* e = qobject_cast<QGraphicsDropShadowEffect*>(graphicsEffect());
 		if (e){
 			e->setColor(s.color());
@@ -113,17 +117,21 @@ void QStandardBlockShape::paint(QPainter *painter, const QStyleOptionGraphicsIte
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    QDiagramLineStyle lineStyle = qvariant_cast<QDiagramLineStyle>(property("lineStyle"));
-    painter->setPen(lineStyle.pen());
-    QColor color = property("backgroundColor").value<QColor>();
-    painter->setBrush(QBrush(color, Qt::SolidPattern));
+    QDiagramLineStyle lineStyle = qdiagramproperty_cast<QDiagramLineStyle>(property("lineStyle"));
+	QPen p;
+	p.setColor(lineStyle.color());
+	p.setWidthF(lineStyle.width());
+	p.setStyle(lineStyle.penStyle());
+    painter->setPen(p);
+	QBrush b = qdiagramproperty_cast<QBrush>(property("background"));
+    painter->setBrush(b);
     painter->drawPath(shape());
 
     paintText(painter, option, widget);
     paintConnectionPoints(painter, option, widget);
     paintFocus(painter, option, widget);
 
-    setConnectionPointsVisible(!isSelected());
+//    setConnectionPointsVisible(!isSelected());
     setRotation(property("rotation").toDouble());
 }
 
@@ -133,10 +141,10 @@ void QStandardBlockShape::paintText(QPainter *painter, const QStyleOptionGraphic
     Q_UNUSED(widget);
     painter->save();
 
-    QDiagramTextStyle textStyle = qvariant_cast<QDiagramTextStyle>(property("textStyle"));
-    painter->setFont(textStyle.font());
-    painter->setPen(QPen(textStyle.color()));
-    painter->drawText(shape().boundingRect(), Qt::AlignCenter, property("text").toString());
+	QFont f = qdiagramproperty_cast<QFont>(property("font"));
+	QString t = qdiagramproperty_cast<QString>(property("text"));
+    painter->setFont(f);
+    painter->drawText(shape().boundingRect(), Qt::AlignCenter, t);
 
     painter->restore();
 }
@@ -144,13 +152,13 @@ void QStandardBlockShape::paintText(QPainter *painter, const QStyleOptionGraphic
 QPainterPath QStandardBlockShape::shape() const
 {
     QPainterPath p;
-    if (property("shape") == "circle"){
+    if (metaData()->itemClass() == "circle"){
         qreal a = boundingRect().width() * property("thickness").toDouble() / 100;
         p.addEllipse(boundingRect());
         QRectF r = boundingRect();
         r.adjust(a / 2, a / 2, -a / 2, -a / 2);
         p.addEllipse(r);
-    } else if (property("shape") == "cross"){
+    } else if (metaData()->itemClass() == "cross"){
         qreal a = boundingRect().width() / 2 * property("ratio").toDouble() / 100;
         p.moveTo(a, 0);
         p.lineTo(boundingRect().width() - a , 0);
@@ -165,7 +173,7 @@ QPainterPath QStandardBlockShape::shape() const
         p.lineTo(0, a);
         p.lineTo(a, a);
         p.lineTo(a, 0);
-    } else if (property("shape") == "hexagon"){
+    } else if (metaData()->itemClass() == "hexagon"){
         qreal a = tan(property("angle").toDouble()*PI/180) * boundingRect().height() / 2;
         p.moveTo(a, 0);
         p.lineTo(boundingRect().width() - a, 0);
@@ -174,17 +182,17 @@ QPainterPath QStandardBlockShape::shape() const
         p.lineTo(a, boundingRect().height());
         p.lineTo(0, boundingRect().center().y());
         p.lineTo(a, 0);
-    } else if (property("shape").toString() == "rectangle" || property("shape").toString() == "square"){
+    } else if (metaData()->itemClass() == "rectangle" || metaData()->itemClass() == "square"){
         p.addRect(boundingRect());
-    } else if (property("shape") == "square.rounded" || property("shape") == "rectangle.rounded"){
+    } else if (metaData()->itemClass() == "square.rounded" || metaData()->itemClass() == "rectangle.rounded"){
         p.addRoundedRect(boundingRect(), property("radius").toDouble(), property("radius").toDouble());
-    } else if (property("shape").toString() == "diamond"){
+    } else if (metaData()->itemClass() == "diamond"){
         p.moveTo(0, boundingRect().center().y());
         p.lineTo(boundingRect().center().x(), 0);
         p.lineTo(boundingRect().width(), boundingRect().center().y());
         p.lineTo(boundingRect().center().x(), boundingRect().height());
         p.lineTo(0, boundingRect().center().y());
-    } else if (property("shape") == "octagon"){
+    } else if (metaData()->itemClass() == "octagon"){
         qreal a = boundingRect().width() / 2 * property("ratio").toDouble() / 100;
         p.moveTo(a, 0);
         p.lineTo(boundingRect().width() - a, 0);
@@ -195,26 +203,26 @@ QPainterPath QStandardBlockShape::shape() const
         p.lineTo(0, boundingRect().height() - a);
         p.lineTo(0, a);
         p.lineTo(a, 0);
-    } else if (property("shape") == "parallelogramm"){
+    } else if (metaData()->itemClass() == "parallelogramm"){
         qreal a = tan(property("angle").toDouble()*PI/180) * boundingRect().height();
         p.moveTo(a, 0);
         p.lineTo(boundingRect().width(), 0);
         p.lineTo(boundingRect().bottomRight().x() - a, boundingRect().height());
         p.lineTo(boundingRect().bottomLeft());
         p.lineTo(a, 0);
-    } else if (property("shape") == "trapezoid"){
+    } else if (metaData()->itemClass() == "trapezoid"){
         qreal a = tan(property("angle").toDouble()*PI/180) * boundingRect().height();
         p.moveTo(a, boundingRect().height());
         p.lineTo(boundingRect().width() - a, boundingRect().height());
         p.lineTo(boundingRect().topRight());
         p.lineTo(boundingRect().topLeft());
         p.lineTo(a, boundingRect().height());
-    } else if (property("shape") == "triangle.isosceles"){
+    } else if (metaData()->itemClass() == "triangle.isosceles"){
         p.moveTo(boundingRect().bottomLeft());
         p.lineTo(boundingRect().center().x(), 0);
         p.lineTo(boundingRect().bottomRight());
         p.lineTo(boundingRect().bottomLeft());
-    } else if (property("shape") == "triangle.right_angle"){
+    } else if (metaData()->itemClass() == "triangle.right_angle"){
         p.moveTo(0, 0);
         p.lineTo(boundingRect().bottomRight());
         p.lineTo(boundingRect().bottomLeft());
@@ -224,7 +232,7 @@ QPainterPath QStandardBlockShape::shape() const
 }
 
 QStandardBlockShapeConnectionPoint::QStandardBlockShapeConnectionPoint(QAbstractDiagramShape* shape, const QString & id, Position position) :
-    QAbstractDiagramShapeConnectionPoint(shape, id, QAbstractDiagramShapeConnectionPoint::West, -1)
+    QAbstractDiagramShapeConnectionPoint(shape, id, QDiagramToolkit::West, -1)
 {
     m_pos = position;
     updatePosition();

@@ -24,27 +24,27 @@ QDiagramTextStyle::QDiagramTextStyle() :
 {
     m_alignment = Qt::AlignCenter;
 
-    addProperty("alignment", Qt::AlignCenter);
-    addProperty("family", "Arial");
-    addProperty("size", 10);
-    addProperty("bold", false);
-    addProperty("color", QColor(Qt::black));
-    addProperty("italic", false);
-    addProperty("underline", false);
-    addProperty("strikeOut", false);
+    addProperty("alignment", QDiagramToolkit::Alignment, Qt::AlignCenter);
+    addProperty("family", QDiagramToolkit::String, "Arial");
+    addProperty("size", QDiagramToolkit::Int, 10);
+	addProperty("bold", QDiagramToolkit::Bool, false);
+	addProperty("color", QDiagramToolkit::Color, QColor(Qt::black));
+	addProperty("italic", QDiagramToolkit::Bool, false);
+	addProperty("underline", QDiagramToolkit::Bool, false);
+	addProperty("strikeOut", QDiagramToolkit::Bool, false);
 }
 
 QDiagramTextStyle::QDiagramTextStyle(const QString &name, const QString &plugin) :
     QDiagramStyle(name, plugin)
 {
-    addProperty("alignment", Qt::AlignCenter);
-    addProperty("family", "Arial");
-    addProperty("size", 10);
-    addProperty("bold", false);
-    addProperty("color", QColor(Qt::black));
-    addProperty("italic", false);
-    addProperty("underline", false);
-    addProperty("strikeOut", false);
+    addProperty("alignment", QDiagramToolkit::Alignment, Qt::AlignCenter);
+    addProperty("family", QDiagramToolkit::String, "Arial");
+    addProperty("size", QDiagramToolkit::Int, 10);
+	addProperty("bold", QDiagramToolkit::Bool, false);
+	addProperty("color", QDiagramToolkit::Color, QColor(Qt::black));
+	addProperty("italic", QDiagramToolkit::Bool, false);
+	addProperty("underline", QDiagramToolkit::Bool, false);
+	addProperty("strikeOut", QDiagramToolkit::Bool, false);
 }
 
 Qt::Alignment QDiagramTextStyle::alignment() const

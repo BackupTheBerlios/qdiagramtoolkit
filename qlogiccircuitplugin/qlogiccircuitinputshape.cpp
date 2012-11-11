@@ -13,18 +13,20 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU Leser General Public License for more details.
 **
-** You should have received a copy of the GNU Lesser General Public License
+** You should have received a copy o	f the GNU Lesser General Public License
 ** along with qdialgramlib.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 #include "stdafx.h"
 #include "qlogiccircuitinputshape.h"
 #include "qlogiccircuitinputshape_p.h"
 
+#include "qlogiccircuitplugin.h"
+
 #define GATE_BASE_SIZE 13.0
 #define GATE_CP_SIZE 6.0
 
 QLogicCircuitInputShapeConnectionPoint::QLogicCircuitInputShapeConnectionPoint(QAbstractDiagramShape* shape) :
-    QAbstractDiagramShapeConnectionPoint(shape, "inp1", QAbstractDiagramShapeConnectionPoint::East)
+    QAbstractDiagramShapeConnectionPoint(shape, "in", QDiagramToolkit::East)
 {
     updatePosition();
 }
@@ -65,11 +67,12 @@ QLogicCircuitInputShape::QLogicCircuitInputShape(QGraphicsItem* parent) :
 }
 
 QLogicCircuitInputShape::QLogicCircuitInputShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "input", properties, parent)
 {
-    addProperty("name", QDiagramGraphicsItemMetaProperty::String, false, properties.value("name", "<input>"));
-    addProperty("signalType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("signalType").toString());
-    addProperty("state", QDiagramGraphicsItemMetaProperty::Bool, false, properties.value("state", false).toBool());
+	initGeometry(182, 26);
+    addProperty("name", QDiagramToolkit::String, false, properties.value("name", "<input>"));
+    addProperty("signalType", QDiagramToolkit::String, true, properties.value("signalType").toString());
+    addProperty("state", QDiagramToolkit::Bool, false, properties.value("state", false).toBool());
 
 	restoreProperties(properties);
 
@@ -77,18 +80,6 @@ QLogicCircuitInputShape::QLogicCircuitInputShape(const QMap<QString, QVariant> &
 
     addConnectionPoint(new QLogicCircuitInputShapeConnectionPoint(this));
 }
-
-//QLogicCircuitInputShape::QLogicCircuitInputShape(const QString & uuid, const QString & type, const QString & plugin, QGraphicsItem* parent) :
-//    QAbstractDiagramShape(uuid, "input", plugin, parent)
-//{
-//    addProperty("name", QDiagramGraphicsItemMetaProperty::String, false, "<input>");
-//    setProperty("signalType", type);
-//    addProperty("value", QDiagramGraphicsItemMetaProperty::Bool, false, false);
-//
-//    setAcceptHoverEvents(true);
-//
-//    addConnectionPoint(new QLogicCircuitInputShapeConnectionPoint(this));
-//}
 
 QRectF QLogicCircuitInputShape::boundingRect() const
 {

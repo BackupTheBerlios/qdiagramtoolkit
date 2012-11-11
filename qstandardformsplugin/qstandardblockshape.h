@@ -24,7 +24,7 @@
 class QStandardBlockShape : public QAbstractDiagramShape
 {
 public:
-    QStandardBlockShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
+    QStandardBlockShape(const QString & itemClass, const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
 
     QRectF boundingRect() const;
 

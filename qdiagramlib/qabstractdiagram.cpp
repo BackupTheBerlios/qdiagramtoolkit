@@ -22,6 +22,7 @@
 #include "qabstractdiagramplugin.h"
 #include "qabstractdiagramshapeconnector.h"
 #include "qabstractdiagramscene.h"
+#include <qdiagrammetadata.h>
 #include "qdiagrampluginloader.h"
 
 QAbstractDiagram::QAbstractDiagram(QObject *parent) :
@@ -30,6 +31,9 @@ QAbstractDiagram::QAbstractDiagram(QObject *parent) :
     m_scene = new QAbstractDiagramScene(this);
     m_scene->setSceneRect(0, 0, 841, 1189);
     m_undostack = new QUndoStack(this);
+
+	m_layers = new QDiagramLayers(this);
+
     connect(m_undostack, SIGNAL(indexChanged(int)), SLOT(undoStackIndexChanged(int)));
 
     connect(m_scene, SIGNAL(itemMoved(QGraphicsItem*,QPointF,QPointF)), this, SLOT(itemMoved(QGraphicsItem*,QPointF,QPointF)));
@@ -54,6 +58,13 @@ QString QAbstractDiagram::author() const
     return m_author;
 }
 
+void QAbstractDiagram::clearSelection()
+{
+    Q_FOREACH(QGraphicsItem* i, m_scene->items()){
+		i->setSelected(false);
+	}
+}
+
 QList<QAbstractDiagramShapeConnector*> QAbstractDiagram::connectors() const
 {
     QList<QAbstractDiagramShapeConnector*> mConnections;
@@ -64,6 +75,11 @@ QList<QAbstractDiagramShapeConnector*> QAbstractDiagram::connectors() const
         }
     }
     return mConnections;
+}
+
+QVariant QAbstractDiagram::defaultValue(QDiagramToolkit::PropertyType type) const
+{
+	return QDiagramProperty::defaultValue(type);
 }
 
 QDiagramEndOfLineStyle QAbstractDiagram::endOfLineStyle(const QString &id) const
@@ -132,6 +148,11 @@ QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::items() const
         }
     }
     return mItems;
+}
+
+QDiagramLayers* QAbstractDiagram::layers() const
+{
+	return m_layers;
 }
 
 QStringList QAbstractDiagram::plugins() const
@@ -205,6 +226,33 @@ QAbstractDiagramShape* QAbstractDiagram::shape(const QString & uuid) const
     return 0;
 }
 
+QList<QAbstractDiagramShape*> QAbstractDiagram::shapes() const
+{
+	QList<QAbstractDiagramShape*> l;
+    Q_FOREACH(QGraphicsItem* graphicsItem, m_scene->items()){
+        QAbstractDiagramShape* s = dynamic_cast<QAbstractDiagramShape*>(graphicsItem);
+		if (s){
+			l << s;
+		}
+    }
+	return l;
+}
+
+void QAbstractDiagram::select(const QString & uuid)
+{
+	QAbstractDiagramGraphicsItem* i = findItemByUuid(uuid);
+	if (i){
+		i->setSelected(true);
+	}
+}
+
+void QAbstractDiagram::selectAll()
+{
+    Q_FOREACH(QGraphicsItem* i, m_scene->items()){
+		i->setSelected(true);
+	}
+}
+
 QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::selectedItems() const
 {
     QList<QAbstractDiagramGraphicsItem*> items;
@@ -229,6 +277,7 @@ QList<QAction *> QAbstractDiagram::standardItemContextMenuActions() const
 
 void QAbstractDiagram::takeItem(QAbstractDiagramGraphicsItem *item)
 {
+	m_layers->remove(item);
     m_scene->removeItem(item);
 }
 

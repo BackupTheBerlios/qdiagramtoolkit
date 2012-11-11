@@ -20,11 +20,13 @@
 #include "qlogiccircuitoutputshape.h"
 #include "qlogiccircuitoutputshape_p.h"
 
+#include "qlogiccircuitplugin.h"
+
 #define GATE_BASE_SIZE 13.0
 #define GATE_CP_SIZE 6.0
 
 QLogicCircuitOutputShapeConnectionPoint::QLogicCircuitOutputShapeConnectionPoint(QAbstractDiagramShape* shape) :
-    QAbstractDiagramShapeConnectionPoint(shape, "out1", QAbstractDiagramShapeConnectionPoint::West, 1)
+    QAbstractDiagramShapeConnectionPoint(shape, "in", QDiagramToolkit::West, 1)
 {
     setDirection(QAbstractDiagramShapeConnectionPoint::In);
     updatePosition();
@@ -67,10 +69,11 @@ QLogicCircuitOutputShape::QLogicCircuitOutputShape(QGraphicsItem* parent) :
 }
 
 QLogicCircuitOutputShape::QLogicCircuitOutputShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "output", properties, parent)
 {
-    addProperty("name", QDiagramGraphicsItemMetaProperty::String, false, properties.value("name", "<output>").toString());
-    addProperty("signalType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("signalType").toString());
+	initGeometry(182, 26);
+    addProperty("name", QDiagramToolkit::String, false, properties.value("name", "<output>").toString());
+    addProperty("signalType", QDiagramToolkit::String, true, properties.value("signalType").toString());
 
 	restoreProperties(properties);
 
@@ -78,17 +81,6 @@ QLogicCircuitOutputShape::QLogicCircuitOutputShape(const QMap<QString, QVariant>
 
     addConnectionPoint(new QLogicCircuitOutputShapeConnectionPoint(this));
 }
-
-//QLogicCircuitOutputShape::QLogicCircuitOutputShape(const QString & uuid, const QString & type, const QString & plugin, QGraphicsItem* parent) :
-//    QAbstractDiagramShape(uuid, "output", plugin, parent)
-//{
-//    addProperty("name", QDiagramGraphicsItemMetaProperty::String, false, "<output>");
-////    addProperty("signalType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("signalType").toString());
-//
-//    setAcceptHoverEvents(true);
-//
-//    addConnectionPoint(new QLogicCircuitOutputShapeConnectionPoint(this));
-//}
 
 QRectF QLogicCircuitOutputShape::boundingRect() const
 {

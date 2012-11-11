@@ -18,10 +18,40 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QTreeView" name="propertyView"/>
+    <widget class="QTreeView" name="propertyView">
+     <property name="editTriggers">
+      <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="allColumnsShowFocus">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>propertyView</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>QDiagramGraphicsItemPropertiesView</receiver>
+   <slot>propertyViewClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>propertyViewClicked(QModelIndex)</slot>
+ </slots>
 </ui>

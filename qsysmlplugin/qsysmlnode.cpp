@@ -1,17 +1,21 @@
 #include "stdafx.h"
 #include "qsysmlnode.h"
 
+#include "qsysmlplugin.h"
+
 QSysMLNode::QSysMLNode(const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QSysMLPlugin::staticName(), "node", properties, parent)
 {
-    addProperty("nodeType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("nodeType"));
+	initGeometry(39, 39);
+    addProperty("nodeType", QDiagramToolkit::String, true, properties.value("nodeType"));
     if (nodeType() == "initial"){
 //        addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c3", QStandardBlockShapeConnectionPoint::Right));
     } else if (property("nodeType") == "fork"){
+		initGeometry(78, 39);
         QMap<int,QString> pairs;
         pairs[Qt::Horizontal] = "horizontal";
         pairs[Qt::Vertical] = "vertical";
-        addProperty("alignment", QDiagramGraphicsItemMetaProperty::Enumeration, pairs, properties.value("alignment", Qt::Horizontal));
+        addProperty("alignment", QDiagramToolkit::Enumeration, pairs, properties.value("alignment", Qt::Horizontal));
 
         addSizeGripHandle(new QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHandle::Left, this));
         addSizeGripHandle(new QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHandle::Right, this));

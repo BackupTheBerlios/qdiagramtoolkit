@@ -1,27 +1,29 @@
 #include "stdafx.h"
 #include "qstandardshapeconnector.h"
 
+#include "qstandardformsplugin.h"
+
 #include <qdiagramendoflinestyle.h>
 #define PI 3.14159265
 
 QStandardShapeConnector::QStandardShapeConnector(const QVariantMap &properties) :
-    QAbstractDiagramShapeConnector(properties)
+    QAbstractDiagramShapeConnector(QStandardFormsPlugin::staticName(), "default", properties)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
-    addProperty("lineStyle", QDiagramGraphicsItemMetaProperty::LineStyle, false);
-    addProperty("lineStart", QDiagramGraphicsItemMetaProperty::EndOfLineStyle, false);
-    addProperty("lineEnd", QDiagramGraphicsItemMetaProperty::EndOfLineStyle, false);
-    addProperty("text", QDiagramGraphicsItemMetaProperty::String, false);
+    addProperty("lineStyle", QDiagramToolkit::LineStyle, false);
+    addProperty("lineStart", QDiagramToolkit::EndOfLineStyle, false);
+    addProperty("lineEnd", QDiagramToolkit::EndOfLineStyle, false);
+    addProperty("text", QDiagramToolkit::String, false);
 }
 
 //QStandardShapeConnector::QStandardShapeConnector(const QString &uuid, const QString &style) :
 //    QAbstractDiagramShapeConnector(uuid, style)
 //{
 //    setFlag(QGraphicsItem::ItemIsSelectable);
-//    addProperty("lineStyle", QDiagramGraphicsItemMetaProperty::LineStyle, false);
-//    addProperty("lineStart", QDiagramGraphicsItemMetaProperty::EndOfLineStyle, false);
-//    addProperty("lineEnd", QDiagramGraphicsItemMetaProperty::EndOfLineStyle, false);
-//    addProperty("text", QDiagramGraphicsItemMetaProperty::String, false);
+//    addProperty("lineStyle", QDiagramToolkit::LineStyle, false);
+//    addProperty("lineStart", QDiagramToolkit::EndOfLineStyle, false);
+//    addProperty("lineEnd", QDiagramToolkit::EndOfLineStyle, false);
+//    addProperty("text", QDiagramToolkit::String, false);
 //}
 
 QStandardShapeConnector::~QStandardShapeConnector()
@@ -68,7 +70,7 @@ QList<QPointF> QStandardShapeConnector::defaultConnector() const
     mLineEnd.setP1(endPos());
 
     switch(orientationAtStart()){
-    case QAbstractDiagramShapeConnectionPoint::East:
+    case QDiagramToolkit::East:
         if (mLine.dx() < 20){
             mLineStart.setP2(startPos() + QPointF(20, 0));
 
@@ -81,7 +83,7 @@ QList<QPointF> QStandardShapeConnector::defaultConnector() const
             mLineEnd.setP2(QPointF(mLineStart.p2().x(), mLineEnd.p1().y()));
         }
         break;
-    case QAbstractDiagramShapeConnectionPoint::West:
+    case QDiagramToolkit::West:
         if (mLine.dx() > -20){
             mLineStart.setP2(startPos() - QPointF(20, 0));
 
@@ -137,7 +139,7 @@ void QStandardShapeConnector::paint(QPainter *painter, const QStyleOptionGraphic
 
 void QStandardShapeConnector::paintEndOfLine(QPainter* painter, const QPointF & pos, double angle)
 {
-    QDiagramEndOfLineStyle style = qvariant_cast<QDiagramEndOfLineStyle>(property("lineStart"));
+	QDiagramEndOfLineStyle style = qdiagramproperty_cast<QDiagramEndOfLineStyle>(property("lineStart"));
     if (!style.isValid() || style.name() == "none"){
         return;
     }
@@ -157,10 +159,10 @@ void QStandardShapeConnector::paintEndOfLine(QPainter* painter, const QPointF & 
                                            cos(angle + PI - PI / 3) * arrowSize);
 
     QPolygonF arrowHead;
-    arrowHead.clear();
-       arrowHead << pos << mArrowP1 << mArrowP2;
-        painter->drawLine(pos, mArrowP1);
-        painter->drawLine(pos, mArrowP2);
+	arrowHead.clear();
+	arrowHead << pos << mArrowP1 << mArrowP2;
+	painter->drawLine(pos, mArrowP1);
+	painter->drawLine(pos, mArrowP2);
 }
 
 void QStandardShapeConnector::paintBreakPoints(QPainter *painter, const QList<QPointF> &points)

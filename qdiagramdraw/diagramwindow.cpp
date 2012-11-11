@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QGraphicsItemGroup>
 #include <QImage>
 #include <QImageWriter>
 #include <QMessageBox>
@@ -31,6 +32,13 @@ QDiagram* DiagramWindow::diagram() const
 QDiagramView *DiagramWindow::diagramView() const
 {
     return ui->diagramView;
+}
+
+void DiagramWindow::group()
+{
+	QGraphicsItemGroup* g = cDiagram->scene()->createItemGroup(cDiagram->scene()->selectedItems());
+	g->setFlag(QGraphicsItem::ItemIsMovable);
+	g->setFlag(QGraphicsItem::ItemIsSelectable);
 }
 
 void DiagramWindow::print(QPrinter *printer)
@@ -113,3 +121,6 @@ void DiagramWindow::setDiagram(QDiagram* diagram)
     setWindowTitle(cDiagram->title());
 }
 
+void DiagramWindow::ungroup()
+{
+}

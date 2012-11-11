@@ -19,6 +19,10 @@
 #include "stdafx.h"
 #include "qdiagramreader.h"
 
+#include "qabstractdiagramshapeconnector.h"
+#include "qabstractdiagram.h"
+
+#include "qdiagram.h"
 #include "qdiagramiohandler.h"
 #include "qdiagramioplugin.h"
 
@@ -229,9 +233,9 @@ QByteArray QDiagramReader::format() const
      return d->format;
 }
 
-QAbstractDiagram* QDiagramReader::read(QObject *parent)
+QDiagram* QDiagramReader::read(QObject *parent)
 {
-    QAbstractDiagram* diagram = 0;
+    QDiagram* diagram = 0;
     if (!d->handler && !d->initHandler()){
         return 0;
     }
@@ -241,8 +245,15 @@ QAbstractDiagram* QDiagramReader::read(QObject *parent)
     if (diagram == 0){
         d->diagramReaderError = InvalidDataError;
         d->errorString = QLatin1String(QT_TRANSLATE_NOOP(QDiagramReader, "Unable to read diagram data"));
-    }
-
+	} else {
+		Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->items()){
+			QAbstractDiagramShapeConnector* c = qgraphicsitem_cast<QAbstractDiagramShapeConnector*>(i);
+			if (c){
+				c->reconnect();
+			}
+		}
+	}
+	d->errorString = QLatin1String(QT_TRANSLATE_NOOP(QDiagramReader, "No error"));
     return diagram;
 }
 

@@ -34,19 +34,18 @@ QDiagramShapeListWidget::QDiagramShapeListWidget(QWidget *parent) :
     setDropIndicatorShown(true);
 }
 
-void QDiagramShapeListWidget::addShape(const QIcon & icon, const QString & title, const QString & name, const QMap<QString,QVariant> & properties, const QString & plugin)
+void QDiagramShapeListWidget::addShape(const QIcon & icon, const QString & title, const QVariantMap & metaData, const QVariantMap & properties)
 {
     QListWidgetItem* i = new QListWidgetItem(icon, title);
-    i->setData(Qt::UserRole, plugin);
-    i->setData(Qt::UserRole + 1, name);
-    i->setData(Qt::UserRole + 2, properties);
+    i->setData(Qt::UserRole, metaData);
+    i->setData(Qt::UserRole + 1, properties);
     addItem(i);
 }
 
-void QDiagramShapeListWidget::removeShape(const QString & name, const QString & plugin)
+void QDiagramShapeListWidget::removeShape(const QString & itemClass, const QString & plugin)
 {
     for (int i = 0; i < count(); i++){
-        if (item(i)->data(Qt::UserRole) == plugin && item(i)->data(Qt::UserRole + 1) == name){
+		if (item(i)->data(Qt::UserRole).toMap().value("plugin") == plugin && item(i)->data(Qt::UserRole).toMap().value("itemClass") == itemClass){
             delete takeItem(i);
         }
     }
@@ -59,7 +58,7 @@ void QDiagramShapeListWidget::startDrag(Qt::DropActions /*supportedActions*/)
     QByteArray mItemData;
     QDataStream mDataStream(&mItemData, QIODevice::WriteOnly);
 
-    mDataStream << mItem->data(Qt::UserRole) << mItem->data(Qt::UserRole + 1)<< mItem->data(Qt::UserRole + 2);
+    mDataStream << mItem->data(Qt::UserRole) << mItem->data(Qt::UserRole + 1) << mItem->data(Qt::UserRole + 2) << mItem->data(Qt::UserRole + 3);
 
     QMimeData* mMimeData = new QMimeData;
     mMimeData->setData("application/qdiagram.shape", mItemData);

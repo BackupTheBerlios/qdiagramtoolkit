@@ -33,7 +33,7 @@ QDiagramPluginLoader::~QDiagramPluginLoader()
 
 }
 
-QAbstractDiagram *QDiagramPluginLoader::diagram(const QString &plugin, const QString & type, QObject *parent, const QString &path)
+QDiagram *QDiagramPluginLoader::diagram(const QString &plugin, const QString & type, QObject *parent, const QString &path)
 {
     if (plugin == "Standard"){
         return new QDiagram(parent);

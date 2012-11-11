@@ -34,7 +34,7 @@ public:
 
     QAbstractDiagramShapeConnector* createConnection(const QString & uuid, QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QString & style);
 
-    QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
+    QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
 
     QDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
 
@@ -54,6 +54,8 @@ public:
 
     QList<QDiagramLineStyle> lineStyles() const;
 
+	QVariantMap metaData(const QString & name) const;
+
     QString name() const;
 
     QAbstractDiagramShape* restoreShape(const QString & uuid, const QString & style, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
@@ -69,6 +71,8 @@ public:
       * Returns the default properties for the shape specified by the given @p name.
       */
     QMap<QString,QVariant> defaultProperties(const QString & name) const;
+
+	static QString staticName();
     /**
       * Returns the (user-readable) title of the connector or shape specified by the given @p name.
       */

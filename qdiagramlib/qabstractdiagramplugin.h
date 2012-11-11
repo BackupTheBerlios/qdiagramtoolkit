@@ -48,9 +48,9 @@ public:
       */
     virtual QList<QDiagramConnectorStyle> connectors() const = 0;
     /**
-      * Creates a diagram item based on the given @p properties and adds it to the graphics @p scene.
+      * Creates a diagram item based on the given @p metaData and @p properties. The item is added to the graphics scene @p scene.
       */
-    virtual QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & properties, QGraphicsScene* scene) = 0;
+    virtual QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties, QGraphicsScene* scene) = 0;
     /**
       * Returns the default properties for the shape specified by the given @p name.
       */
@@ -77,6 +77,10 @@ public:
       * Returns a list of line styles provided by the plugin.
       */
     virtual QList<QDiagramLineStyle> lineStyles() const = 0;
+	/**
+	 * Returns the meta data for the shape specified by the given @p name.
+	 */
+	virtual QVariantMap metaData(const QString & name) const = 0;
     /**
       * Returns the plugin's name.
       */

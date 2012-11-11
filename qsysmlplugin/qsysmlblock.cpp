@@ -1,12 +1,15 @@
 #include "stdafx.h"
 #include "qsysmlblock.h"
 
+#include "qsysmlplugin.h"
+
 QSysMLBlock::QSysMLBlock(const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QSysMLPlugin::staticName(), "block", properties, parent)
 {
-    addProperty("blockType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("blockType"));
-    addProperty("backgroundColor", QDiagramGraphicsItemMetaProperty::Color, false, QColor("white"));
-    addProperty("name", QDiagramGraphicsItemMetaProperty::String, false, "action");
+	initGeometry(78, 65);
+    addProperty("blockType", QDiagramToolkit::String, true, properties.value("blockType"));
+    addProperty("backgroundColor", QDiagramToolkit::Color, false, QColor("white"));
+    addProperty("name", QDiagramToolkit::String, false, "action");
 
     addSizeGripHandle(new QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHandle::Left, this));
     addSizeGripHandle(new QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHandle::Right, this));
@@ -23,7 +26,7 @@ QRectF QSysMLBlock::boundingRect() const
 
 void QSysMLBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QColor color = property("backgroundColor").value<QColor>();
+	QColor color = qdiagramproperty_cast<QColor>(property("backgroundColor"));
     painter->setBrush(QBrush(color, Qt::SolidPattern));
     painter->drawRect(0, 0, geometry().width(), geometry().height());
 

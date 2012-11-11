@@ -19,22 +19,18 @@
 #include "stdafx.h"
 #include "qlogiccircuitshapeconnector.h"
 
+#include "qlogiccircuitplugin.h"
+
 //												Shape at End
 // Shape Start	Property Name	Property Value
 // Input		Signal Type		Analog
 
 // QMap<QString, QMultiMap<QString, QString> > 
 QLogicCircuitShapeConnector::QLogicCircuitShapeConnector(const QVariantMap & properties) :
-    QAbstractDiagramShapeConnector(properties)
+    QAbstractDiagramShapeConnector(QLogicCircuitPlugin::staticName(), "default", properties)
 {
 	restoreProperties(properties);
 }
-
-//QLogicCircuitShapeConnector::QLogicCircuitShapeConnector(const QString & uuid, const QString & style) :
-//    QAbstractDiagramShapeConnector(uuid, style)
-//{
-//    setFlag(QGraphicsItem::ItemIsSelectable);
-//}
 
 QRectF QLogicCircuitShapeConnector::boundingRect() const
 {
@@ -48,14 +44,14 @@ QList<QPointF> QLogicCircuitShapeConnector::breakPoints() const
 
 void QLogicCircuitShapeConnector::calcBoundingRect()
 {
-    QPainterPath mPath;
+    QPainterPath p;
     if (!m_breakPoints.isEmpty()){
-        mPath.moveTo(m_breakPoints.first());
+        p.moveTo(m_breakPoints.first());
         for (int iPoints = 1; iPoints < m_breakPoints.size(); iPoints++){
-            mPath.lineTo(m_breakPoints.at(iPoints));
+            p.lineTo(m_breakPoints.at(iPoints));
         }
     }
-    m_boundingRect = mPath.boundingRect();
+    m_boundingRect = p.boundingRect();
 }
 
 bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoint* startPoint, QAbstractDiagramShapeConnectionPoint* endPoint) const
@@ -67,57 +63,88 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
         return false;
     }
     //
-    if (startPoint->parentShape()->property("shape").toString() == "gate"){
-		if (endPoint->parentShape()->property("shape") == "output" && endPoint->connections().size() < endPoint->maxConnections()){
+    //
+    if (startPoint->parentShape()->metaData()->itemClass() == "gate"){
+		if (endPoint->parentShape()->metaData()->itemClass() == "output" && endPoint->connections().size() < endPoint->maxConnections()){
 			return true;
-		} else if (endPoint->parentShape()->property("shape") == "input"){
+		} else if (endPoint->parentShape()->metaData()->itemClass() == "input"){
 			return true;
 		}
         // Gate to gate
-        if (startPoint->orientation() == QAbstractDiagramShapeConnectionPoint::East && endPoint->orientation() == QAbstractDiagramShapeConnectionPoint::West){
+        if (startPoint->orientation() == QDiagramToolkit::East && endPoint->orientation() == QDiagramToolkit::West){
             if (endPoint->connections().size() < endPoint->maxConnections()){
                 // Output to input
                 return true;
             }
         }
-    } else if (startPoint->parentShape()->property("shape").toString() == "function"){
+    } else if (startPoint->parentShape()->metaData()->itemClass() == "function"){
         if (startPoint->parentShape()->property("function") == "comparator"){
-            if (endPoint->parentShape()->property("shape") == "output"){
-                if (endPoint->parentShape()->property("signalType") == "analog"){
+            if (endPoint->parentShape()->metaData()->itemClass() == "output"){
+                if (endPoint->parentShape()->property("signalType") == "digital"){
                     return true;
                 }
-			} else if (endPoint->parentShape()->property("shape") == "gate"){
+			} else if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
 				return true;
-			} else if (endPoint->parentShape()->property("shape") == "parameter"){
+			} else if (endPoint->parentShape()->metaData()->itemClass() == "parameter"){
                 if (endPoint->parentShape()->property("signalType") == "analog"){
                     return true;
                 }
             }
         } else if (startPoint->parentShape()->property("function") == "operatingHoursCounter"){
-            if (endPoint->parentShape()->property("shape") == "output"){
+            if (endPoint->parentShape()->metaData()->itemClass() == "output"){
                 if (endPoint->parentShape()->property("signalType") == "analog"){
                     return true;
                 }
             }
+        } else if (startPoint->parentShape()->property("function") == "timer"){
+            if (endPoint->parentShape()->metaData()->itemClass() == "output"){
+                if (endPoint->parentShape()->property("signalType") == "digital"){
+                    return true;
+                }
+			} else if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
+				return true;
+			}
         }
-    } else if (startPoint->parentShape()->property("shape").toString() == "input"){
+    } else if (startPoint->parentShape()->metaData()->itemClass() == "input"){
         if (startPoint->parentShape()->property("signalType").toString() == "analog"){
-            if (endPoint->parentShape()->property("shape") == "function"){
+            if (endPoint->parentShape()->metaData()->itemClass() == "function"){
                 if (endPoint->parentShape()->property("function") == "comparator"){
                     return true;
                 }
             }
         } else if (startPoint->parentShape()->property("signalType").toString() == "digital"){
-            if (endPoint->parentShape()->property("shape").toString() == "gate"){
-                return true;
-			} else if (endPoint->parentShape()->property("shape").toString() == "output"){
+            if (endPoint->parentShape()->metaData()->itemClass() == "function"){
+				if (endPoint->parentShape()->property("function") == "timer"){
+					if (endPoint->id() == "trigger"){
+						return true;
+					}
+				}
+			} else if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
                 return true;
             }
         }
-    } else if (startPoint->parentShape()->property("shape").toString() == "parameter"){
+    } else if (startPoint->parentShape()->metaData()->itemClass() == "parameter"){
         if (startPoint->parentShape()->property("signalType").toString() == "analog"){
-	        if (endPoint->parentShape()->property("shape").toString() == "function"){
+	        if (endPoint->parentShape()->metaData()->itemClass() == "function"){
 				if (endPoint->parentShape()->property("function") == "comparator"){
+					return true;
+				} else if (endPoint->parentShape()->property("function").toString() == "timer"){
+					if (endPoint->id() == "parameter"){
+						return true;
+					}
+				}
+			}
+		} else if (startPoint->parentShape()->property("signalType").toString() == "digital"){
+	        if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
+				return true;
+			}
+		}
+	} else if (startPoint->parentShape()->metaData()->itemClass() == "value"){
+		if (endPoint->parentShape()->metaData()->itemClass() == "function"){
+			if (endPoint->parentShape()->property("function") == "comparator"){
+				return true;
+			} else if (endPoint->parentShape()->property("function") == "timer"){
+				if (endPoint->id() == "parameter"){
 					return true;
 				}
 			}
@@ -128,42 +155,42 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
 
 QList<QPointF> QLogicCircuitShapeConnector::defaultConnector() const
 {
-    QList<QPointF> mPoints;
-    QList<QPointF> mIntermediate;
-    QLineF mLine(startPos(), endPos());
-    QLineF mLineEnd;
-    QLineF mLineStart;
+    QList<QPointF> points;
+    QList<QPointF> sections;
+    QLineF line(startPos(), endPos());
+    QLineF lineEnd;
+    QLineF lineStart;
 
-    mLine = QLineF(startPos(), endPos());
+    line = QLineF(startPos(), endPos());
 
-    mLineStart.setP1(startPos());
-    mLineEnd.setP1(endPos());
+    lineStart.setP1(startPos());
+    lineEnd.setP1(endPos());
 
     switch(orientationAtStart()){
-    case QAbstractDiagramShapeConnectionPoint::East:
-        if (mLine.dx() < 20){
-            mLineStart.setP2(startPos() + QPointF(20, 0));
+    case QDiagramToolkit::East:
+        if (line.dx() < 20){
+            lineStart.setP2(startPos() + QPointF(20, 0));
 
-            mLineEnd.setP2(mLineEnd.p1() - QPointF(20, 0));
-            mIntermediate << QPointF(mLineStart.p2().x(), mLineStart.p1().y() + mLine.dy() / 2)
-                          << QPointF(mLineEnd.p2().x(), mLineEnd.p2().y() - mLine.dy() / 2);
+            lineEnd.setP2(lineEnd.p1() - QPointF(20, 0));
+            sections << QPointF(lineStart.p2().x(), lineStart.p1().y() + line.dy() / 2)
+                          << QPointF(lineEnd.p2().x(), lineEnd.p2().y() - line.dy() / 2);
         } else {
-            mLineStart.setP2(mLineStart.p1() + QPointF(mLine.dx() / 2 , 0));
+            lineStart.setP2(lineStart.p1() + QPointF(line.dx() / 2 , 0));
 
-            mLineEnd.setP2(QPointF(mLineStart.p2().x(), mLineEnd.p1().y()));
+            lineEnd.setP2(QPointF(lineStart.p2().x(), lineEnd.p1().y()));
         }
         break;
-    case QAbstractDiagramShapeConnectionPoint::West:
-        if (mLine.dx() > -20){
-            mLineStart.setP2(startPos() - QPointF(20, 0));
+    case QDiagramToolkit::West:
+        if (line.dx() > -20){
+            lineStart.setP2(startPos() - QPointF(20, 0));
 
-            mLineEnd.setP2(mLineEnd.p1() + QPointF(20, 0));
-            mIntermediate << QPointF(mLineStart.p2().x(), mLineStart.p1().y() + mLine.dy() / 2)
-                          << QPointF(mLineEnd.p2().x(), mLineEnd.p2().y() - mLine.dy() / 2);
+            lineEnd.setP2(lineEnd.p1() + QPointF(20, 0));
+            sections << QPointF(lineStart.p2().x(), lineStart.p1().y() + line.dy() / 2)
+                          << QPointF(lineEnd.p2().x(), lineEnd.p2().y() - line.dy() / 2);
         } else {
-            mLineStart.setP2(mLineStart.p1() + QPointF(mLine.dx() / 2 , 0));
+            lineStart.setP2(lineStart.p1() + QPointF(line.dx() / 2 , 0));
 
-            mLineEnd.setP2(QPointF(mLineStart.p2().x(), mLineEnd.p1().y()));
+            lineEnd.setP2(QPointF(lineStart.p2().x(), lineEnd.p1().y()));
         }
         break;
     default:
@@ -171,16 +198,15 @@ QList<QPointF> QLogicCircuitShapeConnector::defaultConnector() const
     }
 
 
-    mPoints.append(mLineStart.p1());
-    mPoints.append(mLineStart.p2());
-    QListIterator<QPointF> mIt(mIntermediate);
-    while(mIt.hasNext()){
-        mPoints.append(mIt.next());
+    points.append(lineStart.p1());
+    points.append(lineStart.p2());
+    QListIterator<QPointF> it(sections);
+    while(it.hasNext()){
+        points.append(it.next());
     }
-    mPoints.append(mLineEnd.p2());
-    mPoints.append(mLineEnd.p1());
-
-    return mPoints;
+    points.append(lineEnd.p2());
+    points.append(lineEnd.p1());
+    return points;
 }
 
 void QLogicCircuitShapeConnector::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
@@ -190,6 +216,7 @@ void QLogicCircuitShapeConnector::paint(QPainter * painter, const QStyleOptionGr
     if (startConnectionPoint() && startConnectionPoint()->parentShape()->property("state").toBool()){
         painter->setPen(Qt::green);
     }
+	painter->setPen(Qt::black);
     drawPolyline(painter, m_breakPoints);
     if (isSelected()){
         paintBreakPoints(painter, m_breakPoints);

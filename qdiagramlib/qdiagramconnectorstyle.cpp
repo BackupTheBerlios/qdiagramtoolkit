@@ -46,6 +46,11 @@ bool QDiagramConnectorStyle::isNull() const
     return m_name.isNull() || m_plugin.isNull();
 }
 
+bool QDiagramConnectorStyle::isValid() const
+{
+	return !isNull();
+}
+
 QString QDiagramConnectorStyle::name() const
 {
     return m_name;

@@ -64,7 +64,7 @@ public:
         NorthNorthWest = 0x8000
     };
 
-    QDiagramShapeConnectionPoint(QAbstractDiagramShape* parentShape, QDiagramShapeConnectionPoint::Position position, QAbstractDiagramShapeConnectionPoint::Orientation orientation);
+    QDiagramShapeConnectionPoint(QAbstractDiagramShape* parentShape, QDiagramShapeConnectionPoint::Position position, QDiagramToolkit::ConnectionPointOrientation orientation);
     ~QDiagramShapeConnectionPoint();
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

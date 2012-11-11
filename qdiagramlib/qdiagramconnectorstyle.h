@@ -34,6 +34,8 @@ public:
     QIcon icon() const;
 
     bool isNull() const;
+
+	bool isValid() const;
     /**
       *
       */
@@ -54,5 +56,7 @@ private:
 };
 
 Q_DECLARE_METATYPE(QDiagramConnectorStyle)
+Q_DECLARE_METATYPE(QDiagramConnectorStyle*)
+Q_DECLARE_METATYPE(QList<QDiagramConnectorStyle>)
 
 #endif // QDIAGRAMCONNECTORSTYLE_H

@@ -29,44 +29,34 @@
 
 QString QStandardFormsPlugin::name() const
 {
-    return "Standard Forms";
+	return QStandardFormsPlugin::staticName();
 }
 
 QList<QDiagramConnectorStyle> QStandardFormsPlugin::connectors() const
 {
-    QList<QDiagramConnectorStyle> mStyles;
+    QList<QDiagramConnectorStyle> l;
 
-    mStyles << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.default"), "Default", "default");
-    mStyles << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.line"), "Line", "line");
-    mStyles << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.line.ae"), "Line Arrow End", "line.ae");
-    return mStyles;
+    l << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.default"), "Default", "default");
+    l << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.line"), "Line", "line");
+    l << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.line.ae"), "Line Arrow End", "line.ae");
+    return l;
 }
 
-QAbstractDiagramGraphicsItem *QStandardFormsPlugin::createItem(const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
+QAbstractDiagramGraphicsItem *QStandardFormsPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
 {
     QVariantMap props(properties);
     QAbstractDiagramGraphicsItem* item = 0;
     if (!properties.contains("uuid")){
         return 0;
     }
-    if (properties.value("itemType") == "connector"){
+    if (metaData.value("itemType") == "connector"){
         item = new QStandardShapeConnector(properties);
-    } else if (properties.value("itemType") == "line"){
+    } else if (metaData.value("itemType") == "line"){
         props["p1"] = QPointF(properties.value("x").toDouble(), properties.value("y").toDouble());
         props["p2"] = props.value("p1").toPointF() + QPointF(100, 100);
         item = new QStandardLine(props);
-    } else if (properties.value("itemType") == "shape"){
-        item = new QStandardBlockShape(properties);
-    }
-//    initializeProperties(item);
-    if (item){
-        scene->addItem(item);
-//        item->blockUndoCommands(true);
-//        item->restoreFromProperties(props);
-//        restoreProperties(item, props);
-//        item->blockUndoCommands(false);
-    } else {
-        qDebug() << properties;
+    } else if (metaData.value("itemType") == "shape"){
+		item = new QStandardBlockShape(metaData.value("itemClass").toString(), properties);
     }
     return item;
 }
@@ -188,20 +178,8 @@ QAbstractDiagramShape *QStandardFormsPlugin::restoreShape(const QString &uuid, c
 QMap<QString, QVariant> QStandardFormsPlugin::defaultProperties(const QString & name) const
 {
     QMap<QString, QVariant> properties;
-    properties["plugin"] = this->name();
     QVariantMap p;
-    p["x"] = 0;
-    p["y"] = 0;
-    p["width"] = 78;
-    p["height"] = 78;
-    properties["geometry"] = p;
-    if (name.startsWith("lines.")){
-        properties["itemType"] = "line";
-    } else {
-        properties["itemType"] = "shape";
-    }
     properties["rotation"] = 0.0;
-    properties["shape"] = name;
     if (name == "hexagon"){
         properties["angle"] = 30.0;
     }
@@ -223,7 +201,22 @@ QMap<QString, QVariant> QStandardFormsPlugin::defaultProperties(const QString & 
     if (name == "square.rounded" || name == "rectangle.rounded"){
         properties["radius"] = 10.0;
     }
+	properties["zlevel"] = 50;
     return properties;
+}
+
+QVariantMap QStandardFormsPlugin::metaData(const QString & name) const
+{
+	QVariantMap m;
+	m["plugin"] = QStandardFormsPlugin::staticName();
+	if (name.startsWith("lines.")){
+		m["itemType"] = "line";
+	} else {
+		m["itemType"] = "shape";
+	}
+	m["itemClass"] = name;
+
+	return m;
 }
 
 QStringList QStandardFormsPlugin::shapes(const QString & group, QAbstractDiagram *diagram) const
@@ -242,6 +235,11 @@ QStringList QStandardFormsPlugin::shapes(const QString & group, QAbstractDiagram
           << "cross" << "circle";
     }
     return s;
+}
+
+QString QStandardFormsPlugin::staticName()
+{
+    return "Standard Forms";
 }
 
 QString QStandardFormsPlugin::title(const QString & name) const

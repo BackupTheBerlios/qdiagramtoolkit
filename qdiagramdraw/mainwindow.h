@@ -27,6 +27,9 @@ public:
 
     DiagramWindow* activeDiagramWindow() const;
 public slots:
+	void bringForwardActionTriggered();
+	void bringToFrontActionTriggered();
+
     void clipboardChanged(QClipboard::Mode mode);
     void copyActionTriggered();
     void cutActionTriggered();
@@ -35,6 +38,8 @@ public slots:
     void diagramItemAdded(QAbstractDiagramGraphicsItem* item);
 
     void exitActionTriggered();
+
+	void groupActionTriggered();
 
     void newActionTriggered();
 
@@ -48,12 +53,16 @@ public slots:
 
     void saveActionTriggered();
 	void saveAsImageActionTriggered();
+	void scriptEditorActionTriggered();
     void selectionChanged();
+	void sendBackwardActionTriggered();
+	void sendToBackActionTriggered();
     void simulatorActionTriggered();
     void subWindowActivated( QMdiSubWindow* window );
 
     void undoActionTriggered();
-    void undoStackCanUndoChanged ( bool canUndo );
+    void undoStackCanUndoChanged( bool canUndo );
+	void ungroupActionTriggered();
 private:
     void updateWindowMenu();
 

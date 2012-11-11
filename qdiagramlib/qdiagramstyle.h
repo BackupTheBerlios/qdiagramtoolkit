@@ -21,9 +21,27 @@
 
 #include <qdiagramlib_global.h>
 
+#include <qdiagramtoolkit.h>
+#include <qdiagrammetaproperty.h>
+
 class QDIAGRAMLIBSHARED_EXPORT QDiagramStyle
 {
 public:
+ //   /**
+ //     * This enum type defines the types of variable that a QDiagramMetaProperty can contain.
+ //     */
+ //   enum PropertyType {
+ //       Invalid, /*!< no type. */
+	//	Alignment, 
+ //       Bool, /*!< a boolean value */
+ //       Brush, /*!< a QBrush */
+ //       Color, /*!< a QColor. */
+ //       Double, /*!< a Double. */
+ //       Int, /*!< an Int. */
+ //       Pen,
+ //       String /*!< a QString. */
+	//};
+
     QString id() const;
 
     bool isValid() const;
@@ -42,6 +60,8 @@ public:
 
     bool setProperty(const QString & name, const QVariant & value);
 
+	QDiagramToolkit::PropertyType type(const QString & name) const;
+
     QVariant value(const QString & name) const;
 
     QVariant value(int index) const;
@@ -49,9 +69,12 @@ protected:
     QDiagramStyle();
     QDiagramStyle(const QString & name, const QString & plugin);
 
-    void addProperty(const QString & name, const QVariant & value);
+    void addProperty(const QString & name, QDiagramToolkit::PropertyType type, const QVariant & value);
 private:
+	QString toString(Qt::PenStyle style) const;
+
     QVariantMap m_properties;
+	QVariantMap m_types;
 };
 
 #endif // QDIAGRAMSTYLE_H

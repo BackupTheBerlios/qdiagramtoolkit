@@ -21,9 +21,14 @@
 #include <QtCore>
 #include <QtGui>
 
-#include <qabstractdiagram.h>
 #include <qabstractdiagramgraphicsitem.h>
+#include <qdiagram.h>
+#include <qdiagramlayer.h>
+#include <qdiagramlayers.h>
+#include <qdiagrammetadata.h>
+#include <qdiagrammetaproperty.h>
 #include <qdiagrampluginloader.h>
+#include <qdiagramgraphicsitemshadow.h>
 
 #include "json.h"
 
@@ -45,7 +50,7 @@ bool JSONFormatIOHandler::canRead() const
     return false;
 }
 
-QAbstractDiagram* JSONFormatIOHandler::read(QObject *parent)
+QDiagram* JSONFormatIOHandler::read(QObject *parent)
 {
     if (device() == 0){
         return 0;
@@ -58,28 +63,58 @@ QAbstractDiagram* JSONFormatIOHandler::read(QObject *parent)
     }
 	QVariantMap dmap = m.value("diagram").toMap();
 
-    if (dmap.value("type").isNull()){
+	QVariantMap mmap = dmap.value("metaData").toMap();
+	QVariantMap lsmap = dmap.value("layers").toMap();
+
+    if (mmap.value("type").isNull()){
         return 0;
     }
-    if (dmap.value("plugin").isNull()){
+    if (mmap.value("plugin").isNull()){
         return 0;
     }
-    QAbstractDiagram* dm = 0;
-    dm = QDiagramPluginLoader::diagram(dmap.value("plugin").toString(), dmap.value("type").toString(), parent);
+    QDiagram* dm = 0;
+    dm = QDiagramPluginLoader::diagram(mmap.value("plugin").toString(), mmap.value("type").toString(), parent);
     if (dm == 0){
         return 0;
     }
-    Q_FOREACH(QVariant i, dmap.value("plugins").toList()){
+
+	QMapIterator<QString,QVariant> it(lsmap);
+	while(it.hasNext()){
+		it.next();
+		dm->layers()->add(it.key());
+	}
+
+    Q_FOREACH(QVariant i, mmap.value("plugins").toList()){
         dm->addPlugin(i.toString());
     }
+	QVariantMap pmap = dmap.value("properties").toMap();
 
     dm->setTitle(dmap.value("title").toString());
-    QVariantMap items = dmap.value("items").toMap();
-    QMapIterator<QString,QVariant> it(items);
+    
+	QVariantMap items = dmap.value("items").toMap();
+    it = QMapIterator<QString,QVariant>(items);
     while(it.hasNext()){
         it.next();
-        dm->restoreItem(it.value().toMap());
+		QVariantMap mm = it.value().toMap().value("metaData").toMap();
+		QVariantMap pm = it.value().toMap().value("properties").toMap();
+        dm->restoreItem(mm, pm);
     }
+
+	it = QMapIterator<QString,QVariant>(lsmap);
+	while(it.hasNext()){
+		it.next();
+		QDiagramLayer* l = dm->layers()->layer(it.key());
+		if (l){
+			l->setVisible(it.value().toMap().value("visible").toBool());
+			Q_FOREACH(QString uuid, it.value().toMap().value("items").toStringList()){
+				QAbstractDiagramGraphicsItem* i = dm->findItemByUuid(uuid);
+				if (i){
+					l->add(i);
+				}
+			}
+			l->setLocked(it.value().toMap().value("locked").toBool());
+		}
+	}
     return dm;
 }
 
@@ -87,19 +122,58 @@ bool JSONFormatIOHandler::write(QAbstractDiagram *diagram)
 {
     QByteArray d;
     bool ok;
-    QVariantMap m;
-    m["type"] = diagram->type();
-    m["plugin"] = diagram->plugin();
-    m["plugins"] = diagram->plugins();
-    m["title"] = diagram->title();
-    QVariantMap i;
+    QVariantMap imap;
+
     Q_FOREACH(QAbstractDiagramGraphicsItem* item, diagram->items()){
-        i[item->uuid()] = item->properties();
+		QVariantMap pm;
+		QVariantMap im;
+		QVariantMap mm;
+		mm["plugin"] = item->metaData()->pluginName();
+		mm["itemType"] = item->metaData()->itemType();
+		mm["itemClass"] = item->metaData()->itemClass();
+		im["metaData"] = mm;
+		for (int i = 0; i < item->metaData()->propertyCount(); i++){
+			if (item->property(item->metaData()->property(i).name()).isValid()){
+				pm[item->metaData()->property(i).name()] = item->property(item->metaData()->property(i).name()).value();
+			}
+		}
+		im["properties"] = pm;
+        imap[item->uuid()] = im;
     }
 
-    m["items"] = i;
+	QVariantMap lmap;
+	QVariantMap lsmap;
+
+	for (int i = 0; i < diagram->layers()->count(); i++){
+		lmap.clear();
+		lmap["visible"] = diagram->layers()->layer(i)->isVisible();
+		lmap["locked"] = diagram->layers()->layer(i)->isLocked();
+		QStringList uuids;
+		Q_FOREACH(QAbstractDiagramGraphicsItem* item, diagram->layers()->layer(i)->items()){
+			uuids.append(item->uuid());
+		}
+		lmap["items"] = uuids;
+		lsmap[diagram->layers()->layer(i)->name()] = lmap;
+	}
+
+    QVariantMap mmap;
+	QVariantMap pmap;
+
+    mmap["type"] = diagram->type();
+    mmap["plugin"] = diagram->plugin();
+    mmap["plugins"] = diagram->plugins();
+
+    pmap["title"] = diagram->title();
+	pmap["author"] = diagram->author();
+
+    QVariantMap dmap;
+	dmap["metaData"] = mmap;
+	dmap["properties"] = pmap;
+	dmap["items"] = imap;
+	dmap["layers"] = lsmap;
+
     QVariantMap dm;
-    dm["diagram"] = m;
+	dm["diagram"] = dmap;
     d = QtJson::Json::serialize(dm, ok);
     if (!ok){
         return false;

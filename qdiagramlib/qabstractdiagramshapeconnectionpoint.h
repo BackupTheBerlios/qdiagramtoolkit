@@ -37,14 +37,6 @@ public:
         Out,
         InvalidDirection
     };
-    //! This enum describes the orientation of a connection point.
-    enum Orientation {
-        North,
-        East,
-        South,
-        West,
-        Invalid
-    };
     enum {
         Type = QGraphicsItem::UserType + 4203
     };
@@ -56,7 +48,7 @@ public:
     /**
       * Constructs a QGraphicsItem with the given @p index, @p orientation and @p parentShape.
       */
-    QAbstractDiagramShapeConnectionPoint(QAbstractDiagramShape* parentShape, const QString & id, QAbstractDiagramShapeConnectionPoint::Orientation orientation, int maxConnections = -1 );
+    QAbstractDiagramShapeConnectionPoint(QAbstractDiagramShape* parentShape, const QString & id, QDiagramToolkit::ConnectionPointOrientation orientation, int maxConnections = -1 );
     /**
       * Destroys the QAbstractDiagramShapeConnectionPoint.
       */
@@ -84,6 +76,18 @@ public:
       * Returns a list connections attached to this tie point.
       */
     QList<QAbstractDiagramShapeConnectionPoint::Connection> connections() const;
+	/**
+	 *
+	 */
+	QAbstractDiagramShapeConnector* connector(int index) const;
+	/**
+	 *
+	 */
+	QList<QAbstractDiagramShapeConnector*> connectors() const;
+	/**
+	 * Returns the number of connections.
+	 */
+	int count() const;
     /**
       * Returns the connector's position in the diagram.
       */
@@ -108,7 +112,7 @@ public:
     /**
       * Returns the connection point's orientation.
       */
-    QAbstractDiagramShapeConnectionPoint::Orientation orientation() const;
+    QDiagramToolkit::ConnectionPointOrientation orientation() const;
     /**
       * This function, which is usually called by QGraphicsView, paints the contents of an item in local coordinates.
       * Reimplement this function in a QAbstractDiagramShapeConnectionPoint subclass to provide the item's painting implementation, using painter.
@@ -165,8 +169,11 @@ private:
     QString m_id;
     int m_maxConnections;
     QString m_name;
-    QAbstractDiagramShapeConnectionPoint::Orientation m_orientation;
+    QDiagramToolkit::ConnectionPointOrientation m_orientation;
     QRectF m_rect;
 };
+
+Q_DECLARE_METATYPE(QAbstractDiagramShapeConnectionPoint*)
+Q_DECLARE_METATYPE(QList<QAbstractDiagramShapeConnectionPoint*>)
 
 #endif // QABSTRACTDIAGRAMSHAPECONNECTIONPOINT_H

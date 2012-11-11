@@ -36,11 +36,16 @@ public:
     QDiagramUndoCommand(QAbstractDiagram* diagram, const QString & uuid, const QString & shape, const QString & plugin = "default", QUndoCommand* parent = 0);
     QDiagramUndoCommand(QAbstractDiagram* diagram, const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin = "default", QUndoCommand* parent = 0);
 
+	QDiagramUndoCommand(QAbstractDiagram* diagram, const QString & uuid, const QVariantMap & metaData, const QVariantMap & properties, QUndoCommand* parent = 0);
     QAbstractDiagram* diagram() const;
     /**
       * Returns the plugin name. Default is set to <i>default</i>.
       */
     QString plugin() const;
+	/**
+	 *
+	 */
+	QVariantMap metaData() const;
     /**
       * Returns the command's properties.
       */
@@ -53,6 +58,7 @@ public:
       */
     QString uuid() const;
 protected:
+	void setMetaData(const QVariantMap & data);
     /**
       * Sets the @p name of the plugin.
       * @see plugin()
@@ -65,69 +71,8 @@ private:
     QString m_plugin;
     QString m_shape;
     QString m_uuid;
+	QVariantMap m_metaData;
     QMap<QString,QVariant> m_properties;
-};
-
-class QDIAGRAMLIBSHARED_EXPORT QDiagramConnectShapesCommand : public QDiagramUndoCommand
-{
-public:
-    QDiagramConnectShapesCommand(QAbstractDiagram* diagram, QAbstractDiagramShapeConnector* connector, const QString & plugin = "default", QUndoCommand* parent = 0);
-    QDiagramConnectShapesCommand(QAbstractDiagram* diagram, const QString & uuid, QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style, const QString & plugin = "default", QUndoCommand* parent = 0);
-    void undo();
-
-    void redo();
-};
-
-class QDIAGRAMLIBSHARED_EXPORT QDiagramChangePropertyCommand : public QDiagramUndoCommand
-{
-public:
-    enum {
-        Id = 43
-    };
-    QDiagramChangePropertyCommand(QAbstractDiagram* diagram, QDiagramShape* item, const QString & property, const QVariant & oldValue, const QVariant & newValue, QUndoCommand* parent = 0);
-    /**
-      * Returns the id of this command.
-      */
-    int id() const
-    {
-        return Id;
-    }
-    /**
-      * Attempts to merge this command with @p other. Returns true on success; otherwise returns false.
-      * @reimp
-      */
-    bool mergeWith(const QUndoCommand* other);
-
-    QString name() const;
-
-    void undo();
-
-    void redo();
-private:
-    QVariant m_old;
-    QString m_name;
-    QVariant m_new;
-};
-
-class QDIAGRAMLIBSHARED_EXPORT QDiagramRemoveItemCommand : public QDiagramUndoCommand
-{
-public:
-    enum {
-        Id = 44
-    };
-    QDiagramRemoveItemCommand(QAbstractDiagramGraphicsItem* item, QUndoCommand* parent = 0);
-    QDiagramRemoveItemCommand(QAbstractDiagram* diagram, const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, QUndoCommand* parent = 0 );
-    /**
-      * Returns the id of this command.
-      */
-    int id() const
-    {
-        return Id;
-    }
-
-    void undo();
-
-    void redo();
 };
 
 #endif // QDIAGRAMUNDOCOMMAND_H

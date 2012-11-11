@@ -62,8 +62,8 @@ void QDiagramShapeToolBox::addShapes(QAbstractDiagramPlugin* plugin)
 
     if (plugin->groups().size() < 2){
         w = new QDiagramShapeListWidget(this);
-        Q_FOREACH(QString mName, plugin->shapes()){
-            w->addShape(plugin->icon(mName), plugin->title(mName), mName, plugin->defaultProperties(mName), plugin->name());
+        Q_FOREACH(QString n, plugin->shapes()){
+			w->addShape(plugin->icon(n), plugin->title(n), plugin->metaData(n), plugin->defaultProperties(n));
         }
         ui->toolBox->addItem(w, plugin->name());
     } else {
@@ -73,8 +73,8 @@ void QDiagramShapeToolBox::addShapes(QAbstractDiagramPlugin* plugin)
         }
         Q_FOREACH(QString group, plugin->groups()){
             w = new QDiagramShapeListWidget(this);
-            Q_FOREACH(QString mName, plugin->shapes(group)){
-                w->addShape(plugin->icon(mName), plugin->title(mName), mName, plugin->defaultProperties(mName), plugin->name());
+            Q_FOREACH(QString n, plugin->shapes(group)){
+				w->addShape(plugin->icon(n), plugin->title(n), plugin->metaData(n), plugin->defaultProperties(n));
             }
             t->addItem(w, group);
         }

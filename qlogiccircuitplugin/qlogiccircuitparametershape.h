@@ -26,8 +26,6 @@ class QDiagramGraphicsTextItem;
 class QLogicCircuitParameterShape : public QAbstractDiagramShape
 {
 public:
-    QLogicCircuitParameterShape(QGraphicsItem* parent = 0);
-
     QLogicCircuitParameterShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
 
     QRectF boundingRect() const;

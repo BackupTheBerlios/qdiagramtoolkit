@@ -18,14 +18,15 @@
 ******************************************************************************/
 #include "stdafx.h"
 #include "qlogiccircuitgateshape.h"
-
 #include "qlogiccircuitgateshape_p.h"
+
+#include "qlogiccircuitplugin.h"
 
 #define GATE_BASE_SIZE 13.0
 #define GATE_CP_SIZE 8.0
 
 QLogicGateInputConnectionPoint::QLogicGateInputConnectionPoint(QAbstractDiagramShape* shape, const QString & id, int index, int maxConnections) :
-    QAbstractDiagramShapeConnectionPoint(shape, id, QAbstractDiagramShapeConnectionPoint::West, maxConnections)
+    QAbstractDiagramShapeConnectionPoint(shape, id, QDiagramToolkit::West, maxConnections)
 {
     m_index = index;
     setDirection(QAbstractDiagramShapeConnectionPoint::In);
@@ -55,7 +56,7 @@ void QLogicGateInputConnectionPoint::updatePosition()
 }
 
 QLogicGateOutputConnectionPoint::QLogicGateOutputConnectionPoint(QAbstractDiagramShape* shape, const QString & id, int maxConnections) :
-    QAbstractDiagramShapeConnectionPoint(shape, id, QAbstractDiagramShapeConnectionPoint::East, maxConnections)
+    QAbstractDiagramShapeConnectionPoint(shape, id, QDiagramToolkit::East, maxConnections)
 {
     setDirection(QAbstractDiagramShapeConnectionPoint::Out);
     updatePosition();
@@ -90,24 +91,27 @@ QLogicCircuitGateShape::QLogicCircuitGateShape(QGraphicsItem* parent) :
 }
 
 QLogicCircuitGateShape::QLogicCircuitGateShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "gate", properties, parent)
 {
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
-    addProperty("gateType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("gateType").toString());
-    addProperty("showState", QDiagramGraphicsItemMetaProperty::Bool, false, false);
+	initGeometry(78, 52);
+
+    addProperty("gateType", QDiagramToolkit::String, true, properties.value("gateType").toString());
+    addProperty("showState", QDiagramToolkit::Bool, false, false);
 
     if (properties.value("gateType").toString() == "not"){
-        addProperty("inputs", QDiagramGraphicsItemMetaProperty::Int, false, 1);
-        addConnectionPoint(new QLogicGateInputConnectionPoint(this, "In1", 0, 1));
+        addProperty("inputs", QDiagramToolkit::Int, false, 1);
+        addConnectionPoint(new QLogicGateInputConnectionPoint(this, "in1", 0, 1));
     } else {
-        addProperty("inputs", QDiagramGraphicsItemMetaProperty::Int, false, 2);
-        addConnectionPoint(new QLogicGateInputConnectionPoint(this, "In1", 0, 1));
-        addConnectionPoint(new QLogicGateInputConnectionPoint(this, "In2", 1, 1));
+        addProperty("inputs", QDiagramToolkit::Int, false, properties.value("inputs", 2).toInt());
+		for (int i = 0; i < properties.value("inputs", 2).toInt(); i++){
+			addConnectionPoint(new QLogicGateInputConnectionPoint(this, QString("in%1").arg(i + 1), i, 1));
+		}
     }
-    addConnectionPoint(new QLogicGateOutputConnectionPoint(this, "Out",1 ));
+    addConnectionPoint(new QLogicGateOutputConnectionPoint(this, "out",1 ));
 
 	restoreProperties(properties);
 }
@@ -177,7 +181,7 @@ void QLogicCircuitGateShape::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 QList<QAbstractDiagramShapeConnector*> QLogicCircuitGateShape::inputs() const
 {
 	QList<QAbstractDiagramShapeConnector*> l;
-	Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, connectionPoints(QAbstractDiagramShapeConnectionPoint::West)){
+	Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, connectionPoints(QDiagramToolkit::West)){
 		Q_FOREACH(QAbstractDiagramShapeConnectionPoint::Connection c, p->connections()){
 			l.append(c.connector);
 		}
@@ -195,20 +199,17 @@ QVariant QLogicCircuitGateShape::itemPropertyChange(const QString &name, const Q
         if (inputs < 2){
             inputs = 2;
         }
-        if (inputs < connectionPoints(QAbstractDiagramShapeConnectionPoint::West).size()){
+        if (inputs < connectionPoints(QDiagramToolkit::West).size()){
 
         } else {
-            while(connectionPoints(QAbstractDiagramShapeConnectionPoint::West).size() < inputs){
-                addConnectionPoint(new QLogicGateInputConnectionPoint(this, QString("In%1").arg(connectionPoints(QAbstractDiagramShapeConnectionPoint::West).size() + 1), connectionPoints(QAbstractDiagramShapeConnectionPoint::West).size(), 1));
+            while(connectionPoints(QDiagramToolkit::West).size() < inputs){
+                addConnectionPoint(new QLogicGateInputConnectionPoint(this, QString("in%1").arg(connectionPoints(QDiagramToolkit::West).size() + 1), connectionPoints(QDiagramToolkit::West).size(), 1));
             }
         }
-        blockUndoCommands(true);
         int offset = geometry().height() / (property("inputs").toInt() * 2);
         QRectF r = geometry();
         r.setHeight(offset * 2 + offset * 2 * (inputs - 1));
-        setProperty("geometry", r);
-        blockUndoCommands(false);
-        prepareGeometryChange();
+		changeGeometry(r);
         return inputs;
     }
     return QAbstractDiagramGraphicsItem::itemPropertyChange(name, value);

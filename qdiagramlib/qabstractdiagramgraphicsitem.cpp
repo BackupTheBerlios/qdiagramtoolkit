@@ -21,8 +21,10 @@
 
 #include "qabstractdiagramshapeconnector.h"
 #include "qdiagram.h"
-#include "qdiagramgraphicsitemmetadata.h"
+#include "qdiagramlayers.h"
+#include "qdiagrammetadata.h"
 #include "qdiagramundocommand.h"
+#include "qdiagramchangepropertycommand.h"
 
 #include <json.h>
 
@@ -30,16 +32,14 @@ QAbstractDiagramGraphicsItem::QAbstractDiagramGraphicsItem(QGraphicsItem* parent
     QGraphicsItem(parent)
 {
     m_blockUndoCommands = false;
-//    cName = "invalid";
-    initMetaData("invalid", "invalid");
+    initMetaData("invalid", "invalid", "invalid", "invalid");
 }
 
-QAbstractDiagramGraphicsItem::QAbstractDiagramGraphicsItem(const QString & uuid, const QString & type, QGraphicsItem* parent) :
+QAbstractDiagramGraphicsItem::QAbstractDiagramGraphicsItem(const QString & uuid, const QString & pluginName, const QString & itemType, const QString & itemClass, QGraphicsItem* parent) :
     QGraphicsItem(parent)
 {
     m_blockUndoCommands = false;
-    initMetaData(uuid, type);
-//    setProperty("pen", "color:black;width:1;style:solid");
+    initMetaData(uuid, pluginName, itemType, itemClass);
 }
 
 QAbstractDiagramGraphicsItem::~QAbstractDiagramGraphicsItem()
@@ -66,23 +66,81 @@ bool QAbstractDiagramGraphicsItem::blockUndoCommands(bool block)
     return m_blockUndoCommands;
 }
 
-void QAbstractDiagramGraphicsItem::addProperty(const QString & name, QDiagramGraphicsItemMetaProperty::Type type, bool readOnly, const QVariant & value)
+void QAbstractDiagramGraphicsItem::bringForward()
 {
-    m_metadata->addProperty(name, type, readOnly);
-    if (!value.isNull()){
-        m_properties[name] = value;
-    }
+	if (zValue() <= 100){
+		setZValue(zValue() + 10);
+	}
 }
 
-void QAbstractDiagramGraphicsItem::addProperty(const QString &name, QDiagramGraphicsItemMetaProperty::Type type, const QMap<int, QString> &pairs, const QVariant &value)
+void QAbstractDiagramGraphicsItem::bringToFront()
+{
+	setZValue(100);
+}
+
+void QAbstractDiagramGraphicsItem::addProperty(const QString & name, QDiagramToolkit::PropertyType type, bool readOnly, const QVariant & value)
+{
+    m_metadata->addProperty(name, type, readOnly);
+	m_properties[name] = QDiagramProperty::fromVariant(type, value);
+}
+
+void QAbstractDiagramGraphicsItem::addProperty(const QString &name, QDiagramToolkit::PropertyType type, const QMap<int, QString> &pairs, const QVariant &value)
 {
     m_metadata->addProperty(name, type, pairs);
-    m_properties[name] = value;
+	m_properties[name] = QDiagramProperty::fromVariant(type, value);
+//	m_values[m_metadata->indexOfProperty(name)] = QDiagramPropertyValue(type, value);
 }
 
 QBrush QAbstractDiagramGraphicsItem::brush() const
 {
     return m_brush;
+}
+
+void QAbstractDiagramGraphicsItem::changeGeometry(const QRectF & r)
+{
+	QVariantMap m = QDiagramProperty::toMap(r);
+	m_properties["geometry"] = m;
+	prepareGeometryChange();
+}
+
+bool QAbstractDiagramGraphicsItem::changeProperty(const QString & name, const QVariant & value)
+{
+    QDiagramMetaProperty metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
+	// Check if property is dynamic
+	if (!metaProperty.isValid()){
+		// Check if dynamic property has changed
+		if (m_dynamicProperties.value(name) != value){
+			m_dynamicProperties[name] = value;
+			itemPropertyHasChanged(name, value);
+		}
+		return false;
+	}
+	// Check if static property is read only
+    if (metaProperty.isReadOnly()){
+		// Property is read only
+        return false;
+    }
+    QVariant currentValue = m_properties.value(name);
+    if (currentValue != value){
+        if (name == "brush"){
+            m_brush = brush(value.toString());
+        } else if (name == "geometry"){
+			if (value.canConvert(QVariant::RectF)){
+//                blockUndoCommands(true);
+	            prepareGeometryChange();
+                setPos(value.toRectF().x(), value.toRectF().y());
+                //blockUndoCommands(false);
+			} else if (value.canConvert(QVariant::Map)){
+                //blockUndoCommands(true);
+                prepareGeometryChange();
+		        setPos(value.toMap().value("x").toDouble(), value.toMap().value("y").toDouble());
+                //blockUndoCommands(false);
+            }
+        }
+		m_properties[name] = value;
+		itemPropertyHasChanged(name, value);
+    }
+    return true;
 }
 
 void QAbstractDiagramGraphicsItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
@@ -179,41 +237,59 @@ bool QAbstractDiagramGraphicsItem::hasProperty(const QString & name) const
     return m_properties.contains(name);
 }
 
-void QAbstractDiagramGraphicsItem::initMetaData(const QString & uuid, const QString & type)
+void QAbstractDiagramGraphicsItem::initGeometry(qreal width, qreal height)
 {
-    m_metadata = new QDiagramGraphicsItemMetaData(type);
+	prepareGeometryChange();
+	QVariantMap g;
+	g["x"] = 0;
+	g["y"] = 0;
+	g["width"] = width;
+	g["height"] = height;
+	m_properties["geometry"] = g;
+}
 
-    m_metadata->addProperty("uuid", QDiagramGraphicsItemMetaProperty::UUID, true);
+void QAbstractDiagramGraphicsItem::initMetaData(const QString & uuid, const QString & pluginName, const QString & itemType, const QString & itemClass)
+{
+    m_metadata = new QDiagramMetaData(pluginName, itemType, itemClass);
+
+    m_metadata->addProperty("uuid", QDiagramToolkit::UUID, true);
     m_properties["uuid"] = uuid;
+//	m_values[m_metadata->indexOfProperty("uuid")] = QDiagramPropertyValue(QDiagramToolkit::UUID, uuid);
 
-    m_metadata->addProperty("itemType", QDiagramGraphicsItemMetaProperty::String, true);
-    m_properties["itemType"] = type;
+ //   m_metadata->addProperty("itemType", QDiagramToolkit::String, true);
+ //   m_properties["itemType"] = type;
+	//m_values[m_metadata->indexOfProperty("itemType")] = QDiagramPropertyValue(QDiagramToolkit::String, type);
 
-    m_metadata->addProperty("geometry", QDiagramGraphicsItemMetaProperty::Rect, false);
+    m_metadata->addProperty("geometry", QDiagramToolkit::Rect, false);
+//	m_values[m_metadata->indexOfProperty("geometry")] = QDiagramPropertyValue(QDiagramToolkit::Rect);
 
-    m_metadata->addProperty("pen", QDiagramGraphicsItemMetaProperty::Pen, false);
-    QVariantMap m;
+//    m_metadata->addProperty("pen", QDiagramToolkit::Pen, false);
+//	m_values[m_metadata->indexOfProperty("pen")] = QDiagramPropertyValue(QDiagramToolkit::Pen);
 
-    m["color"] = Qt::black;
-    m["width"] = 1;
-    m["style"] = Qt::SolidLine;
-    m_properties["pen"] = m;
+	//QVariantMap m;
 
-    m_metadata->addProperty("zlevel", QDiagramGraphicsItemMetaProperty::Int, false);
+	//QPen p;
+	//p.setColor(Qt::black);
+	//p.setWidthF(1.0);
+	//p.setStyle(Qt::SolidLine);
+	//m_properties["pen"] = QDiagramProperty::toMap(p);
+
+    m_metadata->addProperty("zlevel", QDiagramToolkit::Int, false);
+//	m_values[m_metadata->indexOfProperty("zlevel")] = QDiagramPropertyValue(QDiagramToolkit::Int);
 }
 
 QVariant QAbstractDiagramGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)
 {
     QVariant mValue(value);
     if (change == QGraphicsItem::ItemPositionChange){
-        QPointF mPoint = itemPositionChange(value).toPointF();
-        if (mPoint.x() < 0){
-            mPoint.setX(0);
+        QPointF p = itemPositionChange(value).toPointF();
+        if (p.x() < 0){
+            p.setX(0);
         }
-        if (mPoint.y() <0){
-            mPoint.setY(0);
+        if (p.y() <0){
+            p.setY(0);
         }
-        mValue = mPoint;
+		return p;
     } else if (change == QGraphicsItem::ItemPositionHasChanged){
         return itemPositionHasChanged(value);
     } else if (change == QGraphicsItem::ItemSceneHasChanged){
@@ -222,6 +298,7 @@ QVariant QAbstractDiagramGraphicsItem::itemChange(GraphicsItemChange change, con
         return itemSelectedChange(value);
     } else if (change == QGraphicsItem::ItemSelectedHasChanged){
         return itemSelectedHasChanged(value);
+	} else if (change == QGraphicsItem::ItemZValueChange){
     } else if (change == QGraphicsItem::ItemZValueHasChanged){
         return itemZValueHasChanged(value);
     }
@@ -230,6 +307,9 @@ QVariant QAbstractDiagramGraphicsItem::itemChange(GraphicsItemChange change, con
 
 QVariant QAbstractDiagramGraphicsItem::itemPositionChange( const QVariant & value )
 {
+	if (diagram() && diagram()->layers()->isLocked(this)){
+		return pos();
+	}
     return value;
 }
 
@@ -281,7 +361,7 @@ QVariant QAbstractDiagramGraphicsItem::itemZValueHasChanged(const QVariant &valu
     return value;
 }
 
-QDiagramGraphicsItemMetaData* QAbstractDiagramGraphicsItem::metaData() const
+QDiagramMetaData* QAbstractDiagramGraphicsItem::metaData() const
 {
     return m_metadata;
 }
@@ -295,7 +375,7 @@ bool QAbstractDiagramGraphicsItem::parse(const QString &data)
         while(it.hasNext()){
             int i = metaData()->indexOfProperty(it.key());
             if (i > -1){
-                if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Rect){
+                if (metaData()->property(i).type() == QDiagramToolkit::Rect){
                     //QVariantMap m = it.value().toMap();
                     //QRectF r;
                     //r.setX(m.value("x").toDouble());
@@ -353,34 +433,69 @@ QPen QAbstractDiagramGraphicsItem::pen(const QString & attrs)
 
 QMap<QString,QVariant> QAbstractDiagramGraphicsItem::properties() const
 {
-//    QVariantMap m;
-//    for (int i = 0; i < metaData()->propertyCount(); i++){
-//        if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Brush){
-//        } else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Color){
-//            m[metaData()->property(i).name()] = qvariant_cast<QColor>(property(metaData()->property(i).name())).name();
-//        } else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-//        } else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-//        } else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Point){
-//        } else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Rect){
-//            QVariantMap r;
-//            r["x"] = property(metaData()->property(i).name()).toRectF().x();
-//            r["y"] = property(metaData()->property(i).name()).toRectF().y();
-//            r["width"] = property(metaData()->property(i).name()).toRectF().width();
-//            r["height"] = property(metaData()->property(i).name()).toRectF().height();
-//            m[metaData()->property(i).name()] = r;
-//        } else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::TextStyle){
-//        } else {
-//            m[metaData()->property(i).name()] = property(metaData()->property(i).name());
-//        }
-//    }
-//    return m;
-    return m_properties;
+	QVariantMap p(m_properties);
+	QMapIterator<QString,QVariant> it(m_dynamicProperties);
+	while(it.hasNext()){
+		it.next();
+		p[it.key()] = it.value();
+	}
+    return p;
 }
 
-QVariant QAbstractDiagramGraphicsItem::property( const QString & name ) const
+QDiagramProperty QAbstractDiagramGraphicsItem::property( const QString & name ) const
 {
-    return m_properties.value(name, QVariant());
+	QDiagramMetaProperty metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
+	if (!metaProperty.isValid()){
+//		return m_dynamicProperties.value(name, QVariant());
+	}
+	QVariant v = m_properties.value(name);
+	if (v.isNull()){
+		QAbstractDiagram* d = diagram();
+		if (d){
+//			return d->defaultValue(metaProperty.type());
+		} else {
+//			return QDiagramMetaData::defaultValue(metaProperty.type());
+		}
+	}
+//    return v;
+	return QDiagramProperty(this, m_metadata->indexOfProperty(name));
 }
+
+QVariant QAbstractDiagramGraphicsItem::propertyValue(int index) const
+{
+	QDiagramMetaProperty m = m_metadata->property(index);
+	QVariant v;
+	if (m.isValid()){
+		v = m_properties.value(m.name());
+		if (v.isNull()){
+			QAbstractDiagram* d = diagram();
+			if (d){
+				return d->defaultValue(m.type());
+			} else {
+				return QDiagramProperty::defaultValue(m.type());
+			}
+		}
+	}
+	return v;
+}
+
+//QVariant QAbstractDiagramGraphicsItem::property( const QString & name ) const
+//{
+//	qdiagrammetaproperty.h metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
+//	if (!metaProperty.isValid()){
+//		return m_dynamicProperties.value(name, QVariant());
+//	}
+//	QVariant v = m_properties.value(name);
+//	if (v.isNull()){
+//		QAbstractDiagram* d = diagram();
+//		if (d){
+//			return d->defaultValue(metaProperty.type());
+//		} else {
+//			return QDiagramMetaData::defaultValue(metaProperty.type());
+//		}
+//	}
+//    return v;
+//}
 
 void QAbstractDiagramGraphicsItem::restoreProperties(const QVariantMap & p)
 {
@@ -391,13 +506,27 @@ void QAbstractDiagramGraphicsItem::restoreProperties(const QVariantMap & p)
 		it.next();
 		index = metaData()->indexOfProperty(it.key());
 		if (index > -1){
-			if (metaData()->property(index).type() == QDiagramGraphicsItemMetaProperty::Rect){
+			if (metaData()->property(index).type() == QDiagramToolkit::Color){
+				m_properties[it.key()] = QColor(it.value().toString());
+			} else if (metaData()->property(index).type() == QDiagramToolkit::Rect){
 				if (it.value().canConvert(QVariant::Map)){
-					m_properties[it.key()] = it.value().toMap();
-					setPos(it.value().toMap().value("x").toDouble(), it.value().toMap().value("y").toDouble());
+					if (it.key() == "geometry"){
+						QVariantMap m = m_properties.value("geometry").toMap();
+						m["width"] = it.value().toMap().value("width", m.value("width"));
+						m["height"] = it.value().toMap().value("height", m.value("height"));
+						m["x"] = it.value().toMap().value("x").toDouble();
+						m["y"] = it.value().toMap().value("y").toDouble();
+						setPos(m.value("x").toDouble(), m.value("y").toDouble());
+						m_properties[it.key()] = m;
+					} else {
+						m_properties[it.key()] = it.value().toMap();
+					}
 				}
 			} else {
 				m_properties[it.key()] = it.value();
+			}
+			if (it.key() == "zlevel"){
+				setZValue(it.value().toDouble());
 			}
 		} else {
 			m_properties[it.key()] = it.value();
@@ -414,19 +543,19 @@ QByteArray QAbstractDiagramGraphicsItem::serialize() const
 {
 //	QVariantMap m;
 //	for (int i = 0; i < metaData()->propertyCount(); i++){
-//		if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Brush){
-//		} else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Color){
-//		} else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::EndOfLineStyle){
-//		} else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::LineStyle){
-//		} else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Point){
-//		//} else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::Rect){
+//		if (metaData()->property(i).type() == QDiagramToolkit::Brush){
+//		} else if (metaData()->property(i).type() == QDiagramToolkit::Color){
+//		} else if (metaData()->property(i).type() == QDiagramToolkit::EndOfLineStyle){
+//		} else if (metaData()->property(i).type() == QDiagramToolkit::LineStyle){
+//		} else if (metaData()->property(i).type() == QDiagramToolkit::Point){
+//		//} else if (metaData()->property(i).type() == QDiagramToolkit::Rect){
 //		//	QVariantMap r;
 //		//	r["x"] = property(metaData()->property(i).name()).toRectF().x();
 //		//	r["y"] = property(metaData()->property(i).name()).toRectF().y();
 //		//	r["width"] = property(metaData()->property(i).name()).toRectF().width();
 //		//	r["height"] = property(metaData()->property(i).name()).toRectF().height();
 //  //          m[metaData()->property(i).name()] = r;
-//		} else if (metaData()->property(i).type() == QDiagramGraphicsItemMetaProperty::TextStyle){
+//		} else if (metaData()->property(i).type() == QDiagramToolkit::TextStyle){
 //		} else {
 //			m[metaData()->property(i).name()] = property(metaData()->property(i).name());
 //		}
@@ -444,57 +573,103 @@ QColor QAbstractDiagramGraphicsItem::selectionColor() const
 
 bool QAbstractDiagramGraphicsItem::setProperty(const QString & name, const QVariant & value)
 {
-    QDiagramGraphicsItemMetaProperty mMetaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
-    if (mMetaProperty.isValid() && mMetaProperty.isReadOnly()){
+	if (diagram() && diagram()->layers()->isLocked(this)){
+		return false;
+	}
+	QDiagramMetaProperty metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
+	// Check if property is dynamic
+	if (!metaProperty.isValid()){
+		QVariant currentValue = m_dynamicProperties.value(name);
+		QVariant newValue = itemPropertyChange(name, value);
+		if (currentValue != newValue){
+			QAbstractDiagram* d = diagram();
+			if (d && !m_blockUndoCommands){
+				d->undoStack()->push(new QDiagramChangePropertyCommand(d, (QDiagramShape*)this, name, currentValue, newValue));
+			}
+		}
+		return false;
+	}
+    if (metaProperty.isReadOnly()){
+		// Property is read only
         return false;
     }
-    QVariant mOldValue = m_properties.value(name);
-    if (mOldValue != value){
-        QVariant newValue = itemPropertyChange(name, value);
-        if (name == "brush"){
-            m_brush = brush(newValue.toString());
-            m_properties[name] = newValue;
-        } else if (name == "geometry"){
-			if (value.canConvert(QVariant::RectF)){
-				QVariantMap m;
-				m["x"] = value.toRectF().x();
-				m["y"] = value.toRectF().y();
-				m["width"] = value.toRectF().width();
-				m["height"] = value.toRectF().height();
-                newValue = m;
-				m_properties[name] = m;
-                blockUndoCommands(true);
-	            prepareGeometryChange();
-                setPos(value.toRectF().x(), value.toRectF().y());
-                blockUndoCommands(false);
-			} else if (value.canConvert(QVariant::Map)){
-                blockUndoCommands(true);
-                prepareGeometryChange();
-		        setPos(newValue.toMap().value("x").toDouble(), newValue.toMap().value("y").toDouble());
-                blockUndoCommands(false);
-            }
-        } else if (name == "pen"){
-            if (value.canConvert(QVariant::Map)){
-
-            } else {
-                m_pen = pen(newValue.toString());
-            }
-            m_properties[name] = newValue;
-        } else {
-            m_properties[name] = newValue;
-        }
-        itemPropertyHasChanged(name, m_properties.value(name));
-        QAbstractDiagram* mDiagram = diagram();
-        if (mDiagram && !m_blockUndoCommands){
-            mDiagram->undoStack()->push(new QDiagramChangePropertyCommand(mDiagram, (QDiagramShape*)this, name, mOldValue, newValue));
-        }
-    }
-    return true;
+	QVariant currentValue = m_properties.value(name);
+	QVariant newValue = itemPropertyChange(name, QDiagramProperty::fromVariant(metaProperty.type(), value));
+	if (currentValue != newValue){
+		QAbstractDiagram* d = diagram();
+		if (d && !m_blockUndoCommands){
+			d->undoStack()->push(new QDiagramChangePropertyCommand(d, (QDiagramShape*)this, name, currentValue, newValue));
+			return true;
+		}
+	}
+	return false;
+//	qdiagrammetaproperty.h metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
+//	// Check if property is dynamic
+//	if (!metaProperty.isValid()){
+//		// Check if dynamic property has changed
+//		if (m_dynamicProperties.value(name) != value){
+//			QVariant currentValue = m_dynamicProperties.value(name);
+//	        QVariant newValue = itemPropertyChange(name, value);
+//			m_dynamicProperties[name] = newValue;
+//			itemPropertyHasChanged(name, newValue);
+//			QAbstractDiagram* d = diagram();
+//			if (d && !m_blockUndoCommands){
+//				d->undoStack()->push(new QDiagramChangePropertyCommand(d, (QDiagramShape*)this, name, currentValue, newValue));
+//			}
+//		}
+//		return false;
+//	}
+//	// Check if static property is read only
+//    if (metaProperty.isReadOnly()){
+//		// Property is read only
+//        return false;
+//    }
+//    QVariant currentValue = m_properties.value(name);
+//    if (currentValue != value){
+//		QVariant newValue = itemPropertyChange(name, QDiagramMetaData::fromVariant(metaProperty.type(), value));
+//        if (name == "brush"){
+//            m_brush = brush(newValue.toString());
+//            m_properties[name] = newValue;
+//        } else if (name == "geometry"){
+//			if (value.canConvert(QVariant::RectF)){
+//				m_properties[name] = newValue;
+////                blockUndoCommands(true);
+//	            prepareGeometryChange();
+//                setPos(value.toRectF().x(), value.toRectF().y());
+//                //blockUndoCommands(false);
+//			} else if (value.canConvert(QVariant::Map)){
+//                //blockUndoCommands(true);
+//                prepareGeometryChange();
+//		        setPos(newValue.toMap().value("x").toDouble(), newValue.toMap().value("y").toDouble());
+//                //blockUndoCommands(false);
+//            }
+//        } else {
+//			m_properties[name] = newValue;
+//        }
+//        itemPropertyHasChanged(name, m_properties.value(name));
+//        QAbstractDiagram* d = diagram();
+//        if (d && !m_blockUndoCommands){
+//            d->undoStack()->push(new QDiagramChangePropertyCommand(d, (QDiagramShape*)this, name, currentValue, newValue));
+//        }
+//    }
+//    return true;
 }
 
 bool QAbstractDiagramGraphicsItem::undoCommandsBlocked() const
 {
     return m_blockUndoCommands;
+}
+
+void QAbstractDiagramGraphicsItem::sendBackward()
+{
+	if (zValue() > 10){
+		setZValue(zValue() - 10);
+	}
+}
+
+void QAbstractDiagramGraphicsItem::sendToBack()
+{
+	setZValue(0);
 }
 
 void QAbstractDiagramGraphicsItem::setBrush( const QBrush & brush )

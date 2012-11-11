@@ -21,7 +21,7 @@
 
 #include "qabstractdiagramshape.h"
 
-QDiagramShapeConnectionPoint::QDiagramShapeConnectionPoint(QAbstractDiagramShape* shape, QDiagramShapeConnectionPoint::Position position, QAbstractDiagramShapeConnectionPoint::Orientation orientation) :
+QDiagramShapeConnectionPoint::QDiagramShapeConnectionPoint(QAbstractDiagramShape* shape, QDiagramShapeConnectionPoint::Position position, QDiagramToolkit::ConnectionPointOrientation orientation) :
     QAbstractDiagramShapeConnectionPoint(shape, toString(position), orientation)
 {
     m_pos = position;

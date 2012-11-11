@@ -38,7 +38,7 @@ public:
 
     virtual ~QDiagramShape();
 
-    void initConnectionPoint(QDiagramShapeConnectionPoint::Position position, QAbstractDiagramShapeConnectionPoint::Orientation orientation);
+    void initConnectionPoint(QDiagramShapeConnectionPoint::Position position, QDiagramToolkit::ConnectionPointOrientation orientation);
 
     QRectF boundingRect() const;
 

@@ -23,22 +23,24 @@
 #include <qdiagramlineitempositionhandle.h>
 #include <qdiagramlinestyle.h>
 
+#include "qstandardformsplugin.h"
+
 #define PI 3.14159265
 
 QStandardLine::QStandardLine(const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), "line", parent)
+QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), QStandardFormsPlugin::staticName(), "line", "line", parent)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    addProperty("plugin", QDiagramGraphicsItemMetaProperty::String, true, properties.value("plugin").toString());
-    addProperty("p1", QDiagramGraphicsItemMetaProperty::Point, false, properties.value("p1"));
-    addProperty("p2", QDiagramGraphicsItemMetaProperty::Point, false, properties.value("p2"));
-    addProperty("text", QDiagramGraphicsItemMetaProperty::Text, false, properties.value("text"));
-    addProperty("lineStyle", QDiagramGraphicsItemMetaProperty::LineStyle, false, properties.value("lineStyle"));
-    addProperty("startOfLine", QDiagramGraphicsItemMetaProperty::EndOfLineStyle, false, properties.value("startOfLine"));
-    addProperty("endOfLine", QDiagramGraphicsItemMetaProperty::EndOfLineStyle, false, properties.value("endOfLine"));
+    addProperty("plugin", QDiagramToolkit::String, true, properties.value("plugin").toString());
+    addProperty("p1", QDiagramToolkit::Point, false, properties.value("p1"));
+    addProperty("p2", QDiagramToolkit::Point, false, properties.value("p2"));
+    addProperty("text", QDiagramToolkit::Text, false, properties.value("text"));
+    addProperty("lineStyle", QDiagramToolkit::LineStyle, false, properties.value("lineStyle"));
+    addProperty("startOfLine", QDiagramToolkit::EndOfLineStyle, false, properties.value("startOfLine"));
+    addProperty("endOfLine", QDiagramToolkit::EndOfLineStyle, false, properties.value("endOfLine"));
 
     m_handles.append(new QDiagramLineItemPositionHandle(QDiagramLineItemPositionHandle::Start, this));
     m_handles.append(new QDiagramLineItemPositionHandle(QDiagramLineItemPositionHandle::End, this));
@@ -118,16 +120,17 @@ void QStandardLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     Q_UNUSED(widget);
     QLineF l(property("p1").toPointF(), property("p2").toPointF());
 
-    QDiagramLineStyle lineStyle = qvariant_cast<QDiagramLineStyle>(property("lineStyle"));
+	QDiagramLineStyle lineStyle = qdiagramproperty_cast<QDiagramLineStyle>(property("lineStyle"));
 
-    painter->setPen(lineStyle.pen());
-    painter->setBrush(QBrush(lineStyle.pen().color()));
-    painter->drawPath(shape());
-    painter->setPen(lineStyle.pen().color());
-    paintStartOfLine(painter);
-    paintEndOfLine(painter);
-    painter->rotate(l.angle());
-    painter->drawText(boundingRect(), Qt::AlignCenter, property("text").toString());
+	// TODO
+    //painter->setPen(lineStyle.pen());
+    //painter->setBrush(QBrush(lineStyle.pen().color()));
+    //painter->drawPath(shape());
+    //painter->setPen(lineStyle.pen().color());
+    //paintStartOfLine(painter);
+    //paintEndOfLine(painter);
+    //painter->rotate(l.angle());
+    //painter->drawText(boundingRect(), Qt::AlignCenter, property("text").toString());
 
     Q_FOREACH(QDiagramLineItemPositionHandle* handle, m_handles){
         handle->updatePosition();
@@ -136,7 +139,7 @@ void QStandardLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 void QStandardLine::paintEndOfLine(QPainter* painter)
 {
-    QDiagramEndOfLineStyle s = qvariant_cast<QDiagramEndOfLineStyle>(property("endOfLine"));
+	QDiagramEndOfLineStyle s = qdiagramproperty_cast<QDiagramEndOfLineStyle>(property("endOfLine"));
     if (!s.isValid() || s.name() == "none"){
         return;
     }
@@ -167,7 +170,7 @@ void QStandardLine::paintEndOfLine(QPainter* painter)
 
 void QStandardLine::paintStartOfLine(QPainter* painter)
 {
-    QDiagramEndOfLineStyle s = qvariant_cast<QDiagramEndOfLineStyle>(property("startOfLine"));
+	QDiagramEndOfLineStyle s = qdiagramproperty_cast<QDiagramEndOfLineStyle>(property("startOfLine"));
     if (!s.isValid() || s.name() == "none"){
         return;
     }

@@ -2,6 +2,8 @@
 #define QDIAGRAMGRAPHICSITEMPROPERTIESVIEW_P_H
 
 #include "qabstractdiagramgraphicsitem.h"
+#include "qdiagrammetaproperty.h"
+#include "qdiagramproperty.h"
 
 class QAbstractDiagramGraphicsItem;
 class QDiagramGraphicsItemDelegate;
@@ -13,6 +15,7 @@ public:
     QPropertiesModelItem(QAbstractDiagramGraphicsItem* graphicsItem);
     QPropertiesModelItem(QAbstractDiagramGraphicsItem* graphicsItem, int index, QPropertiesModelItem* parent = 0);
     QPropertiesModelItem(const QString & name, QPropertiesModelItem* parent);
+	QPropertiesModelItem(const QString & name, QDiagramToolkit::PropertyType type, QPropertiesModelItem* parent);
     ~QPropertiesModelItem();
 
     QPropertiesModelItem* child(int index) const;
@@ -27,6 +30,8 @@ public:
 
     int index() const;
 
+	bool isChild() const;
+
     QAbstractDiagramGraphicsItem* graphicsItem() const;
 
     QString name() const;
@@ -34,6 +39,8 @@ public:
     bool paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const QStyleOptionViewItemV4 & opt4);
 
     QPropertiesModelItem* parent() const;
+
+	QDiagramProperty property() const;
 
     int row() const;
 
@@ -45,9 +52,9 @@ public:
 
     void setValue(const QVariant & value);
 
-    QDiagramGraphicsItemMetaProperty::Type type() const;
+    QDiagramToolkit::PropertyType type() const;
 
-    QVariant value() const;
+    QVariant value(bool parent = false) const;
 private:
     QList<QPropertiesModelItem*> m_children;
     QMap<QString,QColor> m_colorNameMap;
@@ -55,6 +62,7 @@ private:
     QString m_name;
     QAbstractDiagramGraphicsItem* m_item;
     QPropertiesModelItem* m_parent;
+	QDiagramToolkit::PropertyType m_type;
 };
 
 class QPropertiesModel : public QAbstractItemModel
@@ -136,6 +144,27 @@ class QDiagramEndOfLineStyleComboBox : public QComboBox
     Q_OBJECT
 public:
     QDiagramEndOfLineStyleComboBox(const QList<QDiagramEndOfLineStyle> & styles, QWidget* parent);
+};
+
+class QDiagramColorEditor : public QWidget
+{
+	Q_OBJECT
+public:
+	QDiagramColorEditor(QWidget* parent = 0);
+	~QDiagramColorEditor();
+
+	QColor color() const;
+
+	void setColor(const QColor & color);
+signals:
+	void colorEdited();
+private slots:
+	void comboBoxActivated(int index);
+	void toolButtonClicked();
+private:
+	QColor m_color;
+	QComboBox* m_comboBox;
+	QPushButton* m_toolButton;
 };
 
 #endif // QDIAGRAMGRAPHICSITEMPROPERTIESVIEW_P_H

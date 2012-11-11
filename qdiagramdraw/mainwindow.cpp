@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
+#include <QScriptEngine>
 #include <QSignalMapper>
 
 #include <qabstractdiagramgraphicsitem.h>
@@ -25,141 +26,166 @@
 
 #include "qlogiccircuitsimulator.h"
 
+#include "autocompletemodel.h"
+#include "scripteditor.h"
+
 #define CALL_ACTION(___a___) if (ui->mdiArea->activeSubWindow()){ \
-    DiagramWindow* mWindow = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget()); \
-    if (mWindow){ \
-        mWindow->___a___; \
-    } \
+	DiagramWindow* mWindow = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget()); \
+	if (mWindow){ \
+	mWindow->___a___; \
+	} \
 }
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+QMainWindow(parent),
+ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
 
-    windowMapper = new QSignalMapper(this);
-    connect(windowMapper, SIGNAL(mapped(QWidget*)),
-            this, SLOT(setActiveSubWindow(QWidget*)));
+	QApplication::addLibraryPath(qApp->applicationDirPath() + "/plugins");
+	qDebug() << QApplication::libraryPaths();
 
-    connect(QApplication::clipboard(), SIGNAL(changed(QClipboard::Mode)), this, SLOT(clipboardChanged(QClipboard::Mode)));
+	windowMapper = new QSignalMapper(this);
+	connect(windowMapper, SIGNAL(mapped(QWidget*)),
+		this, SLOT(setActiveSubWindow(QWidget*)));
 
-    qDebug() << QDiagramPluginLoader::plugins();
-	    qDebug() << QDiagramPluginLoader::load("Logic Circuit")->diagrams();
+	connect(QApplication::clipboard(), SIGNAL(changed(QClipboard::Mode)), this, SLOT(clipboardChanged(QClipboard::Mode)));
 
-    qDebug() << "QDiagramIO" << QDiagramReader::supportedDiagramFormats();
+	qDebug() << QDiagramPluginLoader::plugins();
+	qDebug() << QDiagramPluginLoader::load("Logic Circuit")->diagrams();
 
-    updateWindowMenu();
+	qDebug() << "QDiagramIO" << QDiagramReader::supportedDiagramFormats();
+
+	updateWindowMenu();
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+	delete ui;
 }
 
 QDiagram* MainWindow::activeDiagram() const
 {
-    if (ui->mdiArea->activeSubWindow() == 0){
-        return 0;
-    }
-    DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
-    if (w){
-        return w->diagram();
-    }
-    return 0;
+	if (ui->mdiArea->activeSubWindow() == 0){
+		return 0;
+	}
+	DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+	if (w){
+		return w->diagram();
+	}
+	return 0;
 }
 
 DiagramWindow *MainWindow::activeDiagramWindow() const
 {
-    if (QMdiSubWindow *activeSubWindow = ui->mdiArea->activeSubWindow()){
-         return qobject_cast<DiagramWindow *>(activeSubWindow->widget());
-    }
-     return 0;
- }
+	if (QMdiSubWindow *activeSubWindow = ui->mdiArea->activeSubWindow()){
+		return qobject_cast<DiagramWindow *>(activeSubWindow->widget());
+	}
+	return 0;
+}
+
+void MainWindow::bringForwardActionTriggered()
+{
+	QDiagram* diagram = activeDiagram();
+	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
+		i->bringForward();
+	}
+}
+
+void MainWindow::bringToFrontActionTriggered()
+{
+	QDiagram* diagram = activeDiagram();
+	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
+		i->bringToFront();
+	}
+}
 
 void MainWindow::clipboardChanged(QClipboard::Mode mode)
 {
-    if (ui->mdiArea->activeSubWindow()){
-        DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
-        if (w){
-            ui->pasteAction->setEnabled(w->diagramView()->canPaste());
-        }
-    } else {
-        ui->pasteAction->setEnabled(false);
-    }
+	if (ui->mdiArea->activeSubWindow()){
+		DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+		if (w){
+			ui->pasteAction->setEnabled(w->diagramView()->canPaste());
+		}
+	} else {
+		ui->pasteAction->setEnabled(false);
+	}
 }
 
 void MainWindow::copyActionTriggered()
 {
-    if (ui->mdiArea->activeSubWindow()){
-        DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
-        if (w){
-            w->diagramView()->copy();
-        }
-    }
+	if (ui->mdiArea->activeSubWindow()){
+		DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+		if (w){
+			w->diagramView()->copy();
+		}
+	}
 }
 
 void MainWindow::cutActionTriggered()
 {
-    if (ui->mdiArea->activeSubWindow()){
-        DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
-        if (w){
-            w->diagramView()->cut();
-        }
-    }
-    //    QDiagram* diagram = activeDiagram();
-//    if (diagram){
-//        if (!diagram->selectedItems().isEmpty()){
-//            QString uuid = diagram->selectedItems().first()->uuid();
-//            diagram->removeItem(uuid);
-//        }
-//    }
+	if (ui->mdiArea->activeSubWindow()){
+		DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+		if (w){
+			w->diagramView()->cut();
+		}
+	}
+	//    QDiagram* diagram = activeDiagram();
+	//    if (diagram){
+	//        if (!diagram->selectedItems().isEmpty()){
+	//            QString uuid = diagram->selectedItems().first()->uuid();
+	//            diagram->removeItem(uuid);
+	//        }
+	//    }
 }
 
 void MainWindow::diagramViewContextMenuRequested(const QPoint & point, const QPointF & scenePos)
 {
-    QDiagramView* view = qobject_cast<QDiagramView*>(sender());
-    if (view){
+	QDiagramView* view = qobject_cast<QDiagramView*>(sender());
+	if (view){
 		QList<QAction*> actions;
 		QAbstractDiagramShape* shape = view->shapeAt(point);
-        QList<QGraphicsItem*> items = view->graphicsView()->items(point);
-        QMenu menu;
+		QList<QGraphicsItem*> items = view->graphicsView()->items(point);
+		QMenu menu;
 		if (shape){
 			actions = shape->createActions(&menu);
 		}
-        if (items.isEmpty()){
-            menu.addAction(ui->pasteAction);
-        } else if (items.size() == 1){
-            menu.addAction(ui->cutAction);
-            menu.addAction(ui->copyAction);
-            menu.addAction(ui->pasteAction);
-			if (!actions.isEmpty()){
-				menu.addSeparator();
-				menu.addActions(actions);
-			}
-        } else {
+		menu.addAction(ui->cutAction);
+		menu.addAction(ui->copyAction);
+		menu.addAction(ui->pasteAction);
+		menu.addAction(ui->bringToFrontAction);
+		menu.addAction(ui->bringForwardAction);
+		menu.addAction(ui->sendBackwardAction);
+		menu.addAction(ui->sendToBackAction);
+		if (!actions.isEmpty()){
+			menu.addSeparator();
+			menu.addActions(actions);
+		}
+		menu.addSeparator();
+		menu.addAction(ui->refreshAction);
 
-        }
-        menu.addSeparator();
-        menu.addAction(ui->refreshAction);
-
-        ui->pasteAction->setData(scenePos);
-        QAction* a = menu.exec(view->graphicsView()->viewport()->mapToGlobal(point));
+		ui->pasteAction->setData(scenePos);
+		QAction* a = menu.exec(view->graphicsView()->viewport()->mapToGlobal(point));
 		if (a && shape){
 			shape->triggerAction(a->objectName(), a->data());
 		}
-    }
+	}
 }
 
 void MainWindow::diagramItemAdded(QAbstractDiagramGraphicsItem *item)
 {
-//    QMessageBox::information(this, tr("Item added"), QString(tr("UUID %1")).arg(item->uuid()), QMessageBox::Ok);
+	//    QMessageBox::information(this, tr("Item added"), QString(tr("UUID %1")).arg(item->uuid()), QMessageBox::Ok);
 }
 
 void MainWindow::exitActionTriggered()
 {
-    ui->mdiArea->closeAllSubWindows();
-    qApp->exit();
+	ui->mdiArea->closeAllSubWindows();
+	qApp->exit();
+}
+
+void MainWindow::groupActionTriggered()
+{
+	CALL_ACTION(group());
 }
 
 void  MainWindow::newActionTriggered()
@@ -195,160 +221,213 @@ void  MainWindow::newActionTriggered()
 
 void MainWindow::openActionTriggered()
 {
-    QString dir;
-    QString filter;
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), dir, tr("Formats (*.jsn *.xml)"), &filter);
-    if (!fileName.isEmpty()){
-        QDiagramReader reader(fileName, "jsn");
-        QAbstractDiagram* d = reader.read();
-        if (d){
-            DiagramWindow* w = new DiagramWindow();
-            w->setDiagram((QDiagram*)d);
-            connect(w->diagramView(), SIGNAL(graphicsViewContextMenuRequested(QPoint,QPointF)), this, SLOT(diagramViewContextMenuRequested(QPoint,QPointF)));
+	QString dir;
+	QString filter;
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), dir, tr("Formats (*.jsn *.xml)"), &filter);
+	if (!fileName.isEmpty()){
+		QDiagramReader reader(fileName, "jsn");
+		QAbstractDiagram* d = reader.read();
+		if (d){
+			DiagramWindow* w = new DiagramWindow();
+			w->setDiagram((QDiagram*)d);
+			connect(w->diagramView(), SIGNAL(graphicsViewContextMenuRequested(QPoint,QPointF)), this, SLOT(diagramViewContextMenuRequested(QPoint,QPointF)));
 
-            ui->mdiArea->addSubWindow(w);
-            w->show();
-        }
-    }
+			ui->mdiArea->addSubWindow(w);
+			w->show();
+		}
+	}
 }
 
 void MainWindow::pasteActionTriggered()
 {
-    if (ui->mdiArea->activeSubWindow()){
-        DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
-        if (w){
-            w->diagramView()->paste();
-        }
-    }
+	if (ui->mdiArea->activeSubWindow()){
+		DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+		if (w){
+			w->diagramView()->paste();
+		}
+	}
 }
 
 void MainWindow::printPreviewActionTriggered()
 {
-    if (activeDiagram() == 0){
-        return;
-    }
-    QPrinter p(QPrinter::HighResolution);
-    QPrintPreviewDialog* d = new QPrintPreviewDialog(&p, this);
+	if (activeDiagram() == 0){
+		return;
+	}
+	QPrinter p(QPrinter::HighResolution);
+	QPrintPreviewDialog* d = new QPrintPreviewDialog(&p, this);
 
-    connect(d, SIGNAL(paintRequested(QPrinter*)), activeDiagram(), SLOT(print(QPrinter*)));
-    d->exec();
-    delete d;
+	connect(d, SIGNAL(paintRequested(QPrinter*)), activeDiagram(), SLOT(print(QPrinter*)));
+	d->exec();
+	delete d;
 }
 
 void MainWindow::redoActionTriggered()
 {
-    CALL_ACTION(redo())
+	CALL_ACTION(redo())
 }
 
 void MainWindow::saveActionTriggered()
 {
-    CALL_ACTION(save())
+	CALL_ACTION(save())
 }
 
 void MainWindow::saveAsImageActionTriggered()
 {
-    CALL_ACTION(saveAsImage())
+	CALL_ACTION(saveAsImage())
 }
 
 void MainWindow::selectionChanged()
 {
-    QDiagram* diagram = activeDiagram();
+	QDiagram* diagram = activeDiagram();
 
-    ui->copyAction->setEnabled(false);
-    ui->cutAction->setEnabled(false);
-    if (diagram){
-        ui->copyAction->setEnabled(!diagram->selectedItems().isEmpty());
-        ui->cutAction->setEnabled(!diagram->selectedItems().isEmpty());
+	ui->copyAction->setEnabled(false);
+	ui->cutAction->setEnabled(false);
+	if (diagram){
+		ui->copyAction->setEnabled(!diagram->selectedItems().isEmpty());
+		ui->cutAction->setEnabled(!diagram->selectedItems().isEmpty());
 
-        if (diagram->selectedItems().isEmpty()){
-            ui->propertiesView->clear();
-        } else {
-            ui->propertiesView->showProperties(diagram->selectedItems());
-        }
-    }
+		if (diagram->selectedItems().isEmpty()){
+			ui->propertiesView->clear();
+		} else {
+			ui->propertiesView->showProperties(diagram->selectedItems());
+		}
+		ui->bringToFrontAction->setEnabled(!diagram->selectedItems().isEmpty());
+		ui->bringForwardAction->setEnabled(!diagram->selectedItems().isEmpty());
+		ui->sendToBackAction->setEnabled(!diagram->selectedItems().isEmpty());
+		ui->sendBackwardAction->setEnabled(!diagram->selectedItems().isEmpty());
+	}
+}
+
+void MainWindow::sendBackwardActionTriggered()
+{
+	QDiagram* diagram = activeDiagram();
+	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
+		i->sendBackward();
+	}
+}
+
+void MainWindow::sendToBackActionTriggered()
+{
+	QDiagram* diagram = activeDiagram();
+	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
+		i->sendToBack();
+	}
+}
+
+void MainWindow::scriptEditorActionTriggered()
+{
+	QScriptEngine* engine = new QScriptEngine(this);
+	engine->importExtension("qdmf");
+	ScriptEditor* editor = new ScriptEditor(this);
+
+
+	editor->autoCompleteModel()->addObject("QAbstractDiagramGraphicsItem", "Object");
+	editor->autoCompleteModel()->addObjectMethod("QAbstractDiagramGraphicsItem", "moveBy", "Moves the item by dx points horizontally, and dy point vertically.\n\nmoveBy(dx, dy)");
+	editor->autoCompleteModel()->addObjectMethod("QAbstractDiagramGraphicsItem", "property", "Returns the property at the giben index.\n\nproperty(index)");
+	editor->autoCompleteModel()->addObjectProperty("QAbstractDiagramGraphicsItem", "uuid", "The item's UUID");
+	editor->autoCompleteModel()->addObjectProperty("QAbstractDiagramGraphicsItem", "metaData", "The item's meta data");
+
+	editor->autoCompleteModel()->addObject("QDiagram", "Object");
+	editor->autoCompleteModel()->addObjectMethod("QDiagram", "addShape", "Adds a shape to the diagram\n\nQDiagram.addShape(x, y, metaData, properties)");
+	editor->autoCompleteModel()->addObject("QDiagramPluginLoader", "Loads a diagram plugin at run-time.");
+	editor->autoCompleteModel()->addObjectMethod("QDiagram", "diagram");
+	editor->autoCompleteModel()->addObject("QDiagramWriter");
+	editor->autoCompleteModel()->addObjectMethod("QDiagramWriter", "write");
+	editor->autoCompleteModel()->addObjectProperty("QDiagramWriter", "errorString", "Returns a text string with the description of the last error that occurred\n\nQDiagramWriter.errorString");
+	editor->setEngine(engine);
+	editor->exec();
+	delete editor;
+	delete engine;
 }
 
 void MainWindow::simulatorActionTriggered()
 {
-    QLogicCircuitSimulator* sim = new QLogicCircuitSimulator(this);
-    sim->setDiagram(activeDiagram());
-    sim->exec();
-    delete sim;
+	QLogicCircuitSimulator* sim = new QLogicCircuitSimulator(this);
+	sim->setDiagram(activeDiagram());
+	sim->exec();
+	delete sim;
 }
 
 void MainWindow::subWindowActivated( QMdiSubWindow* window )
 {
-    QUndoStack* undoStack = 0;
-    ui->closeAction->setEnabled(window != 0);
-    ui->closeAllAction->setEnabled(window != 0);
-    ui->printAction->setEnabled(window != 0);
-    ui->printPreviewAction->setEnabled(window != 0);
-    ui->saveAction->setEnabled(window != 0);
+	QUndoStack* undoStack = 0;
+	ui->closeAction->setEnabled(window != 0);
+	ui->closeAllAction->setEnabled(window != 0);
+	ui->printAction->setEnabled(window != 0);
+	ui->printPreviewAction->setEnabled(window != 0);
+	ui->saveAction->setEnabled(window != 0);
 	ui->saveAsImageAction->setEnabled(window != 0);
-    if (window == 0){
-        return;
-    }
-    DiagramWindow* diagramWindow = qobject_cast<DiagramWindow*>(window->widget());
-    if (diagramWindow){
-        undoStack = diagramWindow->diagram()->undoStack();
+	if (window == 0){
+		return;
+	}
+	DiagramWindow* diagramWindow = qobject_cast<DiagramWindow*>(window->widget());
+	if (diagramWindow){
+		undoStack = diagramWindow->diagram()->undoStack();
 
-        ui->diagramShapeToolBox->addShapes(diagramWindow->diagram());
-        //ui->diagramShapeToolBox->removeShape("output.analog", "Logic Circuit");
-        connect(diagramWindow->diagram(), SIGNAL(selectionChanged()), SLOT(selectionChanged()));
-    }
-    if (undoStack == ui->undoView->stack()){
-        return;
-    }
-    disconnect(ui->undoView->stack());
-    connect(undoStack, SIGNAL(canRedoChanged(bool)), SLOT(redoStackCanRedoChanged(bool)));
-    connect(undoStack, SIGNAL(canUndoChanged(bool)), SLOT(undoStackCanUndoChanged(bool)));
+		ui->diagramShapeToolBox->addShapes(diagramWindow->diagram());
+		//ui->diagramShapeToolBox->removeShape("output.analog", "Logic Circuit");
+		connect(diagramWindow->diagram(), SIGNAL(selectionChanged()), SLOT(selectionChanged()));
 
-    ui->undoView->setStack(undoStack);
-    ui->redoAction->setEnabled(undoStack && undoStack->index() > 0);
-    ui->undoAction->setEnabled(undoStack && undoStack->count() > 0);
+		ui->layersView->setDiagram(diagramWindow->diagram());
+	}
+	if (undoStack == ui->undoView->stack()){
+		return;
+	}
+	disconnect(ui->undoView->stack());
+	connect(undoStack, SIGNAL(canRedoChanged(bool)), SLOT(redoStackCanRedoChanged(bool)));
+	connect(undoStack, SIGNAL(canUndoChanged(bool)), SLOT(undoStackCanUndoChanged(bool)));
 
-    updateWindowMenu();
+	ui->undoView->setStack(undoStack);
+	ui->redoAction->setEnabled(undoStack && undoStack->index() > 0);
+	ui->undoAction->setEnabled(undoStack && undoStack->count() > 0);
+
+	updateWindowMenu();
 }
 
 void MainWindow::undoActionTriggered()
 {
-    CALL_ACTION(undo())
+	CALL_ACTION(undo())
 }
 
 void MainWindow::redoStackCanRedoChanged ( bool canRedo )
 {
-    ui->redoAction->setEnabled(canRedo);
+	ui->redoAction->setEnabled(canRedo);
 }
 
 void MainWindow::undoStackCanUndoChanged ( bool canUndo )
 {
-    ui->undoAction->setEnabled(canUndo);
+	ui->undoAction->setEnabled(canUndo);
+}
+
+void MainWindow::ungroupActionTriggered()
+{
+	CALL_ACTION(ungroup());
 }
 
 void MainWindow::updateWindowMenu()
 {
-    ui->windowMenu->clear();
-    ui->windowMenu->addAction(ui->tileAction);
-    ui->windowMenu->addAction(ui->cascadeAction);
-    QAction* s = ui->windowMenu->addSeparator();
+	ui->windowMenu->clear();
+	ui->windowMenu->addAction(ui->tileAction);
+	ui->windowMenu->addAction(ui->cascadeAction);
+	QAction* s = ui->windowMenu->addSeparator();
 
-    QList<QMdiSubWindow *> windows = ui->mdiArea->subWindowList();
-    s->setVisible(!windows.isEmpty());
+	QList<QMdiSubWindow *> windows = ui->mdiArea->subWindowList();
+	s->setVisible(!windows.isEmpty());
 
-    for (int i = 0; i < windows.size(); ++i) {
-        DiagramWindow* dw= qobject_cast<DiagramWindow *>(windows.at(i)->widget());
+	for (int i = 0; i < windows.size(); ++i) {
+		DiagramWindow* dw= qobject_cast<DiagramWindow *>(windows.at(i)->widget());
 
-        QString text;
-        if (i < 9) {
-            text = tr("&%1 %2").arg(i + 1).arg(dw->diagram()->title());
-        } else {
-            text = tr("%1 %2").arg(i + 1).arg(dw->diagram()->title());
-        }
-        QAction* action  = ui->windowMenu->addAction(text);
-        action->setCheckable(true);
-        action ->setChecked(dw == activeDiagramWindow());
-        connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
-        windowMapper->setMapping(action, windows.at(i));
-    }
+		QString text;
+		if (i < 9) {
+			text = tr("&%1 %2").arg(i + 1).arg(dw->diagram()->title());
+		} else {
+			text = tr("%1 %2").arg(i + 1).arg(dw->diagram()->title());
+		}
+		QAction* action  = ui->windowMenu->addAction(text);
+		action->setCheckable(true);
+		action ->setChecked(dw == activeDiagramWindow());
+		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
+		windowMapper->setMapping(action, windows.at(i));
+	}
 }
 

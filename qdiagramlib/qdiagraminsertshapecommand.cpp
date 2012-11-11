@@ -21,23 +21,23 @@
 
 #include <qdiagrampluginloader.h>
 
-QDiagramInsertShapeCommand::QDiagramInsertShapeCommand(QAbstractDiagram* diagram, const QString & uuid, const QString & shape, const QMap<QString,QVariant> & props, const QString & plugin, QUndoCommand* parent ) :
-    QDiagramUndoCommand(diagram, uuid, shape, props, plugin, parent)
+QDiagramInsertShapeCommand::QDiagramInsertShapeCommand(QAbstractDiagram* diagram, const QString & uuid, const QVariantMap & metaData, const QVariantMap & properties, QUndoCommand* parent) :
+    QDiagramUndoCommand(diagram, uuid, metaData, properties, parent)
 {
-    QAbstractDiagramPlugin* mPlugin = QDiagramPluginLoader::load(plugin);
-    if (mPlugin){
-        setText(QObject::tr("Insert %1").arg(mPlugin->title(shape)));
+    QAbstractDiagramPlugin* p = QDiagramPluginLoader::load(metaData.value("plugin").toString());
+    if (p){
+        setText(QObject::tr("Insert %1").arg(p->title(metaData.value("itemClass").toString())));
     }
 }
 
 void QDiagramInsertShapeCommand::undo()
 {
-    QAbstractDiagramGraphicsItem* item = diagram()->findItemByUuid(uuid());
-    diagram()->takeItem(item);
-    delete item;
+    QAbstractDiagramGraphicsItem* i = diagram()->findItemByUuid(uuid());
+    diagram()->takeItem(i);
+    delete i;
 }
 
 void QDiagramInsertShapeCommand::redo()
 {
-    diagram()->restoreItem(properties());
+    diagram()->restoreItem(metaData(), properties());
 }

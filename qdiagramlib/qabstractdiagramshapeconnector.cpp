@@ -23,33 +23,20 @@
 #include "qabstractdiagramshape.h"
 #include "qabstractdiagramshapeconnectionpoint.h"
 
-QAbstractDiagramShapeConnector::QAbstractDiagramShapeConnector(const QVariantMap & properties) :
-    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), "connector")
+#include "qdiagramconnectionpoint.h"
+
+QAbstractDiagramShapeConnector::QAbstractDiagramShapeConnector(const QString & plugin, const QString & itemClass, const QVariantMap & properties, QGraphicsItem* parent) :
+    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), plugin, "connector", itemClass, parent)
 {
-    addProperty("plugin", QDiagramGraphicsItemMetaProperty::String, true, properties.value("plugin").toString());
-    addProperty("style", QDiagramGraphicsItemMetaProperty::String, true, properties.value("style"));
-    addProperty("shapeAtStart", QDiagramGraphicsItemMetaProperty::UUID, false);
-    addProperty("pointAtStart", QDiagramGraphicsItemMetaProperty::Int, false);
-    addProperty("shapeAtEnd", QDiagramGraphicsItemMetaProperty::UUID, false);
-    addProperty("pointAtEnd", QDiagramGraphicsItemMetaProperty::Int, false);
-    m_connectionPointAtStart = 0;
-    c_connectionPointAtEnd = 0;
+	addProperty("start", QDiagramToolkit::ConnectionPoint, false, properties.value("start"));
+    addProperty("end", QDiagramToolkit::ConnectionPoint, false, properties.value("end"));
+	
+	m_connectionPointAtStart = 0;
+    m_connectionPointAtEnd = 0;
 
 	restoreProperties(properties);
     setFlag(QGraphicsItem::ItemIsSelectable);
 }
-
-//QAbstractDiagramShapeConnector::QAbstractDiagramShapeConnector(const QString & uuid, const QString & style) :
-//    QAbstractDiagramGraphicsItem(uuid, "connector")
-//{
-//    addProperty("style", QDiagramGraphicsItemMetaProperty::String, true, style);
-//    addProperty("shapeAtStart", QDiagramGraphicsItemMetaProperty::UUID, false);
-//    addProperty("pointAtStart", QDiagramGraphicsItemMetaProperty::Int, false);
-//    addProperty("shapeAtEnd", QDiagramGraphicsItemMetaProperty::UUID, false);
-//    addProperty("pointAtEnd", QDiagramGraphicsItemMetaProperty::Int, false);
-//    m_connectionPointAtStart = 0;
-//    c_connectionPointAtEnd = 0;
-//}
 
 QAbstractDiagramShapeConnector::~QAbstractDiagramShapeConnector()
 {
@@ -67,9 +54,9 @@ void QAbstractDiagramShapeConnector::disconnect()
         m_connectionPointAtStart->remove(this);
         m_connectionPointAtStart = 0;
     }
-    if(c_connectionPointAtEnd){
-        c_connectionPointAtEnd->remove(this);
-        c_connectionPointAtEnd = 0;
+    if(m_connectionPointAtEnd){
+        m_connectionPointAtEnd->remove(this);
+        m_connectionPointAtEnd = 0;
     }
 }
 
@@ -89,8 +76,8 @@ void QAbstractDiagramShapeConnector::drawPolyline(QPainter * painter, const QLis
 
 QPointF QAbstractDiagramShapeConnector::endPos() const
 {
-    if (c_connectionPointAtEnd){
-        return c_connectionPointAtEnd->scenePos() + c_connectionPointAtEnd->boundingRect().center();
+    if (m_connectionPointAtEnd){
+        return m_connectionPointAtEnd->scenePos() + m_connectionPointAtEnd->boundingRect().center();
     }
     return m_tempEndPos;
 }
@@ -102,7 +89,7 @@ QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShapeConnector::endConnect
 
 bool QAbstractDiagramShapeConnector::isTemporary() const
 {
-    return m_connectionPointAtStart == 0 && c_connectionPointAtEnd == 0;
+    return m_connectionPointAtStart == 0 && m_connectionPointAtEnd == 0;
 }
 
 QPointF QAbstractDiagramShapeConnector::intersectPoint(QGraphicsItem* item, const QLineF & line) const
@@ -134,15 +121,15 @@ QVariant QAbstractDiagramShapeConnector::itemSceneHasChanged(const QVariant & va
 	return value;
 }
 
-QAbstractDiagramShapeConnectionPoint::Orientation QAbstractDiagramShapeConnector::orientationAtEnd() const
+QDiagramToolkit::ConnectionPointOrientation QAbstractDiagramShapeConnector::orientationAtEnd() const
 {
-    if (c_connectionPointAtEnd){
-        return c_connectionPointAtEnd->orientation();
+    if (m_connectionPointAtEnd){
+        return m_connectionPointAtEnd->orientation();
     }
     return m_tempOrientationAtEnd;
 }
 
-QAbstractDiagramShapeConnectionPoint::Orientation QAbstractDiagramShapeConnector::orientationAtStart() const
+QDiagramToolkit::ConnectionPointOrientation QAbstractDiagramShapeConnector::orientationAtStart() const
 {
     if (m_connectionPointAtStart){
         return m_connectionPointAtStart->orientation();
@@ -156,23 +143,35 @@ void QAbstractDiagramShapeConnector::reconnect()
 	if (diagram() == 0){
 		return;
 	}
-    shape = diagram()->shape(property("shapeAtStart").toString());
+	QDiagramConnectionPoint start = property("start").toConnectionPoint();
+    //shape = diagram()->shape(property("shapeAtStart").toString());
+    shape = diagram()->shape(start.uuid());
     if (shape){
-        m_connectionPointAtStart = shape->connectionPoint(property("pointAtStart").toString());
+        //m_connectionPointAtStart = shape->connectionPoint(property("pointAtStart").toString());
+        m_connectionPointAtStart = shape->connectionPoint(start.id());
     }
     if (m_connectionPointAtStart){
         m_connectionPointAtStart->append(this, QAbstractDiagramShapeConnectionPoint::Out);
-        setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
-        setProperty("pointAtStart", m_connectionPointAtStart->id());
+		//setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
+  //      setProperty("pointAtStart", m_connectionPointAtStart->id());
+		m_connectionPointAtStart->updatePosition();
+		QDiagramConnectionPoint cp(m_connectionPointAtStart->parentShape()->uuid(), m_connectionPointAtStart->id());
+		setProperty("start", qVariantFromValue(cp));
     }
-    shape = diagram()->shape(property("shapeAtEnd").toString());
+	QDiagramConnectionPoint end = property("end").toConnectionPoint();
+    //shape = diagram()->shape(property("shapeAtEnd").toString());
+    shape = diagram()->shape(end.uuid());
     if (shape){
-        c_connectionPointAtEnd = shape->connectionPoint(property("pointAtEnd").toString());
+        //m_connectionPointAtEnd = shape->connectionPoint(property("pointAtEnd").toString());
+        m_connectionPointAtEnd = shape->connectionPoint(end.id());
     }
-    if (c_connectionPointAtEnd){
-        c_connectionPointAtEnd->append(this, QAbstractDiagramShapeConnectionPoint::In);
-        setProperty("shapeAtEnd", c_connectionPointAtEnd->parentShape()->uuid());
-        setProperty("pointAtEnd", c_connectionPointAtEnd->id());
+    if (m_connectionPointAtEnd){
+        m_connectionPointAtEnd->append(this, QAbstractDiagramShapeConnectionPoint::In);
+        //setProperty("shapeAtEnd", m_connectionPointAtEnd->parentShape()->uuid());
+        //setProperty("pointAtEnd", m_connectionPointAtEnd->id());
+		m_connectionPointAtEnd->updatePosition();
+		QDiagramConnectionPoint cp(m_connectionPointAtEnd->parentShape()->uuid(), m_connectionPointAtEnd->id());
+		setProperty("end", qVariantFromValue(cp));
     }
     updatePosition();
 }
@@ -183,32 +182,45 @@ void QAbstractDiagramShapeConnector::remove(QAbstractDiagramShapeConnectionPoint
         m_connectionPointAtStart->remove(this);
         m_connectionPointAtStart = 0;
     }
-    if (c_connectionPointAtEnd == point){
-        c_connectionPointAtEnd->remove(this);
-        c_connectionPointAtEnd = 0;
+    if (m_connectionPointAtEnd == point){
+        m_connectionPointAtEnd->remove(this);
+        m_connectionPointAtEnd = 0;
     }
 }
 
 void QAbstractDiagramShapeConnector::restoreFromProperties(const QMap<QString,QVariant> & properties)
 {
-    QAbstractDiagramShape* mShape = 0;
-    mShape = diagram()->shape(properties.value("shapeAtStart").toString());
-    if (mShape){
-        m_connectionPointAtStart = mShape->connectionPoint(properties.value("pointAtStart").toString());
+	QAbstractDiagramShape* s = 0;
+	QDiagramConnectionPoint cp;
+
+	QVariantMap m;
+
+	m = properties.value("start").toMap();
+    //mShape = diagram()->shape(properties.value("shapeAtStart").toString());
+	s = diagram()->shape(m.value("uuid").toString());
+    if (s){
+        //m_connectionPointAtStart = mShape->connectionPoint(properties.value("pointAtStart").toString());
+        m_connectionPointAtStart = s->connectionPoint(m.value("id").toString());
     }
     if (m_connectionPointAtStart){
         m_connectionPointAtStart->append(this, QAbstractDiagramShapeConnectionPoint::Out);
-        setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
-        setProperty("pointAtStart", m_connectionPointAtStart->id());
+        //setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
+        //setProperty("pointAtStart", m_connectionPointAtStart->id());
+		setProperty("start", qVariantFromValue(QDiagramConnectionPoint(m_connectionPointAtStart->parentShape()->uuid(), m_connectionPointAtStart->id())));
     }
-    mShape = diagram()->shape(properties.value("shapeAtEnd").toString());
-    if (mShape){
-        c_connectionPointAtEnd = mShape->connectionPoint(properties.value("pointAtEnd").toString());
+
+	m = properties.value("end").toMap();
+    //mShape = diagram()->shape(properties.value("shapeAtEnd").toString());
+	s = diagram()->shape(m.value("uuid").toString());
+    if (s){
+        //m_connectionPointAtEnd = mShape->connectionPoint(properties.value("pointAtEnd").toString());
+        m_connectionPointAtEnd = s->connectionPoint(m.value("id").toString());
     }
-    if (c_connectionPointAtEnd){
-        c_connectionPointAtEnd->append(this, QAbstractDiagramShapeConnectionPoint::In);
-        setProperty("shapeAtEnd", c_connectionPointAtEnd->parentShape()->uuid());
-        setProperty("pointAtEnd", c_connectionPointAtEnd->id());
+    if (m_connectionPointAtEnd){
+        m_connectionPointAtEnd->append(this, QAbstractDiagramShapeConnectionPoint::In);
+        //setProperty("shapeAtEnd", m_connectionPointAtEnd->parentShape()->uuid());
+        //setProperty("pointAtEnd", m_connectionPointAtEnd->id());
+		setProperty("start", qVariantFromValue(QDiagramConnectionPoint(m_connectionPointAtEnd->parentShape()->uuid(), m_connectionPointAtEnd->id())));
     }
     updatePosition();
 }
@@ -217,28 +229,30 @@ void QAbstractDiagramShapeConnector::setFrom(QAbstractDiagramShapeConnectionPoin
 {
     m_connectionPointAtStart = item;
     if (m_connectionPointAtStart){
-        setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
-        setProperty("pointAtStart", m_connectionPointAtStart->id());
+        //setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
+        //setProperty("pointAtStart", m_connectionPointAtStart->id());
+		setProperty("start", qVariantFromValue(QDiagramConnectionPoint(m_connectionPointAtStart->parentShape()->uuid(), m_connectionPointAtStart->id())));
     }
 }
 
 void QAbstractDiagramShapeConnector::setTo(QAbstractDiagramShapeConnectionPoint* item)
 {
-    c_connectionPointAtEnd = item;
-    if (c_connectionPointAtEnd){
-        setProperty("shapeAtEnd", c_connectionPointAtEnd->parentShape()->uuid());
-        setProperty("pointAtEnd", c_connectionPointAtEnd->id());
+    m_connectionPointAtEnd = item;
+    if (m_connectionPointAtEnd){
+        //setProperty("shapeAtEnd", m_connectionPointAtEnd->parentShape()->uuid());
+        //setProperty("pointAtEnd", m_connectionPointAtEnd->id());
+		setProperty("end", qVariantFromValue(QDiagramConnectionPoint(m_connectionPointAtEnd->parentShape()->uuid(), m_connectionPointAtEnd->id())));
     }
 }
 
-void QAbstractDiagramShapeConnector::setTemporaryStart(const QPointF & position, QAbstractDiagramShapeConnectionPoint::Orientation orientation)
+void QAbstractDiagramShapeConnector::setTemporaryStart(const QPointF & position, QDiagramToolkit::ConnectionPointOrientation orientation)
 {
     m_tempStartPos = position;
     m_tempOrientationAtStart = orientation;
     updatePosition();
 }
 
-void QAbstractDiagramShapeConnector::setTemporaryEnd(const QPointF & position, QAbstractDiagramShapeConnectionPoint::Orientation orientation)
+void QAbstractDiagramShapeConnector::setTemporaryEnd(const QPointF & position, QDiagramToolkit::ConnectionPointOrientation orientation)
 {
     m_tempEndPos = position;
     m_tempOrientationAtEnd = orientation;
@@ -255,5 +269,5 @@ QPointF QAbstractDiagramShapeConnector::startPos() const
 
 QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShapeConnector::startConnectionPoint() const
 {
-    return c_connectionPointAtEnd;
+    return m_connectionPointAtEnd;
 }

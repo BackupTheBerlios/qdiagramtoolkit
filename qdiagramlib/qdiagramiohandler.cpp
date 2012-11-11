@@ -31,6 +31,11 @@ void QDiagramIOHandler::setDevice(QIODevice *device)
     m_dev = device;
 }
 
+void QDiagramIOHandler::setErrorString(const QString & text)
+{
+	m_errorString = text;
+}
+
 void QDiagramIOHandler::setFormat(const QByteArray &format)
 {
     m_format = format;

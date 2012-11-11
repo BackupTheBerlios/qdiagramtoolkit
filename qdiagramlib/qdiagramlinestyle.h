@@ -23,8 +23,9 @@
 #include <QPen>
 
 #include <qdiagramlib_global.h>
+#include <qdiagramstyle.h>
 
-class QDIAGRAMLIBSHARED_EXPORT QDiagramLineStyle
+class QDIAGRAMLIBSHARED_EXPORT QDiagramLineStyle : public QDiagramStyle
 {
 public:
     /**
@@ -59,7 +60,7 @@ public:
     /**
       *
       */
-    QPen pen() const;
+	Qt::PenStyle penStyle() const;
     /**
       * Returns the name of the plugin providing this style.
       */

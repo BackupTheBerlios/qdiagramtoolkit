@@ -57,6 +57,8 @@
     <addaction name="cutAction"/>
     <addaction name="pasteAction"/>
     <addaction name="separator"/>
+    <addaction name="groupAction"/>
+    <addaction name="ungroupAction"/>
    </widget>
    <widget class="QMenu" name="windowMenu">
     <property name="title">
@@ -74,9 +76,16 @@
     </property>
     <addaction name="simulatorAction"/>
    </widget>
+   <widget class="QMenu" name="toolsMenu">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="scriptEditorAction"/>
+   </widget>
    <addaction name="fileMenu"/>
    <addaction name="editMenu"/>
    <addaction name="menu_Diagram"/>
+   <addaction name="toolsMenu"/>
    <addaction name="windowMenu"/>
    <addaction name="helpMenu"/>
   </widget>
@@ -163,6 +172,15 @@
    <addaction name="separator"/>
    <addaction name="undoAction"/>
    <addaction name="redoAction"/>
+  </widget>
+  <widget class="QDockWidget" name="layersDockWidget">
+   <property name="windowTitle">
+    <string>Layers</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QDiagramLayersView" name="layersView"/>
   </widget>
   <action name="exitAction">
    <property name="text">
@@ -368,6 +386,77 @@
     <string>Close all</string>
    </property>
   </action>
+  <action name="sendToBackAction">
+   <property name="icon">
+    <iconset resource="qdiagramdraw.qrc">
+     <normaloff>:/qdiagramdraw/shape.send_to_back</normaloff>:/qdiagramdraw/shape.send_to_back</iconset>
+   </property>
+   <property name="text">
+    <string>Send to Back</string>
+   </property>
+   <property name="toolTip">
+    <string>Sends the selected items to the back</string>
+   </property>
+  </action>
+  <action name="bringToFrontAction">
+   <property name="icon">
+    <iconset resource="qdiagramdraw.qrc">
+     <normaloff>:/qdiagramdraw/shape.bring_to_front</normaloff>:/qdiagramdraw/shape.bring_to_front</iconset>
+   </property>
+   <property name="text">
+    <string>Bring to Front</string>
+   </property>
+   <property name="toolTip">
+    <string>Brings the selected items to the front</string>
+   </property>
+  </action>
+  <action name="sendBackwardAction">
+   <property name="icon">
+    <iconset resource="qdiagramdraw.qrc">
+     <normaloff>:/qdiagramdraw/shape_bring_backward</normaloff>:/qdiagramdraw/shape_bring_backward</iconset>
+   </property>
+   <property name="text">
+    <string>Send Backward</string>
+   </property>
+   <property name="toolTip">
+    <string>Sends the selected items one level backward</string>
+   </property>
+  </action>
+  <action name="bringForwardAction">
+   <property name="icon">
+    <iconset resource="qdiagramdraw.qrc">
+     <normaloff>:/qdiagramdraw/shape_bring_forward</normaloff>:/qdiagramdraw/shape_bring_forward</iconset>
+   </property>
+   <property name="text">
+    <string>Bring Forward</string>
+   </property>
+   <property name="toolTip">
+    <string>Brings the selected item one level forward</string>
+   </property>
+  </action>
+  <action name="scriptEditorAction">
+   <property name="text">
+    <string>Script Editor</string>
+   </property>
+  </action>
+  <action name="groupAction">
+   <property name="icon">
+    <iconset resource="qdiagramdraw.qrc">
+     <normaloff>:/qdiagramdraw/shape.group</normaloff>:/qdiagramdraw/shape.group</iconset>
+   </property>
+   <property name="text">
+    <string>Group</string>
+   </property>
+  </action>
+  <action name="ungroupAction">
+   <property name="icon">
+    <iconset resource="qdiagramdraw.qrc">
+     <normaloff>:/qdiagramdraw/shape.ungroup</normaloff>:/qdiagramdraw/shape.ungroup</iconset>
+   </property>
+   <property name="text">
+    <string>Ungroup</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -387,6 +476,12 @@
    <class>QUndoView</class>
    <extends>QWidget</extends>
    <header>qundoview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QDiagramLayersView</class>
+   <extends>QWidget</extends>
+   <header>qdiagramlayersview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -666,6 +761,118 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>sendToBackAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>sendToBackActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bringForwardAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>bringForwardActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bringToFrontAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>bringToFrontActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sendBackwardAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>sendBackwardActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scriptEditorAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>scriptEditorActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>groupAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>groupActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>undoAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ungroupActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>saveActionTriggered()</slot>
@@ -681,5 +888,12 @@
   <slot>pasteActionTriggered()</slot>
   <slot>openActionTriggered()</slot>
   <slot>saveAsImageActionTriggered()</slot>
+  <slot>sendToBackActionTriggered()</slot>
+  <slot>bringToFrontActionTriggered()</slot>
+  <slot>bringForwardActionTriggered()</slot>
+  <slot>sendBackwardActionTriggered()</slot>
+  <slot>scriptEditorActionTriggered()</slot>
+  <slot>groupActionTriggered()</slot>
+  <slot>ungroupActionTriggered()</slot>
  </slots>
 </ui>

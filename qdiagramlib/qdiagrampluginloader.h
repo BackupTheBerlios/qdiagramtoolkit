@@ -33,7 +33,7 @@ public:
     QDiagramPluginLoader();
     ~QDiagramPluginLoader();
 
-    static QAbstractDiagram* diagram(const QString & plugin, const QString & type, QObject* parent = 0, const QString & path = QString::null);
+    static QDiagram* diagram(const QString & plugin, const QString & type, QObject* parent = 0, const QString & path = QString::null);
 
     static QAbstractDiagramPlugin* load(const QString & name, const QString & path = QString::null);
 

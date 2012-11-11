@@ -60,9 +60,23 @@ QDiagramUndoCommand::QDiagramUndoCommand(QAbstractDiagram* diagram, const QStrin
     m_properties["uuid"] = uuid;
 }
 
+QDiagramUndoCommand::QDiagramUndoCommand(QAbstractDiagram* diagram, const QString & uuid, const QVariantMap & metaData, const QVariantMap & properties, QUndoCommand* parent) :
+    QUndoCommand(parent)
+{
+	m_uuid = uuid;
+	m_diagram = diagram;
+	m_metaData = metaData;
+	m_properties = properties;
+}
+
 QAbstractDiagram* QDiagramUndoCommand::diagram() const
 {
     return m_diagram;
+}
+
+QVariantMap QDiagramUndoCommand::metaData() const
+{
+	return m_metaData;
 }
 
 QString QDiagramUndoCommand::plugin() const
@@ -73,6 +87,11 @@ QString QDiagramUndoCommand::plugin() const
 QMap<QString,QVariant> QDiagramUndoCommand::properties() const
 {
     return m_properties;
+}
+
+void QDiagramUndoCommand::setMetaData(const QVariantMap & data)
+{
+	m_metaData = data;
 }
 
 void QDiagramUndoCommand::setProperty(const QString & name, const QVariant & value)
@@ -93,118 +112,4 @@ QString QDiagramUndoCommand::shape() const
 QString QDiagramUndoCommand::uuid() const
 {
     return m_uuid;
-}
-
-QDiagramConnectShapesCommand::QDiagramConnectShapesCommand(QAbstractDiagram* diagram, QAbstractDiagramShapeConnector* connector, const QString & plugin, QUndoCommand* parent) :
-    QDiagramUndoCommand(diagram, connector->uuid(), "connector", connector->properties(), plugin, parent)
-{
-    setText(QObject::tr("Connect Shape (%1)").arg(connector->property("style").toString()));
-}
-
-QDiagramConnectShapesCommand::QDiagramConnectShapesCommand(QAbstractDiagram* diagram, const QString & uuid, QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style, const QString & plugin, QUndoCommand* parent) :
-    QDiagramUndoCommand(diagram, uuid, "connector", plugin, parent)
-{
-    QMap<QString,QVariant> mProperties(properties());
-
-    mProperties["shapeAtStart"] = from->parentShape()->uuid();
-    mProperties["pointAtStart"] = from->id();
-    mProperties["shapeAtEnd"] = to->parentShape()->uuid();
-    mProperties["pointAtEnd"] = to->id();
-    mProperties["plugin"] = style.plugin();
-    mProperties["style"] = style.shape();
-    mProperties["itemType"] = "connector";
-    mProperties["uuid"] = uuid;
-
-    setProperties(mProperties);
-
-    setText(QObject::tr("Add Connector (%1)").arg(uuid));
-}
-
-void QDiagramConnectShapesCommand::undo()
-{
-    QAbstractDiagramGraphicsItem* mItem = diagram()->findItemByUuid(uuid());
-    if (mItem){
-        mItem->blockUndoCommands(true);
-        diagram()->removeItem(uuid());
-    }
-}
-
-void QDiagramConnectShapesCommand::redo()
-{
-    diagram()->restoreItem(properties());
-}
-
-QDiagramChangePropertyCommand::QDiagramChangePropertyCommand(QAbstractDiagram* diagram, QDiagramShape* item, const QString & property, const QVariant & oldValue, const QVariant & newValue, QUndoCommand* parent) :
-    QDiagramUndoCommand(diagram, item->uuid(), "default", parent)
-{
-    m_old = oldValue;
-    m_name = property;
-    m_new = newValue;
-    setText(QObject::tr("Change Property %1").arg(m_name));
-}
-
-bool QDiagramChangePropertyCommand::mergeWith(const QUndoCommand* other)
-{
-    if (id() != other->id()){
-        return false;
-    }
-    const QDiagramChangePropertyCommand* cmd = static_cast<const QDiagramChangePropertyCommand *>(other);
-    if (cmd->uuid() != uuid() || cmd->name() != m_name){
-        return false;
-    }
-    QAbstractDiagramGraphicsItem* item = diagram()->findItemByUuid(uuid());
-    if (item == 0){
-        return false;
-    }
-    m_new = cmd->m_new;
-    setText(QObject::tr("Change Property %1").arg(m_name));
-	
-    return true;
-}
-
-QString QDiagramChangePropertyCommand::name() const
-{
-    return m_name;
-}
-
-void QDiagramChangePropertyCommand::undo()
-{
-    QAbstractDiagramGraphicsItem* mItem = diagram()->findItemByUuid(uuid());
-    if (mItem){
-        mItem->blockUndoCommands(true);
-        mItem->setProperty(m_name, m_old);
-        mItem->blockUndoCommands(false);
-    }
-}
-
-void QDiagramChangePropertyCommand::redo()
-{
-    QAbstractDiagramGraphicsItem* mItem = diagram()->findItemByUuid(uuid());
-    if (mItem){
-        mItem->setProperty(m_name, m_new);
-    }
-}
-
-QDiagramRemoveItemCommand::QDiagramRemoveItemCommand(QAbstractDiagramGraphicsItem *item, QUndoCommand *parent) :
-    QDiagramUndoCommand(item->diagram(), item->uuid(), item->property("shape").toString(), item->properties(), item->property("plugin").toString(), parent)
-{
-    setText(QObject::tr("Remove %1").arg(uuid()));
-}
-
-QDiagramRemoveItemCommand::QDiagramRemoveItemCommand(QAbstractDiagram* diagram, const QString & uuid, const QString & shape, const QMap<QString,QVariant> & props, QUndoCommand* parent ) :
-    QDiagramUndoCommand(diagram, uuid, shape, props, "default", parent)
-{
-    setText(QObject::tr("Remove %1").arg(shape));
-}
-
-void QDiagramRemoveItemCommand::undo()
-{
-    diagram()->restoreItem(properties());
-}
-
-void QDiagramRemoveItemCommand::redo()
-{
-    QAbstractDiagramGraphicsItem* item = diagram()->findItemByUuid(uuid());
-    diagram()->takeItem(item);
-    delete item;
 }

@@ -59,7 +59,7 @@ public:
 
     void rebuildConnection();
 
-    void temporaryPosition(const QPointF & pos, QAbstractDiagramShapeConnectionPoint::Orientation orientation = QAbstractDiagramShapeConnectionPoint::Invalid, const QRectF & rect = QRectF());
+    void temporaryPosition(const QPointF & pos, QDiagramToolkit::ConnectionPointOrientation orientation = QDiagramToolkit::ConnectionPointOrientationInvalid, const QRectF & rect = QRectF());
 
     void updatePosition();
 protected:
@@ -89,7 +89,7 @@ private:
     QRectF m_boundingRect;
     QLineF m_line;
     QPointF m_tempEndPos;
-    QAbstractDiagramShapeConnectionPoint::Orientation m_tempOrientationAtEnd;
+    QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtEnd;
     QRectF m_tempToRect;
 };
 

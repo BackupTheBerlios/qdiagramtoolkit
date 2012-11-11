@@ -97,7 +97,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
     mLineStart.setP1(QPointF(endConnectionPoint()->scenePos() + endConnectionPoint()->boundingRect().center()));
 
     mLine.setP1(mLineStart.p1());
-    QAbstractDiagramShapeConnectionPoint::Orientation mOrientation;    
+    QDiagramToolkit::ConnectionPointOrientation mOrientation;    
 
     if (startConnectionPoint() == 0){
         mOrientation = m_tempOrientationAtEnd;
@@ -108,7 +108,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
         mLineEnd.setP1(startConnectionPoint()->scenePos() + startConnectionPoint()->boundingRect().center());
         mLine.setP2(mLineEnd.p1());
     }
-    if (mOrientation == QAbstractDiagramShapeConnectionPoint::Invalid){
+    if (mOrientation == QDiagramToolkit::ConnectionPointOrientationInvalid){
 
         qreal mStartDeltaX = 0;
         qreal mStartDeltaY = 0;
@@ -117,7 +117,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
         qreal mEndDeltaY = 0;
 
         switch(endConnectionPoint()->orientation()){
-        case QAbstractDiagramShapeConnectionPoint::North:
+        case QDiagramToolkit::North:
             if (mLine.dy() < -40){
                 mStartDeltaY =  mLine.dy() / 2;
                 mEndDeltaY = mStartDeltaY;
@@ -126,7 +126,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
                 mEndDeltaY = mLine.dy() + 20;
             }
             break;
-        case QAbstractDiagramShapeConnectionPoint::East:
+        case QDiagramToolkit::East:
             if (mLine.dx() > 40){
                 mStartDeltaX = mLine.dx() / 2;
                 mEndDeltaX = mStartDeltaX;
@@ -135,7 +135,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
                 mEndDeltaX = mLine.dx() - 20;
             }
             break;
-        case QAbstractDiagramShapeConnectionPoint::South:
+        case QDiagramToolkit::South:
             if (mLine.dy() > 40){
                 mStartDeltaY =  mLine.dy() / 2;
                 mEndDeltaY = mStartDeltaY;
@@ -144,7 +144,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
                 mEndDeltaY = mLine.dy() - 20;
             }
             break;
-        case QAbstractDiagramShapeConnectionPoint::West:
+        case QDiagramToolkit::West:
             if (mLine.dx() < -40){
                 mStartDeltaX = mLine.dx() / 2;
                 mEndDeltaX = mStartDeltaX;
@@ -157,8 +157,8 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
         //        qDebug() << mLine.dx() << mStartDeltaX  << mEndDeltaX;
         mLineStart.setP2(QPointF(mLineStart.p1().x() + mStartDeltaX, mLineStart.p1().y() + mStartDeltaY));
         mLineEnd.setP2(QPointF(mLineEnd.p1().x() - mEndDeltaX, mLineEnd.p1().y() - mEndDeltaY));
-    }  else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::South){
-        if (mOrientation == QAbstractDiagramShapeConnectionPoint::West){
+    }  else if (endConnectionPoint()->orientation() == QDiagramToolkit::South){
+        if (mOrientation == QDiagramToolkit::West){
             if (mLine.dx() < 20){
                 mLineEnd.setP2(QPointF(mLineEnd.p1().x() - 20, mLineEnd.p1().y()));
                 mLineStart.setP2(QPointF(mLineStart.p1().x(), mLineStart.p1().y() + mLine.dy() / 2));
@@ -167,7 +167,7 @@ QList<QPointF> QDiagramShapeConnector::defaultConnector() const
                 mLineStart.setP2(QPointF(mLineStart.p1().x(), mLineEnd.p1().y()));
                 mLineEnd.setP2(mLineStart.p2());
             }
-        } else if ( mOrientation == QAbstractDiagramShapeConnectionPoint::South){
+        } else if ( mOrientation == QDiagramToolkit::South){
             mLineEnd.setP2(QPointF(mLineEnd.p1().x(), mLineEnd.p1().y() + 20));
             mLineStart.setP2(QPointF(mLineStart.p1().x(), mLineEnd.p2().y()));
         }
@@ -192,19 +192,19 @@ QList<QPointF> QDiagramShapeConnector::lineConnector() const
     QLineF mLineEnd;
     switch(endConnectionPoint()->orientation())
     {
-    case QAbstractDiagramShapeConnectionPoint::North:
+    case QDiagramToolkit::North:
         mLineStart.setP1(QPointF(endConnectionPoint()->scenePos() + endConnectionPoint()->boundingRect().center()));
         mLineStart.setP2(QPointF(mLineStart.p1().x(), mLineStart.p1().y() - 20));
         break;
-    case QAbstractDiagramShapeConnectionPoint::East:
+    case QDiagramToolkit::East:
         mLineStart.setP1(QPointF(endConnectionPoint()->scenePos() + endConnectionPoint()->boundingRect().center()));
         mLineStart.setP2(QPointF(mLineStart.p1().x()+ 20, mLineStart.p1().y()));
         break;
-    case QAbstractDiagramShapeConnectionPoint::South:
+    case QDiagramToolkit::South:
         mLineStart.setP1(QPointF(endConnectionPoint()->scenePos() + endConnectionPoint()->boundingRect().center()));
         mLineStart.setP2(QPointF(mLineStart.p1().x(), mLineStart.p1().y() + 20));
         break;
-    case QAbstractDiagramShapeConnectionPoint::West:
+    case QDiagramToolkit::West:
         mLineStart.setP1(QPointF(endConnectionPoint()->scenePos() + endConnectionPoint()->boundingRect().center()));
         mLineStart.setP2(QPointF(mLineStart.p1().x() - 20, mLineStart.p1().y()));
         break;
@@ -215,7 +215,7 @@ QList<QPointF> QDiagramShapeConnector::lineConnector() const
     mPoints.append(intersectPoint(endConnectionPoint()->parentShape(), mLineStart));
     mPoints.append(mLineStart.p2());
 
-    QAbstractDiagramShapeConnectionPoint::Orientation mOrientation;
+    QDiagramToolkit::ConnectionPointOrientation mOrientation;
     if (startConnectionPoint() == 0){
         mOrientation = m_tempOrientationAtEnd;
         mLineEnd.setP1(m_tempEndPos);
@@ -225,16 +225,16 @@ QList<QPointF> QDiagramShapeConnector::lineConnector() const
     }
     switch(mOrientation)
     {
-    case QAbstractDiagramShapeConnectionPoint::North:
+    case QDiagramToolkit::North:
         mLineEnd.setP2(QPointF(mLineEnd.p1().x(), mLineEnd.p1().y() - 20));
         break;
-    case QAbstractDiagramShapeConnectionPoint::East:
+    case QDiagramToolkit::East:
         mLineEnd.setP2(QPointF(mLineEnd.p1().x() + 20, mLineEnd.p1().y()));
         break;
-    case QAbstractDiagramShapeConnectionPoint::South:
+    case QDiagramToolkit::South:
         mLineEnd.setP2(QPointF(mLineEnd.p1().x(), mLineEnd.p1().y() + 20));
         break;
-    case QAbstractDiagramShapeConnectionPoint::West:
+    case QDiagramToolkit::West:
         mLineEnd.setP2(QPointF(mLineEnd.p1().x() - 20, mLineEnd.p1().y()));
         break;
     default:
@@ -386,9 +386,9 @@ QPainterPath QDiagramShapeConnector::shapeDefaultConnector() const
     QLineF mTempLine(mStart, mEnd);
 
     if (mTempLine.dy() < 20){
-        if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::North){
-        } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::East){
-        } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::South){
+        if (endConnectionPoint()->orientation() == QDiagramToolkit::North){
+        } else if (endConnectionPoint()->orientation() == QDiagramToolkit::East){
+        } else if (endConnectionPoint()->orientation() == QDiagramToolkit::South){
             mLineStart = QLineF(mStart, QPointF(mStart.x(), mStart.y() + 20));
             mLineEnd = QLineF(mEnd, QPointF(mEnd.x(), mEnd.y() - 20));
 
@@ -417,20 +417,20 @@ QPainterPath QDiagramShapeConnector::shapeDefaultConnector() const
 //            mPath.lineTo(mLineEnd.p2());
 
 
-        } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::West){
+        } else if (endConnectionPoint()->orientation() == QDiagramToolkit::West){
         }
 
     } else {
-        if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::North){
+        if (endConnectionPoint()->orientation() == QDiagramToolkit::North){
             mLineStart = QLineF(mStart, QPointF(mStart.x(), mStart.y() - mTempLine.dy() / 2));
             mLineEnd = QLineF(mEnd, QPointF(mEnd.x(), mEnd.y() + mTempLine.dy() / 2));
-        } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::East){
+        } else if (endConnectionPoint()->orientation() == QDiagramToolkit::East){
             mLineStart = QLineF(mStart, QPointF(mStart.x() + 10, mStart.y()));
             mLineEnd = QLineF(mEnd, QPointF(mEnd.x() - 10, mEnd.y()));
-        } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::South){
+        } else if (endConnectionPoint()->orientation() == QDiagramToolkit::South){
             mLineStart = QLineF(mStart, QPointF(mStart.x(), mStart.y() + mTempLine.dy() / 2));
             mLineEnd = QLineF(mEnd, QPointF(mEnd.x(), mEnd.y() - mTempLine.dy() / 2));
-        } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::West){
+        } else if (endConnectionPoint()->orientation() == QDiagramToolkit::West){
             mLineStart = QLineF(mStart, QPointF(mStart.x() - 10, mStart.y()));
             mLineEnd = QLineF(mEnd, QPointF(mEnd.x() + 10, mEnd.y()));
         }
@@ -466,16 +466,16 @@ QPainterPath QDiagramShapeConnector::shapeLineConnector() const
     if (endConnectionPoint() != 0 && startConnectionPoint() != 0){
         mEnd = startConnectionPoint()->scenePos();
     }
-    if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::North){
+    if (endConnectionPoint()->orientation() == QDiagramToolkit::North){
         mLineStart = QLineF(mStart, QPointF(mStart.x(), mStart.y() - 10));
         mLineEnd = QLineF(mEnd, QPointF(mEnd.x(), mEnd.y() + 10));
-    } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::East){
+    } else if (endConnectionPoint()->orientation() == QDiagramToolkit::East){
         mLineStart = QLineF(mStart, QPointF(mStart.x() + 10, mStart.y()));
         mLineEnd = QLineF(mEnd, QPointF(mEnd.x() - 10, mEnd.y()));
-    } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::South){
+    } else if (endConnectionPoint()->orientation() == QDiagramToolkit::South){
         mLineStart = QLineF(mStart, QPointF(mStart.x(), mStart.y() + 10));
         mLineEnd = QLineF(mEnd, QPointF(mEnd.x(), mEnd.y() - 10));
-    } else if (endConnectionPoint()->orientation() == QAbstractDiagramShapeConnectionPoint::West){
+    } else if (endConnectionPoint()->orientation() == QDiagramToolkit::West){
         mLineStart = QLineF(mStart, QPointF(mStart.x() - 10, mStart.y()));
         mLineEnd = QLineF(mEnd, QPointF(mEnd.x() + 10, mEnd.y()));
     }
@@ -527,7 +527,7 @@ QList<QPointF> QDiagramShapeConnector::straightConnector() const
     return mPoints;
 }
 
-void QDiagramShapeConnector::temporaryPosition(const QPointF & pos, QAbstractDiagramShapeConnectionPoint::Orientation orientation, const QRectF & rect)
+void QDiagramShapeConnector::temporaryPosition(const QPointF & pos, QDiagramToolkit::ConnectionPointOrientation orientation, const QRectF & rect)
 {
 //    if (property("style").toString() == "straight"){
         m_tempEndPos = pos;

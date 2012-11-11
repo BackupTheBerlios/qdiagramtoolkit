@@ -27,7 +27,7 @@ QDiagramShapeSizeGripHandle::QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHa
 {
     m_active = false;
     m_posFlag = position;
-    setBrush(QBrush(Qt::lightGray));
+	setBrush(QBrush(Qt::darkCyan));
 
     setAcceptsHoverEvents(true);
     if (m_posFlag & QDiagramShapeSizeGripHandle::Bottom || m_posFlag & QDiagramShapeSizeGripHandle::Top){

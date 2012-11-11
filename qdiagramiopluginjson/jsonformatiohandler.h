@@ -19,6 +19,7 @@
 #ifndef JSONFORMATIOHANDLER_H
 #define JSONFORMATIOHANDLER_H
 
+#include <qdiagram.h>
 #include <qdiagramiohandler.h>
 
 class JSONFormatIOHandler : public QDiagramIOHandler
@@ -28,7 +29,7 @@ public:
 
     bool canRead() const;
 
-    QAbstractDiagram* read(QObject *parent);
+    QDiagram* read(QObject *parent);
 
     bool write(QAbstractDiagram *diagram);
 };

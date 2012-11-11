@@ -211,7 +211,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramchangepropertycommand.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramconnectionpoint.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramconnectorstyle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramconnectshapescommand.cpp"
 				>
 			</File>
 			<File
@@ -219,23 +231,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\qdiagramgraphicsitemmetadata.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetaenum.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetaflag.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetaproperty.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\qdiagramgraphicsitempropertiesview.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramgraphicsitemshadow.cpp"
 				>
 			</File>
 			<File
@@ -263,11 +263,39 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramlayer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramlayers.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramlayersview.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramlineitempositionhandle.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\qdiagramlinestyle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetadata.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetaenum.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetaflag.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetaproperty.cpp"
 				>
 			</File>
 			<File
@@ -279,11 +307,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramproperty.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramreader.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\qdiagramshadowstyle.cpp"
+				RelativePath=".\qdiagramremoveitemcommand.cpp"
 				>
 			</File>
 			<File
@@ -319,7 +351,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramstylesheet.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramtextstyle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramtoolkit.cpp"
 				>
 			</File>
 			<File
@@ -471,7 +511,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramchangepropertycommand.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramconnectionpoint.h"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramconnectorstyle.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramconnectshapescommand.h"
 				>
 			</File>
 			<File
@@ -480,22 +532,6 @@
 			</File>
 			<File
 				RelativePath=".\qdiagramgraphicsitem_p.h"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetadata.h"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetaenum.h"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetaflag.h"
-				>
-			</File>
-			<File
-				RelativePath=".\qdiagramgraphicsitemmetaproperty.h"
 				>
 			</File>
 			<File
@@ -549,6 +585,10 @@
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\qdiagramgraphicsitemshadow.h"
+				>
 			</File>
 			<File
 				RelativePath=".\qdiagramgraphicsscene.h"
@@ -663,6 +703,62 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\qdiagramlayer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramlayers.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing qdiagramlayers.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; &quot;-fStdAfx.h&quot; &quot;-f../../qdiagramlayers.h&quot;  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_SCRIPT_LIB -DQDIAGRAMLIB_LIBRARY -D_WINDLL &quot;-I.\GeneratedFiles&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\qtmain&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtScript&quot; &quot;-I.&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing qdiagramlayers.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; &quot;-fStdAfx.h&quot; &quot;-f../../qdiagramlayers.h&quot;  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_SCRIPT_LIB -DQDIAGRAMLIB_LIBRARY -D_WINDLL &quot;-I.\GeneratedFiles&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\qtmain&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtScript&quot; &quot;-I.&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\qdiagramlayersview.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing qdiagramlayersview.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; &quot;-fStdAfx.h&quot; &quot;-f../../qdiagramlayersview.h&quot;  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_SCRIPT_LIB -DQDIAGRAMLIB_LIBRARY -D_WINDLL &quot;-I.\GeneratedFiles&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\qtmain&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtScript&quot; &quot;-I.&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing qdiagramlayersview.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; &quot;-fStdAfx.h&quot; &quot;-f../../qdiagramlayersview.h&quot;  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_SCRIPT_LIB -DQDIAGRAMLIB_LIBRARY -D_WINDLL &quot;-I.\GeneratedFiles&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\qtmain&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtScript&quot; &quot;-I.&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\qdiagramlib_global.h"
 				>
 			</File>
@@ -675,6 +771,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagrammetadata.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetaenum.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetaflag.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagrammetaproperty.h"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagrammoveshapecommand.h"
 				>
 			</File>
@@ -683,11 +795,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramproperty.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramproperty_p.h"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramreader.h"
 				>
 			</File>
 			<File
-				RelativePath=".\qdiagramshadowstyle.h"
+				RelativePath=".\qdiagramremoveitemcommand.h"
 				>
 			</File>
 			<File
@@ -767,8 +887,38 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramstylesheet.h"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramtextstyle.h"
 				>
+			</File>
+			<File
+				RelativePath=".\qdiagramtoolkit.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing qdiagramtoolkit.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; &quot;-fStdAfx.h&quot; &quot;-f../../qdiagramtoolkit.h&quot;  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_SCRIPT_LIB -DQDIAGRAMLIB_LIBRARY -D_WINDLL &quot;-I.\GeneratedFiles&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\qtmain&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtScript&quot; &quot;-I.&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing qdiagramtoolkit.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; &quot;-fStdAfx.h&quot; &quot;-f../../qdiagramtoolkit.h&quot;  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_SCRIPT_LIB -DQDIAGRAMLIB_LIBRARY -D_WINDLL &quot;-I.\GeneratedFiles&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\qtmain&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtScript&quot; &quot;-I.&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\qdiagramundocommand.h"
@@ -816,6 +966,32 @@
 			>
 			<File
 				RelativePath=".\qdiagramgraphicsitempropertiesview.ui"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Uic&apos;ing $(InputFileName)..."
+						CommandLine="&quot;$(QTDIR)\bin\uic.exe&quot; -o &quot;.\GeneratedFiles\ui_$(InputName).h&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe"
+						Outputs="&quot;.\GeneratedFiles\ui_$(InputName).h&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Uic&apos;ing $(InputFileName)..."
+						CommandLine="&quot;$(QTDIR)\bin\uic.exe&quot; -o &quot;.\GeneratedFiles\ui_$(InputName).h&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe"
+						Outputs="&quot;.\GeneratedFiles\ui_$(InputName).h&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\qdiagramlayersview.ui"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -920,6 +1096,26 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\resources\color_wheel.ico"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\resources\connector_default.ico"
 				>
 				<FileConfiguration
@@ -981,6 +1177,46 @@
 			</File>
 			<File
 				RelativePath=".\resources\hidegrid.png"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\resources\layer_locked.ico"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\resources\layer_unlocked.ico"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -1109,7 +1345,7 @@
 						Name="VCCustomBuildTool"
 						Description="Rcc&apos;ing $(InputFileName)..."
 						CommandLine="&quot;$(QTDIR)\bin\rcc.exe&quot; -name &quot;$(InputName)&quot; -no-compress &quot;$(InputPath)&quot; -o .\GeneratedFiles\qrc_$(InputName).cpp&#x0D;&#x0A;"
-						AdditionalDependencies="$(InputPath);.\resources\showgrid.png;.\resources\hidegrid.png;.\resources\zoomout.png;.\resources\zoomin.png;.\resources\cursor.png;.\resources\straight.png;.\resources\straight_arrow_end.png;.\resources\connector_line.png;.\resources\connector_default.ico;.\resources\line_solid.ico;.\resources\line_dash_dot.ico;.\resources\line_dotted.ico;.\resources\line_dash_dot_dot.ico;.\resources\line_dashed.ico;.\resources\arrow_start_default.ico"
+						AdditionalDependencies="$(InputPath);.\resources\showgrid.png;.\resources\hidegrid.png;.\resources\zoomout.png;.\resources\zoomin.png;.\resources\cursor.png;.\resources\straight.png;.\resources\straight_arrow_end.png;.\resources\connector_line.png;.\resources\connector_default.ico;.\resources\line_solid.ico;.\resources\line_dash_dot.ico;.\resources\line_dotted.ico;.\resources\line_dash_dot_dot.ico;.\resources\line_dashed.ico;.\resources\color_wheel.ico;.\resources\layer_locked.ico;.\resources\layer_unlocked.ico;.\resources\arrow_start_default.ico"
 						Outputs=".\GeneratedFiles\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1120,7 +1356,7 @@
 						Name="VCCustomBuildTool"
 						Description="Rcc&apos;ing $(InputFileName)..."
 						CommandLine="&quot;$(QTDIR)\bin\rcc.exe&quot; -name &quot;$(InputName)&quot; -no-compress &quot;$(InputPath)&quot; -o .\GeneratedFiles\qrc_$(InputName).cpp&#x0D;&#x0A;"
-						AdditionalDependencies="$(InputPath);.\resources\showgrid.png;.\resources\hidegrid.png;.\resources\zoomout.png;.\resources\zoomin.png;.\resources\cursor.png;.\resources\straight.png;.\resources\straight_arrow_end.png;.\resources\connector_line.png;.\resources\connector_default.ico;.\resources\line_solid.ico;.\resources\line_dash_dot.ico;.\resources\line_dotted.ico;.\resources\line_dash_dot_dot.ico;.\resources\line_dashed.ico;.\resources\arrow_start_default.ico"
+						AdditionalDependencies="$(InputPath);.\resources\showgrid.png;.\resources\hidegrid.png;.\resources\zoomout.png;.\resources\zoomin.png;.\resources\cursor.png;.\resources\straight.png;.\resources\straight_arrow_end.png;.\resources\connector_line.png;.\resources\connector_default.ico;.\resources\line_solid.ico;.\resources\line_dash_dot.ico;.\resources\line_dotted.ico;.\resources\line_dash_dot_dot.ico;.\resources\line_dashed.ico;.\resources\color_wheel.ico;.\resources\layer_locked.ico;.\resources\layer_unlocked.ico;.\resources\arrow_start_default.ico"
 						Outputs=".\GeneratedFiles\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1257,6 +1493,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GeneratedFiles\ui_qdiagramlayersview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GeneratedFiles\ui_qdiagramshapetoolbox.h"
 				>
 			</File>
@@ -1378,6 +1618,30 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\GeneratedFiles\Release\moc_qdiagramlayers.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\GeneratedFiles\Release\moc_qdiagramlayersview.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\GeneratedFiles\Release\moc_qdiagramshapelistwidget.cpp"
 					>
 					<FileConfiguration
@@ -1391,6 +1655,18 @@
 				</File>
 				<File
 					RelativePath=".\GeneratedFiles\Release\moc_qdiagramshapetoolbox.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\GeneratedFiles\Release\moc_qdiagramtoolkit.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1528,6 +1804,30 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\GeneratedFiles\Debug\moc_qdiagramlayers.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\GeneratedFiles\Debug\moc_qdiagramlayersview.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\GeneratedFiles\Debug\moc_qdiagramshapelistwidget.cpp"
 					>
 					<FileConfiguration
@@ -1552,6 +1852,18 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\GeneratedFiles\Debug\moc_qdiagramtoolkit.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\GeneratedFiles\Debug\moc_qdiagramview.cpp"
 					>
 					<FileConfiguration
@@ -1564,6 +1876,17 @@
 					</FileConfiguration>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Lokalisierungs Dateien"
+			Filter="ts"
+			UniqueIdentifier="{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}"
+			ParseFiles="false"
+			>
+			<File
+				RelativePath=".\qdiagramlib_de.ts"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\qdiagramlib.pro"

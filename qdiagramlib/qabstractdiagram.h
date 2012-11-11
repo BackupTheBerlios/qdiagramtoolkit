@@ -27,6 +27,8 @@
 #include <QPrinter>
 #include <QUndoStack>
 
+#include <qdiagramlayers.h>
+#include <qdiagrammetaproperty.h>
 #include <qdiagramconnectorstyle.h>
 
 class QAbstractDiagramGraphicsItem;
@@ -94,12 +96,19 @@ public:
       * @see setAuthor()
       */
     QString author() const;
+	/**
+	 * Clears the current selection.
+	 */
+	void clearSelection();
     /**
       *
       */
     QList<QAbstractDiagramShapeConnector*> connectors() const;
-
-    virtual QAbstractDiagramShapeConnector* createConnection(const QString & from, const QString & fromId, const QString & to, const QString & toId, const QDiagramConnectorStyle & style) = 0;
+	/**
+	 * Returns the default value for the property of the specified @p type.
+	 * If no default value can be retrived, defaultValue return an invalid QVariant.
+	 */
+	QVariant defaultValue(QDiagramToolkit::PropertyType type) const;
     /**
       * Returns the end of line style specified by the given @p id.
       */
@@ -124,6 +133,10 @@ public:
       * Returns a list of diagram items.
       */
     QList<QAbstractDiagramGraphicsItem*> items() const;
+	/**
+	 *
+	 */
+	QDiagramLayers* layers() const;
     /**
       * Returns the name of the plugin providing this diagram.
       */
@@ -140,11 +153,29 @@ public:
     /**
       * Restores an item from a repository or from the undo stack.
       */
-    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & properties ) = 0;
+    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties ) = 0;
     /**
       * Returns the current scene for the diagram.
       */
     QAbstractDiagramScene* scene() const;
+	/**
+	 * Selects the item specified by the given @p uuid.
+	 */
+	void select(const QString & uuid);
+	/**
+	 * Selects all items.
+	 * @see clearSelection()
+	 */
+	void selectAll();
+    /**
+      * Returns a list of all currently selected items. The items are returned in no particular order.
+	  * @see selectAll()
+      */
+    QList<QAbstractDiagramGraphicsItem*> selectedItems() const;
+    /**
+      * Returns the diagram's current selection color.
+      */
+    QColor selectionColor() const;
     /**
       * Sets the diagram's author to @p author.
       * @see author
@@ -159,14 +190,10 @@ public:
       * Returns the shape specified with the given @p uuid or 0, if @p uuid does not exist.
       */
     QAbstractDiagramShape* shape(const QString & uuid) const;
-    /**
-      * Returns a list of all currently selected items. The items are returned in no particular order.
-      */
-    QList<QAbstractDiagramGraphicsItem*> selectedItems() const;
-    /**
-      * Returns the diagram's current selection color.
-      */
-    QColor selectionColor() const;
+	/**
+	 *
+	 */
+	QList<QAbstractDiagramShape*> shapes() const;
     /**
       * @see addItemContextMenuAction();
       */
@@ -253,10 +280,13 @@ private slots:
 private:
     QString m_author;
     QList<QAction*> m_standardItemContextMenuActions;
+	QDiagramLayers* m_layers;
     QStringList m_plugins;
     QAbstractDiagramScene* m_scene;
 	QString m_title;
     QUndoStack* m_undostack;
 };
+
+Q_DECLARE_METATYPE(QAbstractDiagram*)
 
 #endif // QABSTRACTDIAGRAM_H

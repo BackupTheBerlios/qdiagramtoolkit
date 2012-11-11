@@ -39,7 +39,7 @@ public:
     /**
       * Constructs a QAbstractDiagramShapeConnector with the given @p properties.
       */
-    QAbstractDiagramShapeConnector(const QVariantMap & properties);
+    QAbstractDiagramShapeConnector(const QString & plugin, const QString & itemClass, const QVariantMap & properties, QGraphicsItem* parent = 0);
     /**
       * Constructs a QAbstractDiagramShapeConnector with the given @p uuid and @p style.
       */
@@ -74,11 +74,11 @@ public:
     /**
       *
       */
-    QAbstractDiagramShapeConnectionPoint::Orientation orientationAtEnd() const;
+    QDiagramToolkit::ConnectionPointOrientation orientationAtEnd() const;
     /**
       *
       */
-    QAbstractDiagramShapeConnectionPoint::Orientation orientationAtStart() const;
+    QDiagramToolkit::ConnectionPointOrientation orientationAtStart() const;
 
     void remove(QAbstractDiagramShapeConnectionPoint* point);
 
@@ -93,11 +93,11 @@ public:
     /**
       * Sets a temporary start @p position with the given @p orientation.
       */
-    void setTemporaryStart(const QPointF & position, QAbstractDiagramShapeConnectionPoint::Orientation orientation);
+    void setTemporaryStart(const QPointF & position, QDiagramToolkit::ConnectionPointOrientation orientation);
     /**
       * Sets a temporary end @p position with the given @p orientation.
       */
-    void setTemporaryEnd(const QPointF & position, QAbstractDiagramShapeConnectionPoint::Orientation orientation = QAbstractDiagramShapeConnectionPoint::Invalid);
+    void setTemporaryEnd(const QPointF & position, QDiagramToolkit::ConnectionPointOrientation orientation = QDiagramToolkit::ConnectionPointOrientationInvalid);
     /**
       * Returns the starting position of this shape connector.
       */
@@ -125,11 +125,14 @@ protected:
     void setTo(QAbstractDiagramShapeConnectionPoint* item);
 private:
     QAbstractDiagramShapeConnectionPoint* m_connectionPointAtStart;
-    QAbstractDiagramShapeConnectionPoint* c_connectionPointAtEnd;
+    QAbstractDiagramShapeConnectionPoint* m_connectionPointAtEnd;
     QPointF m_tempStartPos;
-    QAbstractDiagramShapeConnectionPoint::Orientation m_tempOrientationAtStart;
+    QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtStart;
     QPointF m_tempEndPos;
-    QAbstractDiagramShapeConnectionPoint::Orientation m_tempOrientationAtEnd;
+    QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtEnd;
 };
+
+Q_DECLARE_METATYPE(QAbstractDiagramShapeConnector*)
+Q_DECLARE_METATYPE(QList<QAbstractDiagramShapeConnector*>)
 
 #endif // QABSTRACTDIAGRAMSHAPECONNECTOR_H

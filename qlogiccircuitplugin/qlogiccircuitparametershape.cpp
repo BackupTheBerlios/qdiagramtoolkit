@@ -22,11 +22,13 @@
 
 #include <qdiagramgraphicstextitem.h>
 
+#include "qlogiccircuitplugin.h"
+
 #define GATE_BASE_SIZE 13.0
 #define GATE_CP_SIZE 6.0
 
 QLogicCircuitParameterShapeConnectionPoint::QLogicCircuitParameterShapeConnectionPoint(QAbstractDiagramShape* shape) :
-    QAbstractDiagramShapeConnectionPoint(shape, "inp1", QAbstractDiagramShapeConnectionPoint::East)
+    QAbstractDiagramShapeConnectionPoint(shape, "inp1", QDiagramToolkit::East)
 {
     updatePosition();
 }
@@ -55,36 +57,23 @@ void QLogicCircuitParameterShapeConnectionPoint::updatePosition()
     setRect(r);
 }
 
-QLogicCircuitParameterShape::QLogicCircuitParameterShape(QGraphicsItem* parent) :
-    QAbstractDiagramShape(parent)
-{
-	m_textItem = new QDiagramGraphicsTextItem("name", this);
-	//m_textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
-
-	setFlag(QGraphicsItem::ItemIsMovable);
-    setFlag(QGraphicsItem::ItemIsSelectable);
-    setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-    setAcceptHoverEvents(true);
-
-    addConnectionPoint(new QLogicCircuitParameterShapeConnectionPoint(this));
-}
-
 QLogicCircuitParameterShape::QLogicCircuitParameterShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "parameter", properties, parent)
 {
+	initGeometry(182, 26);
 	m_textItem = new QDiagramGraphicsTextItem("name", this);
 	//m_textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
 
-    addProperty("name", QDiagramGraphicsItemMetaProperty::String, false, properties.value("name", "<input>"));
-    addProperty("signalType", QDiagramGraphicsItemMetaProperty::String, true, properties.value("signalType").toString());
-	if (properties.value("signalType") == "digital"){
-		addProperty("state", QDiagramGraphicsItemMetaProperty::Bool, false, properties.value("state", false).toBool());
-	} else {
-		addProperty("value", QDiagramGraphicsItemMetaProperty::Double, false, properties.value("value", 0.0).toDouble());
-		addProperty("unit", QDiagramGraphicsItemMetaProperty::String, false, properties.value("string").toString());
-	}
+    addProperty("name", QDiagramToolkit::String, false, properties.value("name", "<input>"));
+    addProperty("signalType", QDiagramToolkit::String, true, properties.value("signalType").toString());
+	//if (properties.value("signalType") == "digital"){
+	//	addProperty("state", QDiagramToolkit::Bool, false, properties.value("state", false).toBool());
+	//} else {
+	//	addProperty("value", QDiagramToolkit::Double, false, properties.value("value", 0.0).toDouble());
+	//	addProperty("unit", QDiagramToolkit::String, false, properties.value("string").toString());
+	//}
 
-	m_textItem->setPlainText(property("name").toString());
+	m_textItem->setPlainText(properties.value("name", "<input>").toString());
 
 	restoreProperties(properties);
 

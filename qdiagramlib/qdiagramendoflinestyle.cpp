@@ -22,21 +22,21 @@
 QDiagramEndOfLineStyle::QDiagramEndOfLineStyle() :
     QDiagramStyle()
 {
-    addProperty("width", 10.0);
+    addProperty("width", QDiagramToolkit::Double, 10.0);
 }
 
 QDiagramEndOfLineStyle::QDiagramEndOfLineStyle(const QString &caption, const QString &name, const QString &plugin) :
     QDiagramStyle(name, plugin)
 {
     m_caption = caption;
-    addProperty("width", 10.0);
+    addProperty("width", QDiagramToolkit::Double, 10.0);
 }
 
 QDiagramEndOfLineStyle::QDiagramEndOfLineStyle(const QIcon &icon, const QString &caption, const QString &name, const QString &plugin) :
     QDiagramStyle(name, plugin)
 {
     m_caption = caption;
-    addProperty("width", 10.0);
+    addProperty("width", QDiagramToolkit::Double, 10.0);
     m_icon = icon;
 }
 

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "qlogiccircuitflipflopshape.h"
 
+#include "qlogiccircuitplugin.h"
+
 // @MS PMincho
 
 QLogicCircuitFlipFlopShape::QLogicCircuitFlipFlopShape(QGraphicsItem *parent) :
@@ -9,9 +11,9 @@ QLogicCircuitFlipFlopShape::QLogicCircuitFlipFlopShape(QGraphicsItem *parent) :
 }
 
 QLogicCircuitFlipFlopShape::QLogicCircuitFlipFlopShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "flipflop", properties, parent)
 {
-    addProperty("flipflip", QDiagramGraphicsItemMetaProperty::String, true, properties.value("flipflop", "asyncron").toString());
+    addProperty("flipflop", QDiagramToolkit::String, true, properties.value("flipflop", "asyncron").toString());
 }
 
 QRectF QLogicCircuitFlipFlopShape::boundingRect() const

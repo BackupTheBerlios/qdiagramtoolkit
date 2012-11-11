@@ -189,15 +189,18 @@ void QDiagramGraphicsView::mousePressEvent( QMouseEvent* event )
                     QAbstractDiagramPlugin* mPlugin = QDiagramPluginLoader::plugin(m_connectorStyle.plugin());
                     if (mPlugin){
                         // Start temporary connector
-                        QMap<QString,QVariant> mProperties;
-                        mProperties["uuid"] = "{temp}";
-                        mProperties["itemType"] = "connector";
-                        mProperties["style"] = m_connectorStyle.shape();
+                        QMap<QString,QVariant> pm;
+						QVariantMap mm;
+                        mm["itemType"] = "connector";
+						mm["plugin"] = mPlugin->name();
+                        pm["uuid"] = "{temp}";
+                        pm["style"] = m_connectorStyle.shape();
 //                        m_tempConnector = mPlugin->createConnector(diagram(), "<temporary>", mProperties);
-                        m_tempConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(mPlugin->createItem(mProperties, scene()));
+                        m_tempConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(mPlugin->createItem(mm, pm, scene()));
                         if (m_tempConnector){
+							scene()->addItem(m_tempConnector);
                             m_tempConnector->setTemporaryStart(mPoint->scenePos() + mPoint->boundingRect().center(), mPoint->orientation());
-                            m_tempConnector->setTemporaryEnd(mapToScene(event->pos()), QAbstractDiagramShapeConnectionPoint::Invalid);
+                            m_tempConnector->setTemporaryEnd(mapToScene(event->pos()), QDiagramToolkit::ConnectionPointOrientationInvalid);
                         }
                         //                    scene()->addItem(cTempConnector);
                     }

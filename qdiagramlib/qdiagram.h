@@ -33,6 +33,7 @@
 #include <qdiagramgraphicsscene.h>
 
 class QAbstractDiagramShapeConnectionPoint;
+class QDiagramStyleSheet;
 
 //! The QDiagram class provides a default implementation of a diagram.
 /**
@@ -48,8 +49,14 @@ public:
       * Constructs a QDiagram with the given @p parent.
       */
     explicit QDiagram(QObject* parent = 0);
+	
+	~QDiagram();
 
     virtual QAbstractDiagramGraphicsItem* addItem(const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin = "default");
+    /**
+      *
+      */
+	QString addShape(const QString & name, qreal x, qreal y, const QMap<QString,QVariant> & properties, const QString & plugin);
     /**
       *
       */
@@ -57,7 +64,7 @@ public:
 
     void addConnection(QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style);
 
-    QAbstractDiagramShapeConnector* createConnection(const QString & from, const QString & fromId, const QString & to, const QString & toId, const QDiagramConnectorStyle & style);
+	QString connectShapes(const QString & fromShape, const QString & fromCP, const QString & toShape, const QString & toCP, const QDiagramConnectorStyle & style);
 
     static QDiagramLineStyle lineStyle(const QString & id);
     /**
@@ -75,7 +82,7 @@ public:
     /**
       * Restores an item from the given set of @p properties.
       */
-    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & properties);
+    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties);
     /**
       * Begins a restore operation.
       *
@@ -83,15 +90,15 @@ public:
       */
     virtual void beginRestoreDiagram();
     virtual void endRestoreDiagram();
+
+	QDiagramStyleSheet* styleSheet() const;
     /**
       * Returns the diagram type.
       */
     virtual QString type() const;
-
-    static QByteArray serialize(QAbstractDiagram* diagram, bool includeItems = true);
 signals:
-    void itemAdded(QDiagramShape* findItemByUuid);
-    void itemRestored(QAbstractDiagramGraphicsItem* findItemByUuid);
+    void itemAdded(QDiagramShape* item);
+    void itemRestored(QAbstractDiagramGraphicsItem* item);
 protected:
 
     /**
@@ -136,6 +143,9 @@ protected slots:
     virtual void itemMoved(QGraphicsItem* findItemByUuid, const QPointF & oldPos, const QPointF & newPos);
     virtual void itemRestoredHandler(QAbstractDiagramGraphicsItem* findItemByUuid);
 private:
+	QDiagramStyleSheet* m_styleSheet;
 };
+
+Q_DECLARE_METATYPE(QDiagram*)
 
 #endif // QDIAGRAM_H

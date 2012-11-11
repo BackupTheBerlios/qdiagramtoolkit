@@ -55,7 +55,7 @@ private:
     QList<QPointF> m_breakPoints;
     QLineF m_line;
     QPointF m_tempEndPos;
-    QAbstractDiagramShapeConnectionPoint::Orientation m_tempOrientationAtEnd;
+    QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtEnd;
     QRectF m_tempToRect;
 };
 

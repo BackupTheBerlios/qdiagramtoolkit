@@ -242,5 +242,6 @@ bool QDiagramWriter::write(QAbstractDiagram *diagram)
     if (d->deleteDevice){
         qobject_cast<QFile *>(d->device)->flush();
     }
+	d->errorString = QObject::tr("no error");
     return true;
 }
