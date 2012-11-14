@@ -162,6 +162,12 @@ void QAbstractDiagramShape::restoreFromProperties(const QVariantMap & properties
 	blockUndoCommands(false);
 }
 
+QVariant QAbstractDiagramShape::itemGeometryHasChanged(const QVariant & value)
+{
+	updateConnectionPoints();
+	return value;
+}
+
 QVariant QAbstractDiagramShape::itemPositionHasChanged( const QVariant & value )
 {
     QVariant v = QAbstractDiagramGraphicsItem::itemPositionHasChanged(value);

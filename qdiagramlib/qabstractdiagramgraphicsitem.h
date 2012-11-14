@@ -188,6 +188,8 @@ protected:
     virtual void contextMenuEvent( QGraphicsSceneContextMenuEvent* event );
 
 	void initGeometry(qreal width, qreal height);
+
+	virtual QVariant itemGeometryHasChanged(const QVariant & value);
     /**
       * This virtual function is called by QAbstractDiagramShape to notify custom items that the position has changed.
       * The @p value argument is the new position (the same as pos()), and QAbstractDiagramShape ignores the return value for this notification (i.e., a read-only notification).

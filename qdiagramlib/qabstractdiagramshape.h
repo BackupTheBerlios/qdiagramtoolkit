@@ -114,6 +114,11 @@ protected:
       * Adds the given connection @p point to the shape.
       */
     void addConnectionPoint(QAbstractDiagramShapeConnectionPoint* point);
+	/**
+      * This virtual function is called by QAbstractDiagramShape to notify custom items that the geometry has changed.
+      * The @p value argument is the new geometry (the same as geometry()), and QAbstractDiagramShape ignores the return value for this notification (i.e., a read-only notification).
+      */
+	virtual QVariant itemGeometryHasChanged(const QVariant & value);
     /**
       * This virtual function is called by QAbstractDiagramShape to notify custom items that the position has changed.
       * The @p value argument is the new position (the same as pos()), and QAbstractDiagramShape ignores the return value for this notification (i.e., a read-only notification).

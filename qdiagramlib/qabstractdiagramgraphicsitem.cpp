@@ -136,6 +136,7 @@ bool QAbstractDiagramGraphicsItem::changeProperty(const QString & name, const QV
 		        setPos(value.toMap().value("x").toDouble(), value.toMap().value("y").toDouble());
                 //blockUndoCommands(false);
             }
+			itemGeometryHasChanged(value);
         }
 		m_properties[name] = value;
 		itemPropertyHasChanged(name, value);
@@ -303,6 +304,11 @@ QVariant QAbstractDiagramGraphicsItem::itemChange(GraphicsItemChange change, con
         return itemZValueHasChanged(value);
     }
     return QGraphicsItem::itemChange(change, value);
+}
+
+QVariant QAbstractDiagramGraphicsItem::itemGeometryHasChanged(const QVariant & value)
+{
+	return value;
 }
 
 QVariant QAbstractDiagramGraphicsItem::itemPositionChange( const QVariant & value )
@@ -603,56 +609,6 @@ bool QAbstractDiagramGraphicsItem::setProperty(const QString & name, const QVari
 		}
 	}
 	return false;
-//	qdiagrammetaproperty.h metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
-//	// Check if property is dynamic
-//	if (!metaProperty.isValid()){
-//		// Check if dynamic property has changed
-//		if (m_dynamicProperties.value(name) != value){
-//			QVariant currentValue = m_dynamicProperties.value(name);
-//	        QVariant newValue = itemPropertyChange(name, value);
-//			m_dynamicProperties[name] = newValue;
-//			itemPropertyHasChanged(name, newValue);
-//			QAbstractDiagram* d = diagram();
-//			if (d && !m_blockUndoCommands){
-//				d->undoStack()->push(new QDiagramChangePropertyCommand(d, (QDiagramShape*)this, name, currentValue, newValue));
-//			}
-//		}
-//		return false;
-//	}
-//	// Check if static property is read only
-//    if (metaProperty.isReadOnly()){
-//		// Property is read only
-//        return false;
-//    }
-//    QVariant currentValue = m_properties.value(name);
-//    if (currentValue != value){
-//		QVariant newValue = itemPropertyChange(name, QDiagramMetaData::fromVariant(metaProperty.type(), value));
-//        if (name == "brush"){
-//            m_brush = brush(newValue.toString());
-//            m_properties[name] = newValue;
-//        } else if (name == "geometry"){
-//			if (value.canConvert(QVariant::RectF)){
-//				m_properties[name] = newValue;
-////                blockUndoCommands(true);
-//	            prepareGeometryChange();
-//                setPos(value.toRectF().x(), value.toRectF().y());
-//                //blockUndoCommands(false);
-//			} else if (value.canConvert(QVariant::Map)){
-//                //blockUndoCommands(true);
-//                prepareGeometryChange();
-//		        setPos(newValue.toMap().value("x").toDouble(), newValue.toMap().value("y").toDouble());
-//                //blockUndoCommands(false);
-//            }
-//        } else {
-//			m_properties[name] = newValue;
-//        }
-//        itemPropertyHasChanged(name, m_properties.value(name));
-//        QAbstractDiagram* d = diagram();
-//        if (d && !m_blockUndoCommands){
-//            d->undoStack()->push(new QDiagramChangePropertyCommand(d, (QDiagramShape*)this, name, currentValue, newValue));
-//        }
-//    }
-//    return true;
 }
 
 bool QAbstractDiagramGraphicsItem::undoCommandsBlocked() const
