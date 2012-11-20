@@ -22,7 +22,7 @@ QDiagramLayer::~QDiagramLayer()
 
 void QDiagramLayer::add(QAbstractDiagramGraphicsItem* item)
 {
-	if (!m_items.contains(item)){
+	if (item && !m_items.contains(item)){
 		m_items.append(item);
 		item->setVisible(m_visible);
 	}
