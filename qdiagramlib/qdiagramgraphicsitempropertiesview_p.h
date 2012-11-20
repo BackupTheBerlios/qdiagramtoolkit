@@ -15,6 +15,7 @@ public:
     QPropertiesModelItem(QAbstractDiagramGraphicsItem* graphicsItem);
     QPropertiesModelItem(QAbstractDiagramGraphicsItem* graphicsItem, int index, QPropertiesModelItem* parent = 0);
     QPropertiesModelItem(const QString & name, QPropertiesModelItem* parent);
+    QPropertiesModelItem(const QString & name, int flag, QPropertiesModelItem* parent);
 	QPropertiesModelItem(const QString & name, QDiagramToolkit::PropertyType type, QPropertiesModelItem* parent);
     ~QPropertiesModelItem();
 
@@ -25,6 +26,10 @@ public:
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem & option, const QModelIndex & index, const QStyledItemDelegate* receiver) const;
 
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+
+	QDiagramMetaEnum metaEnumeration() const;
+
+	QDiagramMetaFlag metaFlag() const;
 
     Qt::ItemFlags flags() const;
 
@@ -58,6 +63,7 @@ public:
 private:
     QList<QPropertiesModelItem*> m_children;
     QMap<QString,QColor> m_colorNameMap;
+	int m_flag;
     int m_index;
     QString m_name;
     QAbstractDiagramGraphicsItem* m_item;

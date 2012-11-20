@@ -37,13 +37,6 @@ QDiagramConnectShapesCommand::QDiagramConnectShapesCommand(QAbstractDiagram* dia
 	p["start"] = QDiagramProperty::toMap(qVariantFromValue(cp));
 	cp = QDiagramConnectionPoint(to->parentShape()->uuid(), to->id());
 	p["end"] = QDiagramProperty::toMap(qVariantFromValue(cp));
-    //p["shapeAtStart"] = from->parentShape()->uuid();
-    //p["pointAtStart"] = from->id();
-    //p["shapeAtEnd"] = to->parentShape()->uuid();
-    //p["pointAtEnd"] = to->id();
-    //mProperties["plugin"] = style.plugin();
-    //mProperties["style"] = style.shape();
-    //mProperties["itemType"] = "connector";
     p["uuid"] = uuid;
 
     setProperties(p);

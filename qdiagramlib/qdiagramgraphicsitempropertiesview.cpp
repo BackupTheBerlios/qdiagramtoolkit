@@ -22,16 +22,18 @@
 #include "ui_qdiagramgraphicsitempropertiesview.h"
 
 #include "qdiagram.h"
+#include "qdiagramconnectionpoint.h"
 #include "qdiagrammetadata.h"
 #include "qdiagramendoflinestyle.h"
 #include "qdiagramlinestyle.h"
-#include "QDiagramGraphicsItemShadow.h"
+#include "qdiagramgraphicsitemshadow.h"
 #include "qdiagramtextstyle.h"
 
 QMap<QString,QColor> QDiagramColorComboBox::sColorNameMap;
 
 QPropertiesModelItem::QPropertiesModelItem(QAbstractDiagramGraphicsItem* item)
 {
+	m_flag = -1;
     m_index = -1;
     m_item = item;
     m_parent = 0;
@@ -39,6 +41,7 @@ QPropertiesModelItem::QPropertiesModelItem(QAbstractDiagramGraphicsItem* item)
 
 QPropertiesModelItem::QPropertiesModelItem(QAbstractDiagramGraphicsItem* item, int index, QPropertiesModelItem *parent)
 {
+	m_flag = -1;
     m_index = index;
     m_item = item;
     m_parent = parent;
@@ -50,14 +53,33 @@ QPropertiesModelItem::QPropertiesModelItem(QAbstractDiagramGraphicsItem* item, i
         m_colorNameMap[colorNames.at(i)] = QColor(colorNames.at(i));
     }
 	if (item){
-		for (int i = 0; i < item->metaData()->property(index).propertyCount(); i++){
-			new QPropertiesModelItem(item->metaData()->property(index).property(i).name(), item->metaData()->property(index).property(i).type(), this);
+		if (item->metaData()->property(index).flag().isValid()){
+			for (int i = 0; i < item->metaData()->property(index).flag().keyCount(); i++){
+				new QPropertiesModelItem(item->metaData()->property(index).name(), i, this);
+			}
+		} else {
+			for (int i = 0; i < item->metaData()->property(index).propertyCount(); i++){
+				new QPropertiesModelItem(item->metaData()->property(index).property(i).name(), item->metaData()->property(index).property(i).type(), this);
+			}
 		}
 	}
 }
 
+QPropertiesModelItem::QPropertiesModelItem(const QString & name, int flag, QPropertiesModelItem* parent)
+{
+	m_flag = flag;
+    m_index = -1;
+    m_item = 0;
+    m_name = name;
+    m_parent = parent;
+    if (m_parent != 0){
+        m_parent->m_children.append(this);
+    }
+}
+
 QPropertiesModelItem::QPropertiesModelItem(const QString &name, QPropertiesModelItem *parent)
 {
+	m_flag = -1;
     m_index = -1;
     m_item = 0;
     m_name = name;
@@ -69,7 +91,8 @@ QPropertiesModelItem::QPropertiesModelItem(const QString &name, QPropertiesModel
 
 QPropertiesModelItem::QPropertiesModelItem(const QString & name, QDiagramToolkit::PropertyType type, QPropertiesModelItem* parent)
 {
-    m_index = -1;
+	m_flag = -1;
+	m_index = -1;
     m_item = 0;
     m_name = name;
     m_parent = parent;
@@ -97,9 +120,20 @@ int QPropertiesModelItem::childCount() const
     return m_children.size();
 }
 
-QWidget* QPropertiesModelItem::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex & index, const QStyledItemDelegate* receiver) const
+QWidget* QPropertiesModelItem::createEditor(QWidget* parent, const QStyleOptionViewItem & option, const QModelIndex & index, const QStyledItemDelegate* receiver) const
 {
-    if (type() == QDiagramToolkit::Alignment){
+	if (metaEnumeration().isValid()){
+		QComboBox* cb = new QComboBox(parent);
+		for (int i = 0; i < metaEnumeration().keyCount(); i++){
+			cb->addItem(metaEnumeration().key(i), metaEnumeration().value(i));
+		}
+		QObject::connect(cb, SIGNAL(activated(int)), receiver, SLOT(commitAndClose()));
+		return cb;
+	} else if (metaFlag().isValid()){
+		QCheckBox* cb =  new QCheckBox(parent);
+		cb->setAutoFillBackground(true);
+		QObject::connect(cb, SIGNAL(toggled(bool)), receiver, SLOT(commitAndClose()));
+		return cb;
 	} else if (type() == QDiagramToolkit::Angle){
         QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
         sb->setDecimals(1);
@@ -252,7 +286,11 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
         if (index.column() == 0){
 			return name();
         } else if (index.column() == 1){
-			if (type() == QDiagramToolkit::Angle){
+			if (metaEnumeration().isValid()){
+				return metaEnumeration().key(metaEnumeration().indexOf(property().toInt()));
+			} else if (metaFlag().isValid()/*name() == "alignment"*/){
+				return metaFlag().matchingKeys(value().toInt()).join("|");
+			} else if (type() == QDiagramToolkit::Angle){
 				return value().toString();
 			} else if (type() == QDiagramToolkit::Bool){
 				return value().toBool()?QObject::tr("enabled"):QObject::tr("disabled");
@@ -263,8 +301,13 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 			} else if (type() == QDiagramToolkit::Color){
 				QColor c = qdiagramproperty_cast<QColor>(property());
 				return QDiagramColorComboBox::colorName(c);
+			} else if (type() == QDiagramToolkit::ConnectionPoint){
+				QDiagramConnectionPoint cp = qdiagramproperty_cast<QDiagramConnectionPoint>(property());
+				return QString("%1@%2").arg(cp.id()).arg(cp.uuid());
 			} else if (type() == QDiagramToolkit::Double){
 				return value().toDouble();
+			} else if (type() == QDiagramToolkit::Dynamic){
+				return value().toString();
 			} else if (type() == QDiagramToolkit::Enumeration){
 				return graphicsItem()->metaData()->property(m_index).enumerator().key(value().toInt());
 			} else if (type() == QDiagramToolkit::Font){				
@@ -306,7 +349,8 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 			} else if (type() == QDiagramToolkit::Text){
 				return value().toString();
 			} else if (type() == QDiagramToolkit::UUID){
-				return graphicsItem()->uuid();
+				//return graphicsItem()->uuid();
+				return value().toString();
 			}
 		}
     } else if (role == Qt::DecorationRole){
@@ -376,10 +420,14 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
         }
     } else if (role == Qt::EditRole){
         if (index.column() == 1){
-			if (type() == QDiagramToolkit::Bool){
+			if (metaFlag().isValid()){
+				return value().toBool();
+			} else if (type() == QDiagramToolkit::Bool){
 				return value().toBool();
 			} else if (type() == QDiagramToolkit::Color){
 				return qvariant_cast<QColor>(value());
+			} else if (type() == QDiagramToolkit::Dynamic){
+				return value();
 			} else if (type() == QDiagramToolkit::Int){
 				return value().toInt();
 			}
@@ -392,6 +440,30 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
         }
     }
     return QVariant();
+}
+
+QDiagramMetaEnum QPropertiesModelItem::metaEnumeration() const
+{
+	if (m_flag != -1){
+		return QDiagramMetaEnum();
+	}
+	if (m_item == 0 && m_flag == -1){
+		QDiagramMetaProperty p = m_parent->graphicsItem()->metaData()->property(m_parent->index());
+		return p.property(p.indexOf(m_name)).enumerator();
+	}
+	return m_item->metaData()->property(m_index).enumerator();
+}
+
+QDiagramMetaFlag QPropertiesModelItem::metaFlag() const
+{
+	//if (m_flag == -1){
+	//	return QDiagramMetaFlag();
+	//}
+	if (m_item == 0){
+		QDiagramMetaProperty p = m_parent->graphicsItem()->metaData()->property(m_parent->index());
+		return p.flag();
+	}
+	return m_item->metaData()->property(m_index).flag();
 }
 
 Qt::ItemFlags QPropertiesModelItem::flags() const
@@ -408,7 +480,9 @@ Qt::ItemFlags QPropertiesModelItem::flags() const
 			return f;
 		}
 	}
-	if (type() == QDiagramToolkit::Angle){
+	if (m_flag != -1){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Angle){
 		f |= Qt::ItemIsEditable;
 	} else if (type() == QDiagramToolkit::Bool){
 		f |= Qt::ItemIsEditable;
@@ -418,6 +492,8 @@ Qt::ItemFlags QPropertiesModelItem::flags() const
 		f |= Qt::ItemIsEditable;
 	} else if (type() == QDiagramToolkit::Double){
 		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Dynamic){
+		f |= Qt::ItemIsEditable;
 	} else if (type() == QDiagramToolkit::Enumeration){
 		f |= Qt::ItemIsEditable;
 	} else if (type() == QDiagramToolkit::FontFamily){
@@ -425,6 +501,10 @@ Qt::ItemFlags QPropertiesModelItem::flags() const
 	} else if (type() == QDiagramToolkit::Int){
 		f |= Qt::ItemIsEditable;
 	} else if (type() == QDiagramToolkit::LineStyle){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::Orientation){
+		f |= Qt::ItemIsEditable;
+	} else if (type() == QDiagramToolkit::PenJoinStyle){
 		f |= Qt::ItemIsEditable;
 	} else if (type() == QDiagramToolkit::PenStyle){
 		f |= Qt::ItemIsEditable;
@@ -460,6 +540,9 @@ bool QPropertiesModelItem::isChild() const
 
 QString QPropertiesModelItem::name() const
 {
+	if (m_flag != -1){
+		return metaFlag().key(m_flag);
+	}
     if (m_index == -1){
         return  m_name;
     }
@@ -469,7 +552,17 @@ QString QPropertiesModelItem::name() const
 bool QPropertiesModelItem::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index, const QStyleOptionViewItemV4 &opt4)
 {
     if (index.column() == 1){
-		if (type() == QDiagramToolkit::Bool){
+		if (metaFlag().isValid() && m_flag != -1){
+	        QStyle* style = opt4.widget ? opt4.widget->style() : QApplication::style();
+
+		    style->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, painter, opt4.widget);
+			QStyleOptionButton so;
+			so.rect = opt4.rect;
+			so.state |= index.data(Qt::EditRole).toBool() ? QStyle::State_On : QStyle::State_Off;
+			so.state |= QStyle::State_Enabled;
+			style->drawControl(QStyle::CE_CheckBox, &so, painter);
+  			return true;
+		} else if (type() == QDiagramToolkit::Bool){
 	        QStyle* style = opt4.widget ? opt4.widget->style() : QApplication::style();
 
 		    style->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, painter, opt4.widget);
@@ -563,13 +656,21 @@ bool QPropertiesModelItem::setData(const QModelIndex & index, const QVariant & v
 
 bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & index) const
 {
-	if (type() == QDiagramToolkit::Angle){
+	if (metaEnumeration().isValid()){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		cb->setCurrentIndex(cb->findData(property().toInt()));
+		return true;
+	} else if (metaFlag().isValid()){
+		QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
+		cb->setChecked(!value().toBool());
+		return true;
+	} else if (type() == QDiagramToolkit::Angle){
         QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
 		spinBox->setValue(qdiagramproperty_cast<double>(property()));
         return true;
 	} else if (type() == QDiagramToolkit::Bool){
 		QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
-		cb->setChecked(value().toBool());
+		cb->setChecked(!value().toBool());
 		return true;
 	} else if (type() == QDiagramToolkit::BrushStyle){
 		QComboBox* cb = qobject_cast<QComboBox*>(editor);
@@ -590,7 +691,7 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
         return true;
 	} else if (type() == QDiagramToolkit::Enumeration){
         QComboBox* cb = qobject_cast<QComboBox*>(editor);
-        for (int i = 0; i < m_item->metaData()->property(m_index).enumerator().keys(); i++){
+        for (int i = 0; i < m_item->metaData()->property(m_index).enumerator().keyCount(); i++){
             cb->addItem(m_item->metaData()->property(m_index).enumerator().key(i), m_item->metaData()->property(m_index).enumerator().value(i));
         }
         cb->setCurrentIndex(cb->findData(value().toInt()));
@@ -710,9 +811,17 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
     return false;
 }
 
-bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+bool QPropertiesModelItem::setModelData(QWidget* editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    if (type() == QDiagramToolkit::Angle){
+	if (metaEnumeration().isValid()){
+		QComboBox* cb = qobject_cast<QComboBox*>(editor);
+		model->setData(index, cb->itemData(cb->currentIndex()));
+		return true;
+	} else if (metaFlag().isValid()){
+		QCheckBox* cb = qobject_cast<QCheckBox*>(editor);
+        model->setData(index, cb->isChecked());
+        return true;
+	} else if (type() == QDiagramToolkit::Angle){
         QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
         model->setData(index, spinBox->value());
         return true;
@@ -853,16 +962,24 @@ bool QPropertiesModelItem::setModelData(QWidget *editor, QAbstractItemModel *mod
     return false;
 }
 
-void QPropertiesModelItem::setValue(const QVariant &value)
+void QPropertiesModelItem::setValue(const QVariant & value)
 {
     if (m_item == 0){
-		QVariantMap m = graphicsItem()->property(graphicsItem()->metaData()->property(m_parent->m_index).name()).toMap();
-		if (m.isEmpty()){
-			graphicsItem()->setProperty(graphicsItem()->metaData()->property(m_parent->m_index).name(), value);
+		if (m_flag != -1){
+			int v = this->value(true).toInt();
+			if (value.toBool()){
+				v |= metaFlag().value(m_flag);
+			} else {
+				v &= ~metaFlag().value(m_flag);
+			}
+			graphicsItem()->setProperty(graphicsItem()->metaData()->property(m_parent->m_index).name(), v);
 		} else {
-			property().setValue(value);
-			//m[name()] = value;
-			//graphicsItem()->setProperty(graphicsItem()->metaData()->property(m_parent->m_index).name(), m);
+			QVariantMap m = graphicsItem()->property(graphicsItem()->metaData()->property(m_parent->m_index).name()).toMap();
+			if (m.isEmpty()){
+				graphicsItem()->setProperty(graphicsItem()->metaData()->property(m_parent->m_index).name(), value);
+			} else {
+				property().setValue(value);
+			}
 		}
     } else {
         m_item->setProperty(m_item->metaData()->property(m_index).name(), value);
@@ -881,6 +998,13 @@ QDiagramToolkit::PropertyType QPropertiesModelItem::type() const
 
 QVariant QPropertiesModelItem::value(bool parent) const
 {
+	if (m_flag != -1){
+		int v = graphicsItem()->property(graphicsItem()->metaData()->property(m_parent->m_index).name()).toInt();
+		if (parent){
+			return v;
+		}
+		return v & metaFlag().value(m_flag);
+	}
 	if (m_item == 0){
 		if (!parent){
 			QVariantMap m = graphicsItem()->property(graphicsItem()->metaData()->property(m_parent->m_index).name()).toMap();
@@ -1075,6 +1199,8 @@ void QDiagramGraphicsItemPropertiesView::propertyViewClicked(const QModelIndex &
 void QDiagramGraphicsItemPropertiesView::showProperties(QList<QAbstractDiagramGraphicsItem*> items)
 {
     if (items.size() == 1){
+		ui->typeLineEdit->setText(items.first()->metaData()->itemType());
+		ui->classLineEdit->setText(items.first()->metaData()->itemClass());
         m_model->buildModel(items.first());
     } else {
 
