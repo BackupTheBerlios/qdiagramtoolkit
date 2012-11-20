@@ -198,7 +198,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description=""
 				CommandLine=""
 				ExcludedFromBuild="false"
 			/>
@@ -218,6 +217,26 @@
 			</File>
 			<File
 				RelativePath="qsysmlblock.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmlcontrolconnectionpoint.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmlcontrolflowconnector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmldataconnectionpoint.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmldataflowconnector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmlflowconnector.cpp"
 				>
 			</File>
 			<File
@@ -244,6 +263,26 @@
 			</File>
 			<File
 				RelativePath="qsysmlblock.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmlcontrolconnectionpoint.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmlcontrolflowconnector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmldataconnectionpoint.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmldataflowconnector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qsysmlflowconnector.h"
 				>
 			</File>
 			<File
@@ -454,6 +493,46 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\resources\flow_control.ico"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\resources\flow_data.ico"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="resources\flow_final_node.ico"
 				>
 				<FileConfiguration
@@ -583,7 +662,7 @@
 						Name="VCCustomBuildTool"
 						Description="Rcc&apos;ing $(InputFileName)..."
 						CommandLine="&quot;$(QTDIR)\bin\rcc.exe&quot; -name &quot;$(InputName)&quot; -no-compress &quot;$(InputPath)&quot; -o .\GeneratedFiles\qrc_$(InputName).cpp&#x0D;&#x0A;"
-						AdditionalDependencies="$(InputPath);.\resources\initial_node.ico;.\resources\activity_final_node.ico;.\resources\flow_final_node.ico;.\resources\fork_node.ico;.\resources\join_node.ico;.\resources\decision_node.ico;.\resources\merge_node.ico;.\resources\accept_event_action.ico;.\resources\action.ico;.\resources\send_signal_action.ico;.\resources\fork_node_horizontal.ico;.\resources\block.ico"
+						AdditionalDependencies="$(InputPath);.\resources\initial_node.ico;.\resources\activity_final_node.ico;.\resources\flow_final_node.ico;.\resources\fork_node.ico;.\resources\join_node.ico;.\resources\decision_node.ico;.\resources\merge_node.ico;.\resources\accept_event_action.ico;.\resources\action.ico;.\resources\send_signal_action.ico;.\resources\fork_node_horizontal.ico;.\resources\block.ico;.\resources\flow_control.ico;.\resources\flow_data.ico;.\resources\transition_node.ico"
 						Outputs=".\GeneratedFiles\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -594,13 +673,33 @@
 						Name="VCCustomBuildTool"
 						Description="Rcc&apos;ing $(InputFileName)..."
 						CommandLine="&quot;$(QTDIR)\bin\rcc.exe&quot; -name &quot;$(InputName)&quot; -no-compress &quot;$(InputPath)&quot; -o .\GeneratedFiles\qrc_$(InputName).cpp&#x0D;&#x0A;"
-						AdditionalDependencies="$(InputPath);.\resources\initial_node.ico;.\resources\activity_final_node.ico;.\resources\flow_final_node.ico;.\resources\fork_node.ico;.\resources\join_node.ico;.\resources\decision_node.ico;.\resources\merge_node.ico;.\resources\accept_event_action.ico;.\resources\action.ico;.\resources\send_signal_action.ico;.\resources\fork_node_horizontal.ico;.\resources\block.ico"
+						AdditionalDependencies="$(InputPath);.\resources\initial_node.ico;.\resources\activity_final_node.ico;.\resources\flow_final_node.ico;.\resources\fork_node.ico;.\resources\join_node.ico;.\resources\decision_node.ico;.\resources\merge_node.ico;.\resources\accept_event_action.ico;.\resources\action.ico;.\resources\send_signal_action.ico;.\resources\fork_node_horizontal.ico;.\resources\block.ico;.\resources\flow_control.ico;.\resources\flow_data.ico;.\resources\transition_node.ico"
 						Outputs=".\GeneratedFiles\qrc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="resources\send_signal_action.ico"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\resources\transition_node.ico"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

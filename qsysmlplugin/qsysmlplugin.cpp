@@ -25,6 +25,8 @@
 
 #include "qsysmlaction.h"
 #include "qsysmlblock.h"
+#include "qsysmlcontrolflowconnector.h"
+#include "qsysmldataflowconnector.h"
 #include "qsysmlnode.h"
 
 QString QSysMLPlugin::name() const
@@ -34,12 +36,11 @@ QString QSysMLPlugin::name() const
 
 QList<QDiagramConnectorStyle> QSysMLPlugin::connectors() const
 {
-    QList<QDiagramConnectorStyle> mStyles;
+    QList<QDiagramConnectorStyle> l;
 
-//    mStyles << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.default"), "Default", "default");
-//    mStyles << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.line"), "Line", "line");
-//    mStyles << QDiagramConnectorStyle(name(), QIcon(":/qstandardformsplugin/connector.line.ae"), "Line Arrow End", "line.ae");
-    return mStyles;
+    l << QDiagramConnectorStyle(name(), QIcon(":/qsysmlplugin/flow.control"), "Control Flow", "flow.control");
+    l << QDiagramConnectorStyle(name(), QIcon(":/qsysmlplugin/flow.data"), "Data Flow", "flow.data");
+    return l;
 }
 
 QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
@@ -49,11 +50,11 @@ QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString,QVaria
         return 0;
     }
     if (metaData.value("itemType") == "connector"){
-//        item = new QStandardShapeConnector(properties);
-    } else if (metaData.value("itemType") == "line"){
-//        props["p1"] = QPointF(properties.value("x").toDouble(), properties.value("y").toDouble());
-//        props["p2"] = props.value("p1").toPointF() + QPointF(100, 100);
-//        item = new QStandardLine(props);
+		if (metaData.value("itemClass") == "flow.control"){
+			item = new QSysMLControlFlowConnector(properties);
+		} else if (metaData.value("itemClass") == "flow.data"){
+			item = new QSysMLDataFlowConnector(properties);
+		}
     } else if (metaData.value("itemType") == "shape"){
         if (metaData.value("itemClass") == "action"){
             item = new QSysMLAction(properties);
@@ -66,7 +67,7 @@ QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString,QVaria
     return item;
 }
 
-QDiagram *QSysMLPlugin::diagram(const QString &type, QObject *parent) const
+QDiagram *QSysMLPlugin::diagram(const QString & type, QObject *parent) const
 {
     QDiagram* d = new QDiagram(parent);
     d->addPlugin(name());
@@ -103,18 +104,6 @@ QStringList QSysMLPlugin::groups(QAbstractDiagram *diagram) const
     return g;
 }
 
-
-QPointF QSysMLPlugin::hotSpot(const QString &name) const
-{
-    QPointF p(0, 0);
-    if (name == "node.initial" || name == "gate.nand" || name == "gate.nor"){
-        p = QPointF(-19.5, -19.5);
-    } else if (name == "gate.not"){
-        p = QPointF(0, -26);
-    }
-    return p;
-}
-
 QIcon QSysMLPlugin::icon(const QString &name) const
 {
     if (name == "action"){
@@ -141,6 +130,8 @@ QIcon QSysMLPlugin::icon(const QString &name) const
         return QIcon(":/qsysmlplugin/node.decision");
     } else if (name == "node.merge"){
         return QIcon(":/qsysmlplugin/node.merge");
+    } else if (name == "node.transition"){
+        return QIcon(":/qsysmlplugin/node.transition");
     }
     return QIcon();
 }
@@ -148,27 +139,6 @@ QIcon QSysMLPlugin::icon(const QString &name) const
 QList<QDiagramLineStyle> QSysMLPlugin::lineStyles() const
 {
     QList<QDiagramLineStyle> styles;
-//    QPen p;
-
-//    p = QPen(Qt::black);
-//    p.setStyle(Qt::DashLine);
-//    styles.append(QDiagramLineStyle(name(), "dashed", tr("Dashed"), p, QIcon(":/qstandardformsplugin/line.dashed")));
-
-//    p = QPen(Qt::black);
-//    p.setStyle(Qt::DashDotDotLine);
-//    styles.append(QDiagramLineStyle(name(), "dash_dot_dot", tr("Dash Dot Dot"), p, QIcon(":/qstandardformsplugin/line.dash_dot_dot")));
-
-//    p = QPen(Qt::black);
-//    p.setStyle(Qt::DashDotLine);
-//    styles.append(QDiagramLineStyle(name(), "dash_dot", tr("Dash Dot"), p, QIcon(":/qstandardformsplugin/line.dash_dot")));
-
-//    p = QPen(Qt::DotLine);
-//    p.setColor(QColor(Qt::black));
-//    styles.append(QDiagramLineStyle(name(), "dotted", tr("Dotted"), p, QIcon(":/qstandardformsplugin/line.dotted")));
-
-//    p = QPen(Qt::black);
-//    p.setStyle(Qt::SolidLine);
-//    styles.append(QDiagramLineStyle(name(), "solid", tr("Solid"), p, QIcon(":/qstandardformsplugin/line.solid")));
 
     return styles;
 }
@@ -186,6 +156,12 @@ QVariantMap QSysMLPlugin::metaData(const QString & name) const
     if (name == "action"){
         m["itemType"] = "shape";
         m["itemClass"] = "action";
+	} else if (name == "action.accept_event"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "action";
+	} else if (name == "action.send_signal"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "action";
     } else if (name == "block"){
         m["itemType"] = "shape";
         m["itemClass"] = "block";
@@ -198,10 +174,19 @@ QVariantMap QSysMLPlugin::metaData(const QString & name) const
     } else if (name == "node.final.activity"){
         m["itemType"] = "shape";
         m["itemClass"] = "node";
+    } else if (name == "node.final.flow"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
     } else if (name == "node.fork.horizontal"){
         m["itemType"] = "shape";
         m["itemClass"] = "node";
     } else if (name == "node.fork"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    } else if (name == "node.join"){
+        m["itemType"] = "shape";
+        m["itemClass"] = "node";
+    } else if (name == "node.transition"){
         m["itemType"] = "shape";
         m["itemClass"] = "node";
     }
@@ -214,20 +199,44 @@ QMap<QString, QVariant> QSysMLPlugin::defaultProperties(const QString & name) co
     QMap<QString, QVariant> properties;
     if (name == "action"){
         properties["actionType"] = "default";
+	} else if (name == "action.send_signal"){
+        properties["actionType"] = "sendSignal";
     } else if (name == "block"){
         properties["blockType"] = "default";
-    } else if (name == "node.decision"){
+	} else if (name == "flow.control"){
+		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
+		QPen pen(Qt::black);
+		pen.setWidthF(2.0);
+		pen.setStyle(Qt::DashLine);
+		properties["lineColor"] = QDiagramProperty::toMap(pen);
+	} else if (name == "node.decision"){
         properties["nodeType"] = "decision";
+		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
+		QPen pen(Qt::black);
+		pen.setWidthF(2.0);
+		pen.setStyle(Qt::SolidLine);
+		properties["lineColor"] = QDiagramProperty::toMap(pen);
     } else if (name == "node.initial"){
         properties["nodeType"] = "initial";
     } else if (name == "node.final.activity"){
         properties["nodeType"] = "final.activity";
+    } else if (name == "node.final.flow"){
+        properties["nodeType"] = "final.flow";
     } else if (name == "node.fork.horizontal"){
         properties["nodeType"] = "fork";
         properties["alignment"] = Qt::Horizontal;
     } else if (name == "node.fork"){
         properties["nodeType"] = "fork";
         properties["alignment"] = Qt::Horizontal;
+    } else if (name == "node.join"){
+        properties["nodeType"] = "join";
+        properties["alignment"] = Qt::Horizontal;
+    } else if (name == "node.transition"){
+        properties["nodeType"] = "transition";
+		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
+		QPen pen(Qt::black);
+		pen.setWidthF(2.0);
+		properties["lineColor"] = QDiagramProperty::toMap(pen);
     }
     return properties;
 }
@@ -249,7 +258,8 @@ QStringList QSysMLPlugin::shapes(const QString & group, QAbstractDiagram *diagra
            << "node.fork"
            << "node.join"
            << "node.decision"
-           << "node.merge";
+           << "node.merge"
+           << "node.transition";
         return ad;
     } else if (group == tr("Actions")){
         ac << "action"
@@ -291,18 +301,14 @@ QString QSysMLPlugin::title(const QString & name) const
         return tr("Parallelogramm");
     } else if (name == "node.merge"){
         return tr("Merge Node");
+    } else if (name == "node.transition"){
+        return tr("Transition Node");
     } else if (name == "action"){
         return tr("Action");
     } else if (name == "action.send_signal"){
         return tr("Send Signal Action");
     } else if (name == "action.accept_event"){
         return tr("Accept Event Action");
-//    } else if (name == "trapezoid"){
-//        return tr("Trapezoid");
-//    } else if (name == "triangle.right_angle"){
-//        return tr("Right Angle Triangle ");
-//    } else if (name == "triangle.isosceles"){
-//        return tr(" Isosceles Triangle");
     }
     return QString::null;
 }

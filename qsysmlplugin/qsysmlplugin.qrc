@@ -12,5 +12,8 @@
         <file alias="action.send_signal">resources/send_signal_action.ico</file>
         <file alias="node.fork_horizontal">resources/fork_node_horizontal.ico</file>
         <file alias="block">resources/block.ico</file>
+        <file alias="flow.control">resources/flow_control.ico</file>
+        <file alias="flow.data">resources/flow_data.ico</file>
+        <file alias="node.transition">resources/transition_node.ico</file>
     </qresource>
 </RCC>

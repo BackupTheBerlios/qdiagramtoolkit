@@ -42,8 +42,6 @@ public:
 
     QStringList groups(QAbstractDiagram* diagram = 0) const;
 
-    QPointF hotSpot(const QString &name) const;
-
     QIcon icon(const QString & name) const;
 
     QList<QDiagramLineStyle> lineStyles() const;
