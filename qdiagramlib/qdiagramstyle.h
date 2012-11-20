@@ -44,6 +44,8 @@ public:
 
     QString id() const;
 
+	bool isModified() const;
+
     bool isValid() const;
 
     QString key(int index) const;
@@ -73,6 +75,7 @@ protected:
 private:
 	QString toString(Qt::PenStyle style) const;
 
+	bool m_modified;
     QVariantMap m_properties;
 	QVariantMap m_types;
 };

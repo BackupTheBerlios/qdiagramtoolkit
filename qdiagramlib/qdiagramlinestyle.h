@@ -57,6 +57,7 @@ public:
     bool isValid() const;
 
     QString name() const;
+	QPen pen() const;
     /**
       *
       */
@@ -92,6 +93,8 @@ private:
     QPen m_pen;
     QString m_title;
 };
+
+typedef QList<QDiagramLineStyle> QDiagramLineStyles;
 
 QDebug operator<<(QDebug dbg, const QDiagramLineStyle &s);
 

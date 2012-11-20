@@ -32,8 +32,9 @@ QDiagramLineStyle::QDiagramLineStyle()
 QDiagramLineStyle::QDiagramLineStyle(const QString &plugin, const QString &name, const QString &title, const QPen &pen, const QIcon &icon)
 {
 	addProperty("pen", QDiagramToolkit::Pen, QVariant::fromValue(pen));
-	addProperty("color", QDiagramToolkit::Color, QVariant::fromValue(QColor(Qt::black)));
-	addProperty("width", QDiagramToolkit::Double, 1.0);
+	addProperty("color", QDiagramToolkit::Color, pen.color().name());
+	addProperty("width", QDiagramToolkit::Double, pen.widthF());
+	addProperty("penStyle", QDiagramToolkit::PenStyle, pen.style());
     m_icon = icon;
     m_name = name;
     m_pen = pen;
@@ -69,6 +70,15 @@ bool QDiagramLineStyle::isValid() const
 QString QDiagramLineStyle::name() const
 {
     return m_name;
+}
+
+QPen QDiagramLineStyle::pen() const
+{
+	QPen p;
+	p.setColor(QColor(value("color").toString()));
+	p.setWidthF(value("width").toDouble());
+	p.setStyle(static_cast<Qt::PenStyle>(value("penStyle").toInt()));
+	return p;
 }
 
 Qt::PenStyle QDiagramLineStyle::penStyle() const

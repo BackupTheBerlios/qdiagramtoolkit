@@ -23,10 +23,12 @@
 
 QDiagramStyle::QDiagramStyle()
 {
+	m_modified = false;
 }
 
 QDiagramStyle::QDiagramStyle(const QString &name, const QString &plugin)
 {
+	m_modified = false;
     m_properties["name"] = name;
     m_properties["plugin"] = plugin;
 }
@@ -57,6 +59,11 @@ void QDiagramStyle::addProperty(const QString &name, QDiagramToolkit::PropertyTy
 QString QDiagramStyle::id() const
 {
     return QString("%1@%2").arg(m_properties.value("name").toString()).arg(m_properties.value("plugin").toString());
+}
+
+bool QDiagramStyle::isModified() const
+{
+	return m_modified;
 }
 
 bool QDiagramStyle::isValid() const
@@ -116,11 +123,17 @@ bool QDiagramStyle::setProperty(const QString & name, const QVariant &value)
 		if (!m.keys().contains(l.at(1))){
 			return false;
 		}
+		if (m[l.at(1)] != value){
+			m_modified = true;
+		}
 		m[l.at(1)] = value;
 		m_properties[l.at(0)] = m;
 	} else {
 		if (!m_properties.contains(name)){
 			return false;
+		}
+		if (m_properties.value(name) != value){
+			m_modified = true;
 		}
 		m_properties[name] = value;
 	}

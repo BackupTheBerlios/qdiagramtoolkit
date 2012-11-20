@@ -21,22 +21,31 @@
 
 #include <QPointer>
 
-#include "qdiagramlib_global.h"
+#include <qdiagramlib_global.h>
 
-#include "qdiagram.h"
-#include "qdiagramconnectorstyle.h"
+#include <qabstractdiagram.h>
+#include <qdiagramconnectorstyle.h>
+#include <qdiagramlinestyle.h>
+
+class QAbstractDiagramPlugin;
 
 class QDIAGRAMLIBSHARED_EXPORT QDiagramStyleSheet
 {
 public:
-	QDiagramStyleSheet(QDiagram* diagram = 0);
+	QDiagramStyleSheet(QAbstractDiagram* diagram = 0);
 	~QDiagramStyleSheet();
 
 	QDiagramConnectorStyle connector(const QString & plugin, const QString & name) const;
 
 	QList<QDiagramConnectorStyle> connectors() const;
+
+	QDiagramLineStyle lineStyle(const QString & name) const;
+	/**
+	 *
+	 */
+	QDiagramLineStyles lineStyles() const;
 private:
-	QPointer<QDiagram> m_diagram;
+	QPointer<QAbstractDiagram> m_diagram;
 };
 
 Q_DECLARE_METATYPE(QDiagramStyleSheet*)
