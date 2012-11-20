@@ -46,7 +46,7 @@ public:
       */
     QStringList groups(QAbstractDiagram* diagram = 0) const;
 
-    QPointF hotSpot(const QString & name) const;
+    QPointF hotSpot(const QVariantMap & metaData, const QVariantMap & properties) const;
     /**
       * Returns the icon for the connector of shape specified by the given @p name.
       */

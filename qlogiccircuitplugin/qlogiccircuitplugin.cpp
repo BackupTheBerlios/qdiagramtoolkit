@@ -187,15 +187,15 @@ QStringList QLogicCircuitPlugin::groups(QAbstractDiagram *diagram) const
     return l;
 }
 
-QPointF QLogicCircuitPlugin::hotSpot(const QString &name) const
+QPointF QLogicCircuitPlugin::hotSpot(const QVariantMap & metaData, const QVariantMap & properties) const
 {
     QPointF p(0, 0);
-    if (name == "gate.and" || name == "gate.nand" || name == "gate.nor"
-            || name == "gate.or"
-            || name == "gate.xnor"
-            || name == "gate.xor"){
+    if (properties.value("gateType") == "gate.and" || properties.value("gateType") == "gate.nand" || properties.value("gateType") == "gate.nor"
+            || properties.value("gateType") == "gate.or"
+            || properties.value("gateType") == "gate.xnor"
+            || properties.value("gateType") == "gate.xor"){
         p = QPointF(0, -13);
-    } else if (name == "gate.not"){
+    } else if (properties.value("gateType") == "gate.not"){
         p = QPointF(0, -26);
     }
     return p;
