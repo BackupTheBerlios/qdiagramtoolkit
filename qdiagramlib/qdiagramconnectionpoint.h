@@ -19,6 +19,7 @@
 #ifndef QDIAGRAMCONNECTIONPOINT_H
 #define QDIAGRAMCONNECTIONPOINT_H
 
+#include <QDebug>
 #include <QMetaType>
 
 #include "qdiagramlib_global.h"
@@ -43,6 +44,8 @@ private:
 	QString m_uuid;
 	QString m_id;
 };
+
+QDIAGRAMLIBSHARED_EXPORT QDebug operator<<(QDebug dbg, const QDiagramConnectionPoint &c);
 
 Q_DECLARE_METATYPE(QDiagramConnectionPoint)
 

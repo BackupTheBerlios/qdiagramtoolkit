@@ -57,3 +57,10 @@ QString QDiagramConnectionPoint::uuid() const
 {
 	return m_uuid;
 }
+
+QDebug operator<<(QDebug dbg, const QDiagramConnectionPoint &c)
+{
+	dbg.nospace() << "(" << c.id() << ", " << c.uuid() << ")";
+
+	return dbg.space();
+};
