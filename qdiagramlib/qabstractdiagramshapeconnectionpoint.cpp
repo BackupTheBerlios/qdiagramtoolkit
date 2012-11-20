@@ -140,6 +140,11 @@ int QAbstractDiagramShapeConnectionPoint::count() const
 	return m_connections.size();
 }
 
+QVariantMap QAbstractDiagramShapeConnectionPoint::customConnectorProperties() const
+{
+	return QVariantMap();
+}
+
 QPointF QAbstractDiagramShapeConnectionPoint::diagramPos() const
 {
     return scenePos() + boundingRect().center();
@@ -153,6 +158,11 @@ QAbstractDiagramShapeConnectionPoint::Direction QAbstractDiagramShapeConnectionP
 QString QAbstractDiagramShapeConnectionPoint::id() const
 {
     return m_id;
+}
+
+bool QAbstractDiagramShapeConnectionPoint::isConnected() const
+{
+	return !m_connections.isEmpty();
 }
 
 int QAbstractDiagramShapeConnectionPoint::maxConnections() const

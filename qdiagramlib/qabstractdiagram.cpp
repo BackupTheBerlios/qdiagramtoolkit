@@ -22,12 +22,14 @@
 #include "qabstractdiagramplugin.h"
 #include "qabstractdiagramshapeconnector.h"
 #include "qabstractdiagramscene.h"
-#include <qdiagrammetadata.h>
+#include "qdiagrammetadata.h"
 #include "qdiagrampluginloader.h"
+#include "qdiagramstylesheet.h"
 
 QAbstractDiagram::QAbstractDiagram(QObject *parent) :
     QObject(parent)
 {
+	m_styleSheet = new QDiagramStyleSheet(this);
     m_scene = new QAbstractDiagramScene(this);
     m_scene->setSceneRect(0, 0, 841, 1189);
     m_undostack = new QUndoStack(this);
@@ -39,6 +41,11 @@ QAbstractDiagram::QAbstractDiagram(QObject *parent) :
     connect(m_scene, SIGNAL(itemMoved(QGraphicsItem*,QPointF,QPointF)), this, SLOT(itemMoved(QGraphicsItem*,QPointF,QPointF)));
     // Forward signals
     connect(m_scene, SIGNAL(selectionChanged()), SIGNAL(selectionChanged()));
+}
+
+QAbstractDiagram::~QAbstractDiagram()
+{
+	delete m_styleSheet;
 }
 
 void QAbstractDiagram::addItemContextMenuAction(QAction *action)
@@ -273,6 +280,11 @@ QColor QAbstractDiagram::selectionColor() const
 QList<QAction *> QAbstractDiagram::standardItemContextMenuActions() const
 {
     return m_standardItemContextMenuActions;
+}
+
+QDiagramStyleSheet* QAbstractDiagram::styleSheet() const
+{
+	return m_styleSheet;
 }
 
 void QAbstractDiagram::takeItem(QAbstractDiagramGraphicsItem *item)

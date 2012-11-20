@@ -88,6 +88,11 @@ public:
 	 * Returns the number of connections.
 	 */
 	int count() const;
+	/**
+	 * Returns a map with custom properties set for new connectors attached to this connection point.
+	 * @remark The default implementation returns QVariantMap().
+	 */
+	virtual QVariantMap customConnectorProperties() const;
     /**
       * Returns the connector's position in the diagram.
       */
@@ -100,6 +105,10 @@ public:
       * Returns the connection point's id.
       */
     QString id() const;
+	/**
+	 * Returns true if one or more connectors are connected to this connection point. Otherwise false.
+	 */
+	bool isConnected() const;
     /**
       * Returns the maximum number of connections allowed for this connection point.
       * The default is -1.

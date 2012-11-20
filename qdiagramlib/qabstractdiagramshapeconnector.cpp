@@ -30,9 +30,14 @@ QAbstractDiagramShapeConnector::QAbstractDiagramShapeConnector(const QString & p
 {
 	addProperty("start", QDiagramToolkit::ConnectionPoint, false, properties.value("start"));
     addProperty("end", QDiagramToolkit::ConnectionPoint, false, properties.value("end"));
+    addProperty("font", QDiagramToolkit::Font, false, properties.value("font"));
+    addProperty("text", QDiagramToolkit::String, false, properties.value("text"));
 	
 	m_connectionPointAtStart = 0;
     m_connectionPointAtEnd = 0;
+
+	m_textItem = new QGraphicsTextItem(this);
+	m_textItem->setPlainText(properties.value("text").toString());
 
 	restoreProperties(properties);
     setFlag(QGraphicsItem::ItemIsSelectable);
@@ -46,6 +51,14 @@ QAbstractDiagramShapeConnector::~QAbstractDiagramShapeConnector()
 bool QAbstractDiagramShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoint* start, QAbstractDiagramShapeConnectionPoint* end) const
 {
     return true;
+}
+
+bool QAbstractDiagramShapeConnector::canStartWith(QAbstractDiagramShapeConnectionPoint* cp) const
+{
+	if (cp){
+		return true;
+	}
+	return false;
 }
 
 void QAbstractDiagramShapeConnector::disconnect()
@@ -84,7 +97,7 @@ QPointF QAbstractDiagramShapeConnector::endPos() const
 
 QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShapeConnector::endConnectionPoint() const
 {
-    return m_connectionPointAtStart;
+    return m_connectionPointAtEnd;
 }
 
 bool QAbstractDiagramShapeConnector::isTemporary() const
@@ -115,9 +128,26 @@ QPointF QAbstractDiagramShapeConnector::intersectPoint(const QPointF & pos, cons
     return pos;
 }
 
+QVariant QAbstractDiagramShapeConnector::itemPositionHasChanged(const QVariant & value)
+{
+	QVariant v = QAbstractDiagramGraphicsItem::itemPositionHasChanged(value);
+	updateTextItemPosition();
+	return v;
+}
+
+QVariant QAbstractDiagramShapeConnector::itemPropertyHasChanged( const QString & name, const QVariant & value)
+{
+	if (name == "text"){
+		m_textItem->setPlainText(value.toString());
+		updateTextItemPosition();
+	}
+	return QAbstractDiagramGraphicsItem::itemPropertyHasChanged(name, value);
+}
+
 QVariant QAbstractDiagramShapeConnector::itemSceneHasChanged(const QVariant & value)
 {
 	reconnect();
+	updateTextItemPosition();
 	return value;
 }
 
@@ -147,28 +177,21 @@ void QAbstractDiagramShapeConnector::reconnect()
     //shape = diagram()->shape(property("shapeAtStart").toString());
     shape = diagram()->shape(start.uuid());
     if (shape){
-        //m_connectionPointAtStart = shape->connectionPoint(property("pointAtStart").toString());
         m_connectionPointAtStart = shape->connectionPoint(start.id());
     }
     if (m_connectionPointAtStart){
         m_connectionPointAtStart->append(this, QAbstractDiagramShapeConnectionPoint::Out);
-		//setProperty("shapeAtStart", m_connectionPointAtStart->parentShape()->uuid());
-  //      setProperty("pointAtStart", m_connectionPointAtStart->id());
 		m_connectionPointAtStart->updatePosition();
 		QDiagramConnectionPoint cp(m_connectionPointAtStart->parentShape()->uuid(), m_connectionPointAtStart->id());
 		setProperty("start", qVariantFromValue(cp));
     }
 	QDiagramConnectionPoint end = property("end").toConnectionPoint();
-    //shape = diagram()->shape(property("shapeAtEnd").toString());
     shape = diagram()->shape(end.uuid());
     if (shape){
-        //m_connectionPointAtEnd = shape->connectionPoint(property("pointAtEnd").toString());
         m_connectionPointAtEnd = shape->connectionPoint(end.id());
     }
     if (m_connectionPointAtEnd){
         m_connectionPointAtEnd->append(this, QAbstractDiagramShapeConnectionPoint::In);
-        //setProperty("shapeAtEnd", m_connectionPointAtEnd->parentShape()->uuid());
-        //setProperty("pointAtEnd", m_connectionPointAtEnd->id());
 		m_connectionPointAtEnd->updatePosition();
 		QDiagramConnectionPoint cp(m_connectionPointAtEnd->parentShape()->uuid(), m_connectionPointAtEnd->id());
 		setProperty("end", qVariantFromValue(cp));
@@ -186,6 +209,13 @@ void QAbstractDiagramShapeConnector::remove(QAbstractDiagramShapeConnectionPoint
         m_connectionPointAtEnd->remove(this);
         m_connectionPointAtEnd = 0;
     }
+}
+
+void QAbstractDiagramShapeConnector::restoreProperties(const QVariantMap & p)
+{
+	QAbstractDiagramGraphicsItem::restoreProperties(p);
+	m_textItem->setPlainText(p.value("text").toString());
+	updateTextItemPosition();
 }
 
 void QAbstractDiagramShapeConnector::restoreFromProperties(const QMap<QString,QVariant> & properties)
@@ -269,5 +299,14 @@ QPointF QAbstractDiagramShapeConnector::startPos() const
 
 QAbstractDiagramShapeConnectionPoint* QAbstractDiagramShapeConnector::startConnectionPoint() const
 {
-    return m_connectionPointAtEnd;
+    return m_connectionPointAtStart;
+}
+
+QGraphicsTextItem* QAbstractDiagramShapeConnector::textItem() const
+{
+	return m_textItem;
+}
+
+void QAbstractDiagramShapeConnector::updateTextItemPosition()
+{
 }

@@ -31,19 +31,16 @@
 #include <qdiagramshapeconnectionpoint.h>
 #include <qdiagramundocommand.h>
 #include <qdiagramconnectshapescommand.h>
-#include <qdiagramstylesheet.h>
 
 #include <json.h>
 
 QDiagram::QDiagram(QObject* parent) :
 QAbstractDiagram(parent)
 {
-	m_styleSheet = new QDiagramStyleSheet(this);
 }
 
 QDiagram::~QDiagram()
 {
-	delete m_styleSheet;
 }
 
 QAbstractDiagramGraphicsItem* QDiagram::addItem(const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin)
@@ -70,10 +67,10 @@ void QDiagram::addConnection(QAbstractDiagramShapeConnectionPoint* from, QAbstra
 	QVariantMap metaData;
 	metaData["plugin"] = style.plugin();
 	metaData["itemType"] = "connector";
-	metaData["itemClass"] = style.name();
+	metaData["itemClass"] = style.shape();
 	QVariantMap properties;
+	properties = from->customConnectorProperties();
 	undoStack()->push(new QDiagramConnectShapesCommand(this, QUuid::createUuid().toString(), metaData, properties, from, to));
-    //undoStack()->push(new QDiagramConnectShapesCommand(this, QUuid::createUuid().toString(), from, to, style));
 }
 
 QString QDiagram::addShape(const QString & name, qreal x, qreal y, const QMap<QString,QVariant> & properties, const QString & plugin)
@@ -84,30 +81,38 @@ QString QDiagram::addShape(const QString & name, qreal x, qreal y, const QMap<QS
 QString QDiagram::addShape(const QString & name, const QPointF & pos, const QMap<QString,QVariant> & properties, const QString & plugin)
 {
     QUuid uuid = QUuid::createUuid();
-    QVariantMap m(properties);
-    QAbstractDiagramPlugin* p = QDiagramPluginLoader::load(plugin);
-    if (p){
-        QVariantMap dp = p->defaultProperties(name);
-		QVariantMap g = dp.value("geometry").toMap();
-		if (g.isEmpty()){
-			g = properties.value("geometry").toMap();
-		}
-        g["x"] = pos.x() + p->hotSpot(name).x();
-        g["y"] = pos.y() + p->hotSpot(name).y();
-        m["geometry"] = g;
-        QMapIterator<QString,QVariant> it(dp);
-		while(it.hasNext()){
-			it.next();
-            if (!m.contains(it.key())){
-                m[it.key()] = it.value();
-            }
-		}
-	}
-	m["uuid"] = uuid.toString();
+	QVariantMap m(properties);
 	QVariantMap metaData;
 	metaData["plugin"] = plugin;
 	metaData["itemType"] = "shape";
 	metaData["itemClass"] = name;
+    QAbstractDiagramPlugin* p = QDiagramPluginLoader::load(plugin);
+	if (p == 0){
+		return QString::null;
+	}
+	QVariantMap dp = p->defaultProperties(name);
+	QVariantMap g = dp.value("geometry").toMap();
+	if (g.isEmpty()){
+		g = properties.value("geometry").toMap();
+	}
+	QPointF np(pos.x() + p->hotSpot(metaData, properties).x(), pos.y() + p->hotSpot(metaData, properties).y());
+	if (np.x() < 0){
+		np.setX(0);
+	}
+	if (np.y() < 0){
+		np.setY(0);
+	}
+	g["x"] = np.x();
+	g["y"] = np.y();
+	m["geometry"] = g;
+	QMapIterator<QString,QVariant> it(dp);
+	while(it.hasNext()){
+		it.next();
+		if (!m.contains(it.key())){
+			m[it.key()] = it.value();
+		}
+	}
+	m["uuid"] = uuid.toString();
 	undoStack()->push(new QDiagramInsertShapeCommand(this, uuid.toString(), metaData, m));
     emit shapeAdded(uuid.toString());
     emit contentsChanged();
@@ -294,9 +299,4 @@ void QDiagram::dropEventHandler( QGraphicsSceneDragDropEvent* event )
     } else {
         event->ignore();
     }
-}
-
-QDiagramStyleSheet* QDiagram::styleSheet() const
-{
-	return m_styleSheet;
 }

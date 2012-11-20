@@ -33,7 +33,6 @@
 #include <qdiagramgraphicsscene.h>
 
 class QAbstractDiagramShapeConnectionPoint;
-class QDiagramStyleSheet;
 
 //! The QDiagram class provides a default implementation of a diagram.
 /**
@@ -90,8 +89,6 @@ public:
       */
     virtual void beginRestoreDiagram();
     virtual void endRestoreDiagram();
-
-	QDiagramStyleSheet* styleSheet() const;
     /**
       * Returns the diagram type.
       */
@@ -143,7 +140,6 @@ protected slots:
     virtual void itemMoved(QGraphicsItem* findItemByUuid, const QPointF & oldPos, const QPointF & newPos);
     virtual void itemRestoredHandler(QAbstractDiagramGraphicsItem* findItemByUuid);
 private:
-	QDiagramStyleSheet* m_styleSheet;
 };
 
 Q_DECLARE_METATYPE(QDiagram*)

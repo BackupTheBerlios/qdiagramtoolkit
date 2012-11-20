@@ -36,6 +36,7 @@ class QAbstractDiagramScene;
 class QAbstractDiagramShape;
 class QAbstractDiagramShapeConnectionPoint;
 class QAbstractDiagramShapeConnector;
+class QDiagramStyleSheet;
 
 class QGraphicsItem;
 class QDiagramEndOfLineStyle;
@@ -70,6 +71,10 @@ public:
       * Constructs a QAbstractDiagram with the given @p parent.
       */
     explicit QAbstractDiagram(QObject* parent = 0);
+	/**
+	 * 
+	 */
+	~QAbstractDiagram();
     /**
       * Adds a new item from.
       */
@@ -198,6 +203,8 @@ public:
       * @see addItemContextMenuAction();
       */
     QList<QAction*> standardItemContextMenuActions() const;
+
+	QDiagramStyleSheet* styleSheet() const;
     /**
       * Removes the @p item from the diagram without deleting it.
       */
@@ -283,6 +290,7 @@ private:
 	QDiagramLayers* m_layers;
     QStringList m_plugins;
     QAbstractDiagramScene* m_scene;
+	QDiagramStyleSheet* m_styleSheet;
 	QString m_title;
     QUndoStack* m_undostack;
 };

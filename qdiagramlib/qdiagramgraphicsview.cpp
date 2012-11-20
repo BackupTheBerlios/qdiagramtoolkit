@@ -120,36 +120,36 @@ QDiagramGraphicsView::Mode QDiagramGraphicsView::mode() const
 void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
     if (m_mode == QDiagramGraphicsView::Connect){
-        QAbstractDiagramShapeConnectionPoint* mPoint = connectionPointAt(event->pos());
-        if (event->buttons().testFlag(Qt::LeftButton) && m_tempConnector){
-            QAbstractDiagramShape* mShape = 0;
-            if (mPoint == 0){
-                mShape = shapeAt(event->pos());
-            } else {
-                mShape = mPoint->parentShape();
-                if (!mPoint->canConnect(m_tempConnector)){
-                    mPoint = 0;
-                }
-            }
+		QAbstractDiagramShapeConnectionPoint* cp = connectionPointAt(event->pos());
+		if (event->buttons().testFlag(Qt::LeftButton) && m_tempConnector){
+			QAbstractDiagramShape* shape = 0;
+			if (cp == 0){
+				shape = shapeAt(event->pos());
+			} else {
+				shape = cp->parentShape();
+				if (!cp->canConnect(m_tempConnector)){
+					cp = 0;
+				}
+			}
             // Hide previous shape's connection points
-            if (m_shapeUnderCursor && m_shapeUnderCursor != mShape){
+            if (m_shapeUnderCursor && m_shapeUnderCursor != shape){
 //
 //                m_shapeUnderCursor->setConnectionPointsVisible(false);
             }
             // Show current shape's connection points
-            if (mShape){
-                mShape->setConnectionPointsVisible(true);
+            if (shape){
+                shape->setConnectionPointsVisible(true);
             }
             //
-            if (mShape == 0){
+            if (shape == 0){
                 m_tempEndConnectionPoint = 0;
                 m_tempConnector->setTemporaryEnd(mapToScene(event->pos()));
                 setCursor(Qt::CrossCursor);
             } else {
-                if (mPoint == 0 && m_tempEndConnectionPoint == 0){
+                if (cp == 0 && m_tempEndConnectionPoint == 0){
                     m_tempConnector->setTemporaryEnd(mapToScene(event->pos()));
                     setCursor(Qt::CrossCursor);
-                } else if (mPoint == 0 && m_tempEndConnectionPoint != 0){
+                } else if (cp == 0 && m_tempEndConnectionPoint != 0){
                     if (!m_tempConnector->canConnect(m_tempStartConnectionPoint, m_tempEndConnectionPoint)){
                         m_tempConnector->setTemporaryEnd(mapToScene(event->pos()));
                         setCursor(Qt::ForbiddenCursor);
@@ -158,7 +158,7 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
                         setCursor(Qt::CrossCursor);
                     }
                 } else {
-                    m_tempEndConnectionPoint = mPoint;
+                    m_tempEndConnectionPoint = cp;
                     if (!m_tempConnector->canConnect(m_tempStartConnectionPoint, m_tempEndConnectionPoint)){
                         m_tempConnector->setTemporaryEnd(mapToScene(event->pos()));
                         setCursor(Qt::ForbiddenCursor);
@@ -169,8 +169,38 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
                 }
             }
 
-            m_shapeUnderCursor = mShape;
-        }
+            m_shapeUnderCursor = shape;
+		} else {
+			if (cp){
+				if (cp->connectors().size() < cp->maxConnections()){
+					QAbstractDiagramPlugin* plugin = QDiagramPluginLoader::plugin(m_connectorStyle.plugin());
+					if (plugin){
+						// Start temporary connector
+						QMap<QString,QVariant> pm;
+						QVariantMap mm;
+						mm["itemType"] = "connector";
+						mm["itemClass"] = m_connectorStyle.shape();
+						mm["plugin"] = plugin->name();
+						pm["uuid"] = "{temp}";
+						pm["style"] = m_connectorStyle.shape();
+						//                        m_tempConnector = mPlugin->createConnector(diagram(), "<temporary>", mProperties);
+						QAbstractDiagramShapeConnector* c = dynamic_cast<QAbstractDiagramShapeConnector*>(plugin->createItem(mm, pm, scene()));
+						if (c && c->canStartWith(cp)){
+							setCursor(Qt::CrossCursor);
+						} else {
+							setCursor(Qt::ForbiddenCursor);
+						}
+						//                    scene()->addItem(cTempConnector);
+					} else {
+						setCursor(Qt::CrossCursor);
+					}
+				} else {
+					setCursor(Qt::ForbiddenCursor);
+				}
+			} else {
+				setCursor(Qt::CrossCursor);
+			}
+		}
     } else {
     }
     QGraphicsView::mouseMoveEvent(event);
@@ -180,31 +210,36 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
 void QDiagramGraphicsView::mousePressEvent( QMouseEvent* event )
 {
     if (event->button() == Qt::LeftButton && m_mode == Connect){
-        QAbstractDiagramShapeConnectionPoint* mPoint = connectionPointAt(event->pos());
-        if (mPoint != 0){
-            if (mPoint->maxConnections() == -1 || mPoint->connections().size() < mPoint->maxConnections()){
-                mPoint->parentItem()->setFlag(QGraphicsItem::ItemIsMovable, false);
-                mPoint->parentItem()->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        QAbstractDiagramShapeConnectionPoint* cp = connectionPointAt(event->pos());
+		m_tempStartConnectionPoint = 0;
+        if (cp != 0){
+            if (cp->maxConnections() == -1 || cp->connections().size() < cp->maxConnections()){
+                cp->parentItem()->setFlag(QGraphicsItem::ItemIsMovable, false);
+                cp->parentItem()->setFlag(QGraphicsItem::ItemIsSelectable, false);
                 if (diagram()){
-                    QAbstractDiagramPlugin* mPlugin = QDiagramPluginLoader::plugin(m_connectorStyle.plugin());
-                    if (mPlugin){
+                    QAbstractDiagramPlugin* plugin = QDiagramPluginLoader::plugin(m_connectorStyle.plugin());
+                    if (plugin){
                         // Start temporary connector
                         QMap<QString,QVariant> pm;
 						QVariantMap mm;
                         mm["itemType"] = "connector";
-						mm["plugin"] = mPlugin->name();
+                        mm["itemClass"] = m_connectorStyle.shape();
+						mm["plugin"] = plugin->name();
                         pm["uuid"] = "{temp}";
                         pm["style"] = m_connectorStyle.shape();
 //                        m_tempConnector = mPlugin->createConnector(diagram(), "<temporary>", mProperties);
-                        m_tempConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(mPlugin->createItem(mm, pm, scene()));
-                        if (m_tempConnector){
+                        m_tempConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(plugin->createItem(mm, pm, scene()));
+						if (m_tempConnector && m_tempConnector->canStartWith(cp)){
 							scene()->addItem(m_tempConnector);
-                            m_tempConnector->setTemporaryStart(mPoint->scenePos() + mPoint->boundingRect().center(), mPoint->orientation());
+                            m_tempConnector->setTemporaryStart(cp->scenePos() + cp->boundingRect().center(), cp->orientation());
                             m_tempConnector->setTemporaryEnd(mapToScene(event->pos()), QDiagramToolkit::ConnectionPointOrientationInvalid);
-                        }
-                        //                    scene()->addItem(cTempConnector);
+		                    m_tempStartConnectionPoint = cp;
+							qDebug() << cp->id();
+						} else {
+							delete m_tempConnector;
+							m_tempConnector = 0;
+						}
                     }
-                    m_tempStartConnectionPoint = mPoint;
                 }
             }
         }

@@ -179,6 +179,8 @@ public:
 protected:
 //    QAbstractDiagramGraphicsItem(const QString & diagramShape, QGraphicsItem* parent = 0);
 
+	void addDynamicProperty(const QString & name, const QVariant & value);
+
     void addProperty(const QString & name, QDiagramToolkit::PropertyType type, bool readOnly, const QVariant & value = QVariant());
 
     void addProperty(const QString & name, QDiagramToolkit::PropertyType type, const QMap<int, QString> &enums, const QVariant & value = QVariant());
@@ -216,7 +218,7 @@ protected:
     void setBrush( const QBrush & brush );
 protected:
 	/**
-	 * Sets the 
+	 * Sets the item's geometry to @p r.
 	 */
 	void changeGeometry(const QRectF & r);
     /**
@@ -228,6 +230,9 @@ protected:
       * This virtual function is called by QAbstractDiagramShape to notify custom items that the scene has changed.
       */
     virtual QVariant itemSceneHasChanged(const QVariant & value);
+	/**
+	 * Restories the item's properties values from the given property map @p.
+	 */
 	virtual void restoreProperties(const QVariantMap & p);
     virtual void updateSizeGripHandles();
 private:

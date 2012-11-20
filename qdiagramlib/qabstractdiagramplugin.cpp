@@ -25,24 +25,26 @@ QAbstractDiagramPlugin::~QAbstractDiagramPlugin()
 {
 }
 
-QPointF QAbstractDiagramPlugin::hotSpot(const QString &name) const
+QPointF QAbstractDiagramPlugin::hotSpot(const QVariantMap & metaData, const QVariantMap & properties) const
 {
+	Q_UNUSED(metaData);
+	Q_UNUSED(properties);
     return QPointF(0, 0);
 }
-
-void QAbstractDiagramPlugin::restoreProperties(QAbstractDiagramGraphicsItem* item, const QMap<QString,QVariant> & properties)
-{
-    if (item == 0){
-        return;
-    }
-    //QMap<QString,QVariant>::const_iterator mIt;
-    //for (mIt = properties.constBegin(); mIt != properties.constEnd(); ++mIt){
-    //    item->setProperty(mIt.key(), mIt.value());
-    //}
-    //if (item->property("shape").toString() != "connection"){
-    //    item->setPos(properties.value("x", 0).toReal(), properties.value("y", 0).toReal());
-    //}
-}
+//
+//void QAbstractDiagramPlugin::restoreProperties(QAbstractDiagramGraphicsItem* item, const QMap<QString,QVariant> & properties)
+//{
+//    if (item == 0){
+//        return;
+//    }
+//    //QMap<QString,QVariant>::const_iterator mIt;
+//    //for (mIt = properties.constBegin(); mIt != properties.constEnd(); ++mIt){
+//    //    item->setProperty(mIt.key(), mIt.value());
+//    //}
+//    //if (item->property("shape").toString() != "connection"){
+//    //    item->setPos(properties.value("x", 0).toReal(), properties.value("y", 0).toReal());
+//    //}
+//}
 
 QList<QAction*> QAbstractDiagramPlugin::shapeActions(const QString &style) const
 {

@@ -177,6 +177,12 @@ QVariant QAbstractDiagramShape::itemPositionHasChanged( const QVariant & value )
     return v;
 }
 
+QVariant QAbstractDiagramShape::itemSceneHasChanged(const QVariant & value)
+{
+    updateConnectionPoints();
+	return value;
+}
+
 QVariant QAbstractDiagramShape::itemSelectedHasChanged( const QVariant & value )
 {
     update();

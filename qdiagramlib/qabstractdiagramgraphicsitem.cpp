@@ -78,6 +78,12 @@ void QAbstractDiagramGraphicsItem::bringToFront()
 	setZValue(100);
 }
 
+void QAbstractDiagramGraphicsItem::addDynamicProperty(const QString & name, const QVariant & value)
+{
+	m_metadata->addProperty(name, QDiagramToolkit::Dynamic, false);
+	m_properties[name] = value;
+}
+
 void QAbstractDiagramGraphicsItem::addProperty(const QString & name, QDiagramToolkit::PropertyType type, bool readOnly, const QVariant & value)
 {
     m_metadata->addProperty(name, type, readOnly);
@@ -587,6 +593,7 @@ bool QAbstractDiagramGraphicsItem::setProperty(const QString & name, const QVari
 	if (!metaProperty.isValid()){
 		QVariant currentValue = m_dynamicProperties.value(name);
 		QVariant newValue = itemPropertyChange(name, value);
+		addDynamicProperty(name, newValue);
 		if (currentValue != newValue){
 			QAbstractDiagram* d = diagram();
 			if (d && !m_blockUndoCommands){

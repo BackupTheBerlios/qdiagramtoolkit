@@ -66,9 +66,10 @@ public:
 
     virtual QStringList groups(QAbstractDiagram* diagram = 0) const = 0;
     /**
-      *
+      * Returns the hot spot for the diagram graphics item specified by the given @p metaData and @p properties.
+	  * @remark The default implementation returns QPoint(0, 0);
       */
-    virtual QPointF hotSpot(const QString & name) const;
+    virtual QPointF hotSpot(const QVariantMap & metaData, const QVariantMap & properties) const;
     /**
       * Returns the icon for the connector or shape specified by the given @p name.
       */
@@ -108,7 +109,7 @@ public:
       */
     virtual QString toolTip(const QString & shape) const = 0;
 protected:
-    void restoreProperties(QAbstractDiagramGraphicsItem* item, const QMap<QString,QVariant> & properties);
+    //void restoreProperties(QAbstractDiagramGraphicsItem* item, const QMap<QString,QVariant> & properties);
 };
 
 Q_DECLARE_INTERFACE(QAbstractDiagramPlugin, "qdiagramlib.plugin/1.0")

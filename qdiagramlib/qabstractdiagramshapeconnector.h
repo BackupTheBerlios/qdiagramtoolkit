@@ -55,7 +55,13 @@ public:
       * The default implemetation returns true.
       */
     virtual bool canConnect(QAbstractDiagramShapeConnectionPoint* start, QAbstractDiagramShapeConnectionPoint* end) const;
-
+	/**
+	 *
+	 */
+	virtual bool canStartWith(QAbstractDiagramShapeConnectionPoint* cp) const;
+	/**
+	 * Disconnects all connector attached to this connection point.
+	 */
     void disconnect();
     /**
       * Returns the end position of this connector.
@@ -118,11 +124,32 @@ protected:
 
     QPointF intersectPoint(QGraphicsItem* item, const QLineF & line) const;
     QPointF intersectPoint(const QPointF & pos, const QPolygonF & diagramShape, const QLineF & line) const;
+	/**
+	 * @remp QAbstractDiagramGraphicsItem::itemPositionChange()
+	 */
+	virtual QVariant itemPositionHasChanged(const QVariant & value);
+	/**
+	 * @remp QAbstractDiagramGraphicsItem::itemPropertyHasChanged()
+	 */
+	virtual QVariant itemPropertyHasChanged( const QString & name, const QVariant & value);
 
 	virtual QVariant itemSceneHasChanged(const QVariant & value);
+	/**
+	 * @remp QAbstractDiagramGraphicsItem
+	 */
+	virtual void restoreProperties(const QVariantMap & p);
 
     void setFrom(QAbstractDiagramShapeConnectionPoint* item);
     void setTo(QAbstractDiagramShapeConnectionPoint* item);
+	/**
+	 * Returns the connector's text item.
+	 */
+	QGraphicsTextItem* textItem() const;
+	/**
+	 * Updates the text item's position and is called from itemPropertyHasChanged().
+	 * @remark The default implementation does nothing.
+	 */
+	virtual void updateTextItemPosition();
 private:
     QAbstractDiagramShapeConnectionPoint* m_connectionPointAtStart;
     QAbstractDiagramShapeConnectionPoint* m_connectionPointAtEnd;
@@ -130,6 +157,7 @@ private:
     QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtStart;
     QPointF m_tempEndPos;
     QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtEnd;
+	QGraphicsTextItem* m_textItem;
 };
 
 Q_DECLARE_METATYPE(QAbstractDiagramShapeConnector*)
