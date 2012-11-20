@@ -19,6 +19,10 @@
 #include "stdafx.h"
 #include "qdiagrammetaenum.h"
 
+#define ADD_ENUM(__m__,__d__,__n__) __m__[__d__::__n__] = QObject::tr(#__n__)
+
+QMap<int, QDiagramMetaEnum> s_enums;
+
 QDiagramMetaEnum::QDiagramMetaEnum()
 {
 }
@@ -29,9 +33,71 @@ QDiagramMetaEnum::QDiagramMetaEnum(const QMap<int, QString> pairs, const QMap<in
 	m_icons = icons;
 }
 
+QDiagramMetaEnum QDiagramMetaEnum::defaultEnum(QDiagramToolkit::PropertyType type)
+{
+	QMap<int, QDiagramMetaEnum>::iterator it = s_enums.find(type);
+	if (it != s_enums.end()){
+		return it.value();
+	}
+	QDiagramMetaEnum e;
+	if (type == QDiagramToolkit::BrushStyle){
+		QMap<int, QString> m;
+		ADD_ENUM(m, Qt, NoBrush);
+		ADD_ENUM(m, Qt, SolidPattern);
+		ADD_ENUM(m, Qt, Dense1Pattern);
+		ADD_ENUM(m, Qt, Dense2Pattern);
+		ADD_ENUM(m, Qt, Dense3Pattern);
+		ADD_ENUM(m, Qt, Dense4Pattern);
+		ADD_ENUM(m, Qt, Dense5Pattern);
+		ADD_ENUM(m, Qt, Dense6Pattern);
+		ADD_ENUM(m, Qt, Dense7Pattern);
+		ADD_ENUM(m, Qt, HorPattern);
+		ADD_ENUM(m, Qt, VerPattern);
+		ADD_ENUM(m, Qt, CrossPattern);
+		ADD_ENUM(m, Qt, BDiagPattern);
+		ADD_ENUM(m, Qt, FDiagPattern);
+		ADD_ENUM(m, Qt, DiagCrossPattern);
+		ADD_ENUM(m, Qt, LinearGradientPattern);
+		ADD_ENUM(m, Qt, ConicalGradientPattern);
+		ADD_ENUM(m, Qt, RadialGradientPattern);
+		ADD_ENUM(m, Qt, TexturePattern);
+		return (*s_enums.insert(type, QDiagramMetaEnum(m)));
+	} else if (type == QDiagramToolkit::Orientation){
+		QMap<int, QString> m;
+		ADD_ENUM(m, Qt, Horizontal);
+		ADD_ENUM(m, Qt, Vertical);
+		return (*s_enums.insert(type, QDiagramMetaEnum(m)));
+	} else if (type == QDiagramToolkit::PenJoinStyle){
+		QMap<int, QString> m;
+		ADD_ENUM(m, Qt, MiterJoin);
+		ADD_ENUM(m, Qt, BevelJoin);
+		ADD_ENUM(m, Qt, RoundJoin);
+		return (*s_enums.insert(type, QDiagramMetaEnum(m)));
+	}
+	return e;
+}
+
+int QDiagramMetaEnum::fromString(QDiagramToolkit::PropertyType type, const QString & text)
+{
+	QDiagramMetaEnum e = defaultEnum(type);
+	if (e.isValid()){
+		for (int i = 0; i < e.keyCount(); i++){
+			if (e.key(i) == text){
+				return e.value(i);
+			}
+		}
+	}
+	return 0;
+}
+
 QIcon QDiagramMetaEnum::icon(int index) const
 {
 	return m_icons.value(index);
+}
+
+int QDiagramMetaEnum::indexOf(int value) const
+{
+	return m_pairs.keys().indexOf(value);
 }
 
 bool QDiagramMetaEnum::isValid() const
@@ -47,9 +113,22 @@ QString QDiagramMetaEnum::key(int index) const
     return QString::null;
 }
 
-int QDiagramMetaEnum::keys() const
+int QDiagramMetaEnum::keyCount() const
 {
     return m_pairs.keys().size();
+}
+
+QString QDiagramMetaEnum::toString(QDiagramToolkit::PropertyType type, int value)
+{
+	QDiagramMetaEnum e = defaultEnum(type);
+	if (e.isValid()){
+		for (int i = 0; i < e.keyCount(); i++){
+			if (e.value(i) == value){
+				return e.key(i);
+			}
+		}
+	}
+	return QString::null;
 }
 
 int QDiagramMetaEnum::value(int index) const

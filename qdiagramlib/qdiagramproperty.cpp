@@ -23,7 +23,6 @@
 #include <qabstractdiagram.h>
 #include <qabstractdiagramgraphicsitem.h>
 
-
 sdDiagramProperty::sdDiagramProperty()
 {
 	diagram = 0;
@@ -198,6 +197,7 @@ bool QDiagramProperty::cast_helper(const QVariant & v, QDiagramToolkit::Property
 		p->setStyle(toPenStyle(v.toMap().value("style", "solid").toString()));
 		p->setColor(QColor(v.toMap().value("color", "#000000").toString()));
 		p->setWidthF(v.toMap().value("width", 1.0).toDouble());
+		p->setJoinStyle(static_cast<Qt::PenJoinStyle>(v.toMap().value("joinStyle", Qt::BevelJoin).toInt()));
 		return true;
 	} else if (t == QDiagramToolkit::Point){
 		if (!v.canConvert(QVariant::Map)){
@@ -411,6 +411,7 @@ QDiagramPropertyBag QDiagramProperty::propertyBag(QDiagramToolkit::PropertyType 
 		b["style"] = QDiagramToolkit::PenStyle;
 	} else if (type == QDiagramToolkit::Pen){
 		b["color"] = QDiagramToolkit::Color;
+		b["joinStyle"] = QDiagramToolkit::PenJoinStyle;
 		b["style"] = QDiagramToolkit::PenStyle;
 		b["width"] = QDiagramToolkit::Double;
 	} else if (type == QDiagramToolkit::Point){
@@ -581,6 +582,7 @@ QVariantMap QDiagramProperty::toMap(const QVariant & v)
 		m["color"] = p.color().name();
 		m["width"] = p.widthF();
 		m["style"] = QDiagramProperty::toString(p.style());
+		m["joinStyle"] = QDiagramMetaEnum::toString(QDiagramToolkit::PenJoinStyle, p.joinStyle());
 	} else if (v.type() == QVariant::RectF){
 		m["x"] = v.toRectF().x();
 		m["y"] = v.toRectF().y();
@@ -762,6 +764,11 @@ QString QDiagramProperty::toString(Qt::BrushStyle style)
 		return "radialGradient";
 	}
     return "solid";
+}
+
+QString QDiagramProperty::toString(Qt::PenJoinStyle style)
+{
+	return QString();
 }
 
 QString QDiagramProperty::toString(Qt::PenStyle style)

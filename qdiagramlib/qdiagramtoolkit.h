@@ -39,7 +39,9 @@ public:
 		FontFamily,
         Int, /*!< an Int. */
         LineStyle, /*!< a line style */
+		Orientation,
         Pen,
+		PenJoinStyle,
 		PenStyle,
         Percent, /*!< a percentage value */
         Point, /*!< a point */
@@ -49,7 +51,8 @@ public:
         String, /*!< a QString. */
         Text,
         TextStyle, /*!< a text style */
-        UUID /*!< an UUID. */
+        UUID, /*!< an UUID. */
+		Dynamic
     };
 	QDiagramToolkit(QObject *parent);
 	~QDiagramToolkit();

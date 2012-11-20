@@ -56,6 +56,12 @@ public:
       * Returns true if the property has been added during run-time. Otherwise false.
       */
     bool isDynamic() const;
+	/**
+	 * Returns true if the given @p type is an enumeration. Otherwise false.
+	 */
+	bool isEnumeration(QDiagramToolkit::PropertyType type) const;
+
+	bool isFlag(QDiagramToolkit::PropertyType type) const;
     /**
       * Returns true if the property is read-only. Otherwise false.
       */

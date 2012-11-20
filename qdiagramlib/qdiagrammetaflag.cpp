@@ -19,13 +19,39 @@
 #include "stdafx.h"
 #include "qdiagrammetaflag.h"
 
+#define ADD_FLAG(__m__,__d__,__n__) __m__[__d__::__n__] = QObject::tr(#__n__)
+
+QMap<int, QDiagramMetaFlag> s_flags;
+
 QDiagramMetaFlag::QDiagramMetaFlag()
 {
 }
 
-QDiagramMetaFlag::QDiagramMetaFlag(const QMap<int, QString> &flags)
+QDiagramMetaFlag::QDiagramMetaFlag(const QMap<int, QString> & flags)
 {
     m_flags = flags;
+}
+
+QDiagramMetaFlag QDiagramMetaFlag::defaultFlag(QDiagramToolkit::PropertyType type)
+{
+	QMap<int, QDiagramMetaFlag>::iterator it = s_flags.find(type);
+	if (it != s_flags.end()){
+		return it.value();
+	}
+	QDiagramMetaFlag f;
+	if (type == QDiagramToolkit::Alignment){
+		QMap<int, QString> m;
+		ADD_FLAG(m, Qt, AlignLeft);
+		ADD_FLAG(m, Qt, AlignRight);
+		ADD_FLAG(m, Qt, AlignHCenter);
+		ADD_FLAG(m, Qt, AlignJustify);
+		ADD_FLAG(m, Qt, AlignTop);
+		ADD_FLAG(m, Qt, AlignBottom);
+		ADD_FLAG(m, Qt, AlignVCenter);
+		ADD_FLAG(m, Qt, AlignAbsolute);
+		return (*s_flags.insert(type, QDiagramMetaFlag(m)));
+	}
+	return f;
 }
 
 int QDiagramMetaFlag::keyCount() const
@@ -44,6 +70,17 @@ QString QDiagramMetaFlag::key(int index) const
 bool QDiagramMetaFlag::isValid() const
 {
     return !m_flags.isEmpty();
+}
+
+QStringList QDiagramMetaFlag::matchingKeys(int value) const
+{
+	QStringList l;
+	for (int i = 0; i < m_flags.keys().size(); i++){
+		if (value & m_flags.keys().at(i)){
+			l << m_flags.values().at(i);
+		}
+	}
+	return l;
 }
 
 int QDiagramMetaFlag::value(int index) const

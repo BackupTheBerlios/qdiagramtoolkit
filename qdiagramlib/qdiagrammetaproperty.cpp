@@ -20,6 +20,8 @@
 #include "qdiagrammetaproperty.h"
 #include "qdiagramproperty.h"
 
+QMap<QString, QMap<QString,int>> s_enums;
+
 QDiagramMetaProperty::QDiagramMetaProperty()
 {
     m_dynamic = false;
@@ -38,6 +40,7 @@ QDiagramMetaProperty::QDiagramMetaProperty(int objectType, const QString & name,
 
 	QDiagramPropertyBag b = QDiagramProperty::propertyBag(type);
 	for (QDiagramPropertyBag::Iterator it = b.begin(); it != b.end(); ++it){
+
 		m_properties.append(QDiagramMetaProperty(-1, it.key(), static_cast<QDiagramToolkit::PropertyType>(it.value()), readOnly));
 	}
 }
@@ -59,12 +62,18 @@ QDiagramMetaProperty::QDiagramMetaProperty(int objectType, const QString &name, 
 
 QDiagramMetaEnum QDiagramMetaProperty::enumerator() const
 {
-    return m_enum;
+	if (m_enum.isValid()){
+		return m_enum;
+	}
+	return QDiagramMetaEnum::defaultEnum(m_type);
 }
 
 QDiagramMetaFlag QDiagramMetaProperty::flag() const
 {
-    return m_flag;
+	if (m_flag.isValid()){
+		return m_flag;
+	}
+	return QDiagramMetaFlag::defaultFlag(m_type);
 }
 
 int QDiagramMetaProperty::indexOf(const QString & name) const
@@ -80,6 +89,22 @@ int QDiagramMetaProperty::indexOf(const QString & name) const
 bool QDiagramMetaProperty::isDynamic() const
 {
     return m_dynamic;
+}
+
+bool QDiagramMetaProperty::isEnumeration(QDiagramToolkit::PropertyType type) const
+{
+	if (type == QDiagramToolkit::PenJoinStyle){
+		return true;
+	}
+	return false;
+}
+
+bool QDiagramMetaProperty::isFlag(QDiagramToolkit::PropertyType type) const
+{
+	if (type == QDiagramToolkit::Orientation){
+		return true;
+	}
+	return false;
 }
 
 bool QDiagramMetaProperty::isReadOnly() const

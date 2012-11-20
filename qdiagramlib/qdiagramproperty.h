@@ -132,6 +132,8 @@ public:
 
 	static Qt::PenStyle toPenStyle(const QString & text);
 
+	static QString toString(Qt::PenJoinStyle style);
+
 	static QString toString(Qt::PenStyle style);
 	
 	static QString toString(Qt::BrushStyle style);

@@ -19,21 +19,43 @@
 #ifndef QDIAGRAMGRAPHICSITEMMETAFLAG_H
 #define QDIAGRAMGRAPHICSITEMMETAFLAG_H
 
-class QDiagramMetaFlag
+#include <qdiagramlib_global.h>
+#include <qdiagramtoolkit.h>
+
+//! The QDiagramMetaFlag class provides meta-data about a flag
+class QDIAGRAMLIBSHARED_EXPORT QDiagramMetaFlag
 {
 public:
+	/**
+	 * Constructs an invalid QDiagramMetaFlag.
+	 */
     QDiagramMetaFlag();
-
+	/**
+	 * Returns true if the meta flag object contains a valid (not empty) definition. Otherwise false.
+	 */
     bool isValid() const;
-
+	/**
+	 * Return the number of keys.
+	 */
     int keyCount() const;
-
+	/**
+	 * Returns the key at the specified @p index or QString::null is not key exists at @p index.
+	 */
     QString key(int index) const;
-
+	/**
+	 * Returns a list of keys matching the given @p value.
+	 */
+	QStringList matchingKeys(int value) const;
+	/**
+	 * Returns the value at the given @p index or 0 if no value exists at @p index.
+	 */
     int value(int index) const;
 private:
     friend class QDiagramMetaProperty;
     QDiagramMetaFlag(const QMap<int, QString> &flags);
+
+	static QDiagramMetaFlag defaultFlag(QDiagramToolkit::PropertyType type);
+
     QMap<int,QString> m_flags;
 };
 
