@@ -21,6 +21,14 @@
 
 #include "qdiagramscript_global.h"
 
+/**
+ * @page scripting Scripting
+ * The QDiagramToolkit provides an extenstion for the Qt Script environment.
+ * @code{.cpp}
+ * QScriptEngine* engine = new QScriptEngine();
+ * engine->importExtension("qdiagramtoolkit");
+ * @endcode
+ */
 class QDiagramScriptExtensionPlugin : public QScriptExtensionPlugin
 {
 	Q_OBJECT
