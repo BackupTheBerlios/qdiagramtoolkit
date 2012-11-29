@@ -38,7 +38,11 @@ class QDIAGRAMLIBSHARED_EXPORT QDiagramView : public QWidget
 {
     Q_OBJECT
 	Q_PROPERTY(Qt::Alignment alignment READ alignment WRITE setAlignment)
-//    Q_PROPERTY(Qt::ContextMenuPolicy )
+	//! @property(gridVisible)
+	/**
+	 * This property holds whether the grid is visible.
+	 */
+	Q_PROPERTY(bool gridVisible READ isGridVisible WRITE setGridVisible)
     //! @property(interactive)
     /**
       * This property holds whether the view allowed scene interaction.
@@ -46,8 +50,8 @@ class QDIAGRAMLIBSHARED_EXPORT QDiagramView : public QWidget
       * By default, this property is true.
       */
 	Q_PROPERTY(bool interactive READ isInteractive WRITE setInteractive)
-
-    Q_PROPERTY(bool snapToGrid READ snapToGrid WRITE setSnapToGrid)
+	//! @property(snapToGrid)
+    Q_PROPERTY(bool snapToGrid READ isSnapToGridEnabled WRITE setSnapToGridEnabled)
 
     Q_PROPERTY(QSizeF snapSize READ snapSize WRITE setSnapSize)
 public:
@@ -70,19 +74,24 @@ public:
       * Returns whether text can be pasted from the clipboard into the diagram view.
       */
     bool canPaste();
+
+	QDiagramGraphicsView* currentView() const;
 	/**
      * Returns a pointer to the diagram that is currently visualized in the view. If no diagram is currently visualized, 0 is returned.
      * @see setDiagram()
 	 */
 	QDiagram* diagram() const;
-    /**
-      * Returns the diagram graphics view.
-      */
-    QDiagramGraphicsView* graphicsView() const;
 	/**
-     * Return true if the view allows interaction with the scene.
+     * Return true if the view in the current pag allows interaction with the scene.
 	 */
 	bool isInteractive() const;
+
+	bool isGridVisible() const;
+    /**
+      * Returns true if snap to grid is enabled. Otherwise false.
+      * @see setSnapToGridEnaled()
+      */
+    bool isSnapToGridEnabled() const;
     /**
       * Maps the point @p point, which is in this scene's coordinate system, to the scene's grid coordinate system, and returns the mapped coordinate.
       */
@@ -103,10 +112,6 @@ public:
       * @see snapGridSize()
       */
     void setSnapSize(const QSizeF & size);
-    /**
-      * If @p on is true, snap to grid is enabled.
-      */
-    void setSnapToGrid(bool on);
 	/**
 	 * Returns the shape at position @p pos, which is in viewport coordinates. If there are several shapes at this position, this function returns the topmost shape.
 	 */
@@ -116,13 +121,22 @@ public:
       * @see setSnapSize()
       */
     QSizeF snapSize() const;
-    /**
-      * Returns true if snap to grid is enabled. Otherwise false.
-      * @see setSnapToGrid()
-      */
-    bool snapToGrid() const;
+	/**
+	 * Returns the current page's zoom level in percent.
+	 * @see setZoom()
+	 */
+	int zoom() const;
 signals:
+	void diagramTabContextMenuRequested(const QPoint & pos);
+
     void graphicsViewContextMenuRequested(const QPoint & screenPos, const QPointF & scenePos);
+
+	void mousePositionChanged(const QPointF & pos);
+	/**
+	 * This signal is emitted when the current pages's zoom level has changed. The new zoom level in @p percent is passed.
+	 * @see zoom(), setZoom()
+	 */
+	void zoomChanged(int percent);
 public slots:
     /**
       * Copies any selected items to the clipboard.
@@ -130,18 +144,35 @@ public slots:
 	void copy();
     /**
       * Copies the selected items to the clipboard and deletes them from the diagram.
-      * If there is no selected text nothing happens.
+      * If there is no selected item nothing happens.
       * @see copy() paste()
       */
     void cut();
+
+	void insertPage();
     /**
       * Pastes the mimedata from the clipboard into the diagram view at the current cursor position.
-      * If there is no text in the clipboard nothing happens.
+      * If there is no item in the clipboard nothing happens.
       * To change the behavior of this function, i.e. to modify what QDiagramView can paste and how it is being pasted, reimplement the virtual canInsertFromMimeData() and insertFromMimeData() functions.
       * @see cut(), copy()
       */
 	void paste();
-    void setMode(QDiagramGraphicsView::Mode mode);
+
+	void setConnectorStyle(const QDiagramConnectorStyle & style);
+
+	void setGridVisible(bool visible);
+	/**
+	 * Sets the pointer mode to the current page to @p mode.
+	 */
+    void setMode(QDiagramToolkit::PointerMode mode);
+    /**
+      * If @p on is true, snap to grid is enabled.
+      */
+    void setSnapToGridEnabled(bool on);
+	/**
+	 * sets the zoom factor of the view to the factor specified in @p percent.
+	 */
+	void setZoom(int percent);
 protected:
     /**
       * This function returns true if the contents of the MIME data object, specified by source, can be decoded and inserted into the diagram view.
@@ -153,16 +184,15 @@ protected:
       */
     void insertFromMimeData(const QMimeData* source, const QPointF & scenePos);
 private slots:
+	void currentPageChanged(int index);
     void graphicsViewContextMenuRequestHandler(const QPoint & pos);
-    void gridToolButtonChanged(int id);
 	void itemRestored(QAbstractDiagramGraphicsItem* item);
     void modeMenuActionTriggered();
-    void mouseScenePositionChanged(const QPointF & pos);
-    void zoomChanged(int percent);
-    void zoomSliderValueChanged(int value);
+	void pageAdded(int index);
 private:
+	Qt::Alignment m_alignment;
     QDiagram* m_diagram;
-    bool m_snapToGrid;
+	bool m_interactive;
     QSizeF m_snapSize;
 
     Ui::QDiagramView *ui;

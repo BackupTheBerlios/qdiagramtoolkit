@@ -145,6 +145,11 @@ QVariantMap QAbstractDiagramShapeConnectionPoint::customConnectorProperties() co
 	return QVariantMap();
 }
 
+QAbstractDiagramShapeConnector* QAbstractDiagramShapeConnectionPoint::defaultConnector() const
+{
+	return 0;
+}
+
 QPointF QAbstractDiagramShapeConnectionPoint::diagramPos() const
 {
     return scenePos() + boundingRect().center();

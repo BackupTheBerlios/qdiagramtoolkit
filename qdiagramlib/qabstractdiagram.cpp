@@ -29,18 +29,22 @@
 QAbstractDiagram::QAbstractDiagram(QObject *parent) :
     QObject(parent)
 {
+	m_index = 0;
 	m_styleSheet = new QDiagramStyleSheet(this);
-    m_scene = new QAbstractDiagramScene(this);
-    m_scene->setSceneRect(0, 0, 841, 1189);
-    m_undostack = new QUndoStack(this);
+	blockSignals(true);
+	addPage(tr("Diagram1"));
+	blockSignals(false);
+	//m_pages.at(m_index) = new QAbstractDiagramScene(this);
+ //   m_pages.at(m_index).page->setSceneRect(0, 0, 841, 1189);
+	m_undostack = new QUndoStack(this);
 
-	m_layers = new QDiagramLayers(this);
+	//m_layers = new QDiagramLayers(this);
 
     connect(m_undostack, SIGNAL(indexChanged(int)), SLOT(undoStackIndexChanged(int)));
 
-    connect(m_scene, SIGNAL(itemMoved(QGraphicsItem*,QPointF,QPointF)), this, SLOT(itemMoved(QGraphicsItem*,QPointF,QPointF)));
-    // Forward signals
-    connect(m_scene, SIGNAL(selectionChanged()), SIGNAL(selectionChanged()));
+    //connect(m_pages.at(m_index), SIGNAL(itemMoved(QGraphicsItem*,QPointF,QPointF)), this, SLOT(itemMoved(QGraphicsItem*,QPointF,QPointF)));
+    //// Forward signals
+    //connect(m_pages.at(m_index), SIGNAL(selectionChanged()), SIGNAL(selectionChanged()));
 }
 
 QAbstractDiagram::~QAbstractDiagram()
@@ -51,6 +55,26 @@ QAbstractDiagram::~QAbstractDiagram()
 void QAbstractDiagram::addItemContextMenuAction(QAction *action)
 {
     m_standardItemContextMenuActions.append(action);
+}
+
+int QAbstractDiagram::addPage(const QString & name)
+{
+	pageData p;
+	p.layers = new QDiagramLayers(this);
+	p.page = new QAbstractDiagramScene(this);
+	if (name.isNull()){
+		p.page->setName(tr("Diagram%1").arg(m_pages.size() + 1));
+	} else {
+		p.page->setName(name);
+	}
+    p.page->setSceneRect(0, 0, 841, 1189);
+	m_pages << p;
+
+    connect(p.page, SIGNAL(itemMoved(QGraphicsItem*,QPointF,QPointF)), this, SLOT(itemMoved(QGraphicsItem*,QPointF,QPointF)));
+    connect(p.page, SIGNAL(selectionChanged()), SIGNAL(selectionChanged()));
+
+	emit pageAdded(m_pages.size() - 1);
+	return m_pages.size() - 1;
 }
 
 void QAbstractDiagram::addPlugin(const QString & name)
@@ -65,9 +89,14 @@ QString QAbstractDiagram::author() const
     return m_author;
 }
 
+QStringList QAbstractDiagram::blockedShapes() const
+{
+	return QStringList();
+}
+
 void QAbstractDiagram::clearSelection()
 {
-    Q_FOREACH(QGraphicsItem* i, m_scene->items()){
+    Q_FOREACH(QGraphicsItem* i, m_pages.at(m_index).page->items()){
 		i->setSelected(false);
 	}
 }
@@ -75,13 +104,18 @@ void QAbstractDiagram::clearSelection()
 QList<QAbstractDiagramShapeConnector*> QAbstractDiagram::connectors() const
 {
     QList<QAbstractDiagramShapeConnector*> mConnections;
-    Q_FOREACH(QGraphicsItem* mItem, m_scene->items()){
+    Q_FOREACH(QGraphicsItem* mItem, m_pages.at(m_index).page->items()){
         QAbstractDiagramShapeConnector* mConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(mItem);
         if (mConnector){
             mConnections.append(mConnector);
         }
     }
     return mConnections;
+}
+
+int QAbstractDiagram::currentPage() const
+{
+	return m_index;
 }
 
 QVariant QAbstractDiagram::defaultValue(QDiagramToolkit::PropertyType type) const
@@ -119,12 +153,12 @@ QList<QDiagramEndOfLineStyle> QAbstractDiagram::endOfLineStyles() const
 
 QPointF QAbstractDiagram::gridPos(const QPointF & point) const
 {
-    QPointF mPos(point);
-    if (m_scene && m_scene->isSnapToGridEnabled()){
-        mPos.setX(m_scene->gridSize().width() * (int)(mPos.x() / m_scene->gridSize().width()));
-        mPos.setY(m_scene->gridSize().height() * (int)(mPos.y() / m_scene->gridSize().height()));
+    QPointF p(point);
+	if (m_pages.at(m_index).page->isSnapToGridEnabled()){
+        p.setX(m_pages.at(m_index).page->gridSize().width() * (int)(p.x() / m_pages.at(m_index).page->gridSize().width()));
+        p.setY(m_pages.at(m_index).page->gridSize().height() * (int)(p.y() / m_pages.at(m_index).page->gridSize().height()));
     }
-    return mPos;
+    return p;
 }
 
 QAbstractDiagramGraphicsItem* QAbstractDiagram::findItemByUuid( const QString & uuid ) const
@@ -132,12 +166,22 @@ QAbstractDiagramGraphicsItem* QAbstractDiagram::findItemByUuid( const QString & 
     if (uuid.isEmpty()){
         return 0;
     }
-    Q_FOREACH(QAbstractDiagramGraphicsItem* mItem, items()){
-        if (mItem->uuid() == uuid){
-            return mItem;
+    Q_FOREACH(QAbstractDiagramGraphicsItem* i, items()){
+        if (i->uuid() == uuid){
+            return i;
         }
     }
     return 0;
+}
+
+int QAbstractDiagram::indexOf(QAbstractDiagramScene* page) const
+{
+	for (int i = 0; i < m_pages.size(); i++){
+		if (m_pages.at(i).page == page){
+			return i;
+		}
+	}
+	return -1;
 }
 
 bool QAbstractDiagram::isModified() const
@@ -145,21 +189,49 @@ bool QAbstractDiagram::isModified() const
     return !m_undostack->isClean();
 }
 
-QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::items() const
+bool QAbstractDiagram::isSnapToGridEnabled() const
 {
-    QList<QAbstractDiagramGraphicsItem*> mItems;
-    Q_FOREACH(QGraphicsItem* mGraphicsItem, m_scene->items()){
-        QAbstractDiagramGraphicsItem* mDiagramItem = dynamic_cast<QAbstractDiagramGraphicsItem*>(mGraphicsItem);
-        if (mDiagramItem){
-            mItems.append(mDiagramItem);
-        }
-    }
-    return mItems;
+	return m_pages.at(m_index).page->isSnapToGridEnabled();
 }
 
-QDiagramLayers* QAbstractDiagram::layers() const
+QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::items(int page) const
 {
-	return m_layers;
+    QList<QAbstractDiagramGraphicsItem*> items;
+	for (int i = 0; i < m_pages.size(); i++){
+		if (page == -1 || i == page){
+			Q_FOREACH(QGraphicsItem* mGraphicsItem, m_pages.at(i).page->items()){
+				QAbstractDiagramGraphicsItem* mDiagramItem = dynamic_cast<QAbstractDiagramGraphicsItem*>(mGraphicsItem);
+				if (mDiagramItem){
+					items.append(mDiagramItem);
+				}
+			}
+			if (i == page){
+				break;
+			}
+		}
+    }
+    return items;
+}
+
+QDiagramLayers* QAbstractDiagram::layers(int page) const
+{
+	if (page < m_pages.size()){
+		return m_pages.at(page).layers;
+	}
+	return 0;
+}
+
+QAbstractDiagramScene* QAbstractDiagram::page(int index) const
+{
+	if (index < m_pages.size()){
+		return m_pages.at(index).page;
+	}
+	return 0;
+}
+
+int QAbstractDiagram::pageCount() const
+{
+	return m_pages.size();
 }
 
 QStringList QAbstractDiagram::plugins() const
@@ -207,14 +279,23 @@ void QAbstractDiagram::undoStackIndexChanged(int index)
     emit contentsChanged();
 }
 
-QAbstractDiagramScene* QAbstractDiagram::scene() const
+QAbstractDiagramScene* QAbstractDiagram::scene(int page) const
 {
-    return m_scene;
+    return m_pages.at(m_index).page;
 }
 
 void QAbstractDiagram::setAuthor(const QString &author)
 {
     m_author = author;
+}
+
+void QAbstractDiagram::setCurrentIndex(int index)
+{
+	if (index < m_pages.size()){
+		m_index = index;
+		emit currentPageChanged(m_index);
+		emit currentPageChanged(m_pages.at(m_index).page->name());
+	}
 }
 
 void QAbstractDiagram::setTitle(const QString & title)
@@ -224,8 +305,8 @@ void QAbstractDiagram::setTitle(const QString & title)
 
 QAbstractDiagramShape* QAbstractDiagram::shape(const QString & uuid) const
 {
-    Q_FOREACH(QGraphicsItem* graphicsItem, m_scene->items()){
-        QAbstractDiagramShape* s = dynamic_cast<QAbstractDiagramShape*>(graphicsItem);
+    Q_FOREACH(QGraphicsItem* i, m_pages.at(m_index).page->items()){
+        QAbstractDiagramShape* s = dynamic_cast<QAbstractDiagramShape*>(i);
         if (s && s->uuid() == uuid){
             return s;
         }
@@ -236,8 +317,8 @@ QAbstractDiagramShape* QAbstractDiagram::shape(const QString & uuid) const
 QList<QAbstractDiagramShape*> QAbstractDiagram::shapes() const
 {
 	QList<QAbstractDiagramShape*> l;
-    Q_FOREACH(QGraphicsItem* graphicsItem, m_scene->items()){
-        QAbstractDiagramShape* s = dynamic_cast<QAbstractDiagramShape*>(graphicsItem);
+    Q_FOREACH(QGraphicsItem* i, m_pages.at(m_index).page->items()){
+        QAbstractDiagramShape* s = dynamic_cast<QAbstractDiagramShape*>(i);
 		if (s){
 			l << s;
 		}
@@ -255,7 +336,7 @@ void QAbstractDiagram::select(const QString & uuid)
 
 void QAbstractDiagram::selectAll()
 {
-    Q_FOREACH(QGraphicsItem* i, m_scene->items()){
+    Q_FOREACH(QGraphicsItem* i, m_pages.at(m_index).page->items()){
 		i->setSelected(true);
 	}
 }
@@ -263,8 +344,8 @@ void QAbstractDiagram::selectAll()
 QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::selectedItems() const
 {
     QList<QAbstractDiagramGraphicsItem*> items;
-    Q_FOREACH(QGraphicsItem* graphicsItem, m_scene->selectedItems()){
-        QAbstractDiagramGraphicsItem* item = dynamic_cast<QAbstractDiagramGraphicsItem*>(graphicsItem);
+    Q_FOREACH(QGraphicsItem* i, m_pages.at(m_index).page->selectedItems()){
+        QAbstractDiagramGraphicsItem* item = dynamic_cast<QAbstractDiagramGraphicsItem*>(i);
         if (item){
              items.append(item);
         }
@@ -275,6 +356,11 @@ QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::selectedItems() const
 QColor QAbstractDiagram::selectionColor() const
 {
     return QColor(Qt::magenta);
+}
+
+void QAbstractDiagram::setSnapToGridEnabled(bool on)
+{
+	m_pages.at(m_index).page->setSnapToGridEnabled(on);
 }
 
 QList<QAction *> QAbstractDiagram::standardItemContextMenuActions() const
@@ -289,8 +375,8 @@ QDiagramStyleSheet* QAbstractDiagram::styleSheet() const
 
 void QAbstractDiagram::takeItem(QAbstractDiagramGraphicsItem *item)
 {
-	m_layers->remove(item);
-    m_scene->removeItem(item);
+	m_pages.at(m_index).layers->remove(item);
+    m_pages.at(m_index).page->removeItem(item);
 }
 
 QString QAbstractDiagram::title() const
@@ -300,5 +386,5 @@ QString QAbstractDiagram::title() const
 
 QUndoStack* QAbstractDiagram::undoStack() const
 {
-    return m_undostack;
+	return m_undostack;
 }

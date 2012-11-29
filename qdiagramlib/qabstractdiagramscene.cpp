@@ -73,9 +73,9 @@ bool QAbstractDiagramScene::isSnapToGridEnabled() const
 QAbstractDiagramGraphicsItem* QAbstractDiagramScene::item( const QString & uuid ) const
 {
     Q_FOREACH(QGraphicsItem* mGraphicsItem, items()){
-        QAbstractDiagramGraphicsItem* mDiagramItem = dynamic_cast<QAbstractDiagramGraphicsItem*>(mGraphicsItem);
-        if (mDiagramItem && mDiagramItem->uuid() == uuid){
-            return mDiagramItem;
+        QAbstractDiagramGraphicsItem* i = dynamic_cast<QAbstractDiagramGraphicsItem*>(mGraphicsItem);
+        if (i && i->uuid() == uuid){
+            return i;
         }
     }
     return 0;
@@ -107,6 +107,11 @@ void QAbstractDiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     QGraphicsScene::mouseReleaseEvent(event);
 }
 
+QString QAbstractDiagramScene::name() const
+{
+	return m_name;
+}
+
 QColor QAbstractDiagramScene::selectionColor() const
 {
     return m_selectionColor;
@@ -117,7 +122,17 @@ void QAbstractDiagramScene::setGridSize( const QSize & size )
     m_gridSize = size;
 }
 
+void QAbstractDiagramScene::setName(const QString & name)
+{
+	m_name = name;
+}
+
 void QAbstractDiagramScene::setSelectionColor(const QColor & color)
 {
     m_selectionColor = color;
+}
+
+void QAbstractDiagramScene::setSnapToGridEnabled(bool on)
+{
+	m_snapToGrid = on;
 }

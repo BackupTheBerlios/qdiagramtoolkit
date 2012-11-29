@@ -2,15 +2,32 @@
 #define QDIAGRAMTOOLKIT_H
 
 #include <QObject>
+#include <QMetaType>
 
 #include "qdiagramlib_global.h"
 
+/**
+ * @defgroup plugins The QDiagram Standard Plugins
+ * @defgroup widgets The QDiagram Widgets
+ * @mainpage The QDiagram Toolkit
+ * \tableofcontents
+ * @section intro Introduction
+ * @page plugins Plugins
+ * @section ifplugins Plugin Interface
+ * @subsection customplugins Custom Plugins
+ * @page scripting Scripting
+ * @page qdesigner Qt Designer Plugin
+ * @page widgets QDiagram Widgets
+ */
 class QDIAGRAMLIBSHARED_EXPORT QDiagramToolkit : public QObject
 {
 	Q_OBJECT
 	Q_ENUMS(ConnectionPointOrientation)
+	Q_ENUMS(PointerMode)
 	Q_ENUMS(PropertyType)
 public:
+	QDiagramToolkit(QObject *parent);
+	~QDiagramToolkit();	
     //! This enum describes the orientation of a connection point.
     enum ConnectionPointOrientation {
         North,
@@ -19,8 +36,12 @@ public:
         West,
         ConnectionPointOrientationInvalid
     };
+	enum PointerMode {
+		SelectItemsPointer,
+		ConnectItemsPointer
+	};
     /**
-      * This enum type defines the types of variable that a qdiagrammetaproperty.h can contain.
+      * This enum type defines the types of variable that a QDiagramMetaProperty can contain.
       */
     enum PropertyType {
         PropertyTypeInvalid, /*!< no type. */
@@ -52,15 +73,12 @@ public:
         Text,
         TextStyle, /*!< a text style */
         UUID, /*!< an UUID. */
-		Dynamic
+		Dynamic /*!< a user-defined type */
     };
-	QDiagramToolkit(QObject *parent);
-	~QDiagramToolkit();
-
 private:
-	
 };
 
 Q_DECLARE_METATYPE(QDiagramToolkit::PropertyType)
+Q_DECLARE_METATYPE(QDiagramToolkit::PointerMode)
 
 #endif // QDIAGRAMTOOLKIT_H

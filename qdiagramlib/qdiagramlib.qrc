@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/qdiagram">
+        <file alias="snap.disabled">resources/snap_disabled.ico</file>
+        <file alias="snap.enabled">resources/snap_enabled.ico</file>
         <file alias="grid.visible">resources/showgrid.png</file>
         <file alias="grid.invisible">resources/hidegrid.png</file>
         <file alias="zoom.out">resources/zoomout.png</file>

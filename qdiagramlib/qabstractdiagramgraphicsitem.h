@@ -250,6 +250,7 @@ private:
 
     QList<QAction*> m_actions;
     bool m_blockUndoCommands;
+	int m_index;
     QDiagramMetaData* m_metadata;
 
     QBrush m_brush;

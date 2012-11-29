@@ -1,5 +1,5 @@
 /******************************************************************************
-** Copyright (C) 2011 Martin Hoppe martin@2x2hoppe.de
+** Copyright (C) 2012 Martin Hoppe martin@2x2hoppe.de
 **
 ** This file is part of the QDiagram Toolkit (qdiagramlib)
 **
@@ -31,33 +31,9 @@ QDiagramView::QDiagramView(QWidget *parent) :
 {
     ui->setupUi(this);
     m_diagram = 0;
-    m_snapToGrid = true;
+	m_interactive = true;
     m_snapSize = QSizeF(13, 13);
-
-    ui->modePushButton->setIcon(QIcon(":/qdiagram/cursor.default"));
-    QButtonGroup* g = new QButtonGroup(this);
-    g->addButton(ui->showGridToolButton);
-    g->setId(ui->showGridToolButton, 0);
-    ui->showGridToolButton->setChecked(true);
-    g->addButton(ui->hideGridToolButton);
-    g->setId(ui->hideGridToolButton, 1);
-    g->setExclusive(true);
-
-    connect(g, SIGNAL(buttonClicked(int)), SLOT(gridToolButtonChanged(int)));
-
-    ui->mousePositionLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    ui->mousePositionLabel->setFixedWidth(QFontMetrics(QApplication::font(ui->mousePositionLabel)).width("000,000"));
-    ui->mousePositionLabel->setFixedWidth(QFontMetrics(QApplication::font(ui->mousePositionLabel)).width("000,000"));
-
-    ui->zoomLabel->setFixedWidth(QFontMetrics(QApplication::font(ui->zoomLabel)).width("100%"));
-
-    connect(ui->diagramGraphicsView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
-    connect(ui->diagramGraphicsView, SIGNAL(mouseScenePositionChanged(QPointF)), this, SLOT(mouseScenePositionChanged(QPointF)));
-    connect(ui->diagramGraphicsView, SIGNAL(zoomChanged(int)), this, SLOT(zoomChanged(int)));
-    connect(ui->zoomInToolButton, SIGNAL(clicked()), ui->diagramGraphicsView, SLOT(zoomIn()));
-    connect(ui->zoomOutToolButton, SIGNAL(clicked()), ui->diagramGraphicsView, SLOT(zoomOut()));
-
-	setAlignment(Qt::AlignLeft | Qt::AlignTop);
+	connect(ui->tabWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SIGNAL(diagramTabContextMenuRequested(QPoint)));
 }
 
 QDiagramView::~QDiagramView()
@@ -65,37 +41,9 @@ QDiagramView::~QDiagramView()
     delete ui;
 }
 
-void QDiagramView::addConnector(const QDiagramConnectorStyle & style)
-{
-    QAction* a = 0;
-    if (ui->modePushButton->menu() == 0){
-        QMenu* m = new QMenu(this);
-        ui->modePushButton->setMenu(m);
-        a = m->addAction(QIcon(":/qdiagram/cursor.default"), tr("Selection"), this, SLOT(modeMenuActionTriggered()));
-        a->setData("invalid");
-    }
-    a = ui->modePushButton->menu()->addAction(style.icon(), style.name());
-    a->setData(qVariantFromValue(style));
-    connect(a, SIGNAL(triggered()), SLOT(modeMenuActionTriggered()));
-}
-
-void QDiagramView::addConnector(const QIcon & icon, const QString & text, const QString & shape)
-{
-    QAction* a = 0;
-    if (ui->modePushButton->menu() == 0){
-        QMenu* m = new QMenu(this);
-        ui->modePushButton->setMenu(m);
-        a = m->addAction(QIcon(":/qdiagram/cursor.default"), tr("Selection"), this, SLOT(modeMenuActionTriggered()));
-        a->setData("invalid");
-    }
-    a = ui->modePushButton->menu()->addAction(icon, text);
-    a->setData(shape);
-    connect(a, SIGNAL(triggered()), SLOT(modeMenuActionTriggered()));
-}
-
 Qt::Alignment QDiagramView::alignment() const
 {
-    return ui->diagramGraphicsView->alignment();
+    return m_alignment;
 }
 
 bool QDiagramView::canInsertFromMimeData(const QMimeData *source) const
@@ -130,6 +78,16 @@ void QDiagramView::copy()
     }
 }
 
+void QDiagramView::currentPageChanged(int index)
+{
+	ui->tabWidget->setCurrentIndex(index);
+}
+
+QDiagramGraphicsView* QDiagramView::currentView() const
+{
+	return ui->tabWidget->findChild<QDiagramGraphicsView*>();
+}
+
 void QDiagramView::cut()
 {
     copy();
@@ -142,16 +100,11 @@ QDiagram* QDiagramView::diagram() const
 {
 	return m_diagram;
 }
-
-QDiagramGraphicsView* QDiagramView::graphicsView() const
-{
-    return ui->diagramGraphicsView;
-}
-
-void QDiagramView::gridToolButtonChanged(int id)
-{
-    ui->diagramGraphicsView->showGrid(id == 0 ? true : false);
-}
+//
+//QDiagramGraphicsView* QDiagramView::graphicsView() const
+//{
+//    return ui->diagramGraphicsView;
+//}
 
 void QDiagramView::insertFromMimeData(const QMimeData *source, const QPointF &scenePos)
 {
@@ -184,14 +137,36 @@ void QDiagramView::insertFromMimeData(const QMimeData *source, const QPointF &sc
     }
 }
 
+void QDiagramView::insertPage()
+{
+	diagram()->addPage(tr("Diagram%1").arg(diagram()->pageCount() + 1));
+}
+
 bool QDiagramView::isInteractive() const
 {
-    return ui->diagramGraphicsView->isInteractive();
+    return m_interactive;
+}
+
+bool QDiagramView::isGridVisible() const
+{
+	QDiagramGraphicsView* v = currentView();
+	if (v){
+		return v->isGridVisible();
+	}
+	return false;
+}
+
+bool QDiagramView::isSnapToGridEnabled() const
+{
+	if (m_diagram){
+		return m_diagram->isSnapToGridEnabled();
+	}
+	return false;
 }
 
 void QDiagramView::itemRestored(QAbstractDiagramGraphicsItem* item)
 {
-	if (ui->diagramGraphicsView->mode() == QDiagramGraphicsView::Connect){
+	if (currentView()->mode() == QDiagramToolkit::ConnectItemsPointer){
 		QAbstractDiagramShape* s = qgraphicsitem_cast<QAbstractDiagramShape*>(item);
 		if (s){
 			s->setConnectionPointsVisible(true);
@@ -209,22 +184,43 @@ QPointF QDiagramView::mapToGrid(const QPointF &point)
 
 void QDiagramView::modeMenuActionTriggered()
 {
-    QAction* mAction = qobject_cast<QAction*>(sender());
-    if (mAction){
-        ui->modePushButton->setIcon(mAction->icon());
-        QDiagramConnectorStyle mStyle = qvariant_cast<QDiagramConnectorStyle>(mAction->data());
-        if (mStyle.isNull()){
-            ui->diagramGraphicsView->setMode(QDiagramGraphicsView::Select);
-        } else {
-            ui->diagramGraphicsView->setConnectorStyle(mStyle);
-            ui->diagramGraphicsView->setMode(QDiagramGraphicsView::Connect);
-        }
-    }
+    //QAction* mAction = qobject_cast<QAction*>(sender());
+    //if (mAction){
+    //    ui->modePushButton->setIcon(mAction->icon());
+    //    QDiagramConnectorStyle mStyle = qvariant_cast<QDiagramConnectorStyle>(mAction->data());
+    //    if (mStyle.isNull()){
+    //        ui->diagramGraphicsView->setMode(QDiagramGraphicsView::Select);
+    //    } else {
+    //        ui->diagramGraphicsView->setConnectorStyle(mStyle);
+    //        ui->diagramGraphicsView->setMode(QDiagramGraphicsView::Connect);
+    //    }
+    //}
 }
 
-void QDiagramView::mouseScenePositionChanged(const QPointF & pos)
+void QDiagramView::pageAdded(int index)
 {
-    ui->mousePositionLabel->setText(QString("%1,%2").arg(pos.toPoint().x()).arg(pos.toPoint().y()));
+	QWidget* p = new QWidget();
+	p->setObjectName(QString::fromUtf8("page%1").arg(index));
+	QVBoxLayout* l = new QVBoxLayout(p);
+	l->setContentsMargins(0, 0, 0, 0);
+	l->setObjectName(QString::fromUtf8("verticalLayoutPage%1").arg(index));
+	QDiagramGraphicsView* v = new QDiagramGraphicsView(p);
+	v->setObjectName(QString::fromUtf8("diagramGraphicsViewPage%1").arg(index));
+	v->setMinimumSize(QSize(250, 0));
+	v->setContextMenuPolicy(Qt::CustomContextMenu);
+	v->setDragMode(QGraphicsView::RubberBandDrag);
+	v->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+	v->setRubberBandSelectionMode(Qt::ContainsItemShape);
+	l->addWidget(v);
+
+	connect(v, SIGNAL(zoomChanged(int)), this, SIGNAL(zoomChanged(int)));
+	connect(v, SIGNAL(mouseScenePositionChanged(QPointF)), this, SIGNAL(mousePositionChanged(QPointF)));
+	connect(v, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
+
+	ui->tabWidget->addTab(p, m_diagram->page(index)->name());
+	v->setScene(m_diagram->page(index));
+	v->setAlignment(m_alignment);
+	v->ensureVisible(0, 0, 1, 1);
 }
 
 void QDiagramView::paste()
@@ -235,17 +231,18 @@ void QDiagramView::paste()
         p = a->data().toPointF();
     }
     if (p.isNull()){
-        p = ui->diagramGraphicsView->mapToScene(ui->diagramGraphicsView->viewport()->mapFromGlobal(QCursor::pos()));
+        p = currentView()->mapToScene(currentView()->viewport()->mapFromGlobal(QCursor::pos()));
     }
-    if (m_snapToGrid){
-        p = mapToGrid(p);
-    }
+	// TODO snapToGrid
+    //if (m_snapToGrid){
+    //    p = mapToGrid(p);
+    //}
     insertFromMimeData(QApplication::clipboard()->mimeData(), p);
 }
 
 void QDiagramView::setAlignment(Qt::Alignment alignment)
 {
-	ui->diagramGraphicsView->setAlignment(alignment);
+	m_alignment = alignment;
 }
 
 void QDiagramView::setDiagram(QDiagram *diagram)
@@ -261,26 +258,49 @@ void QDiagramView::setDiagram(QDiagram *diagram)
 		return;
 	}
     m_diagram = diagram;
-    ui->diagramGraphicsView->setScene(m_diagram->scene());
-    // Clear current mode selection menu
-	delete ui->modePushButton->menu();
-	ui->modePushButton->setMenu(0);
-    QAbstractDiagramPlugin* mPlugin = 0;
-    Q_FOREACH(QString mName, m_diagram->plugins()){
-        mPlugin = QDiagramPluginLoader::plugin(mName, true);
-        if (mPlugin){
-            Q_FOREACH(QDiagramConnectorStyle mStyle, mPlugin->connectors()){
-                addConnector(mStyle);
-            }
-        }
-    }
+
+	connect(m_diagram, SIGNAL(currentPageChanged(int)), this, SLOT(currentPageChanged(int)));
+	connect(m_diagram, SIGNAL(pageAdded(int)), this, SLOT(pageAdded(int)));
 	connect(m_diagram, SIGNAL(itemRestored(QAbstractDiagramGraphicsItem*)), this, SLOT(itemRestored(QAbstractDiagramGraphicsItem*)));
+	while(ui->tabWidget->count() > 0){
+		delete ui->tabWidget->widget(0);
+	}
+	for (int i = 0; i < m_diagram->pageCount(); i++){
+		QWidget* p = new QWidget();
+		p->setObjectName(QString::fromUtf8("page%1").arg(i));
+        QVBoxLayout* l = new QVBoxLayout(p);
+        l->setContentsMargins(0, 0, 0, 0);
+        l->setObjectName(QString::fromUtf8("verticalLayoutPage%1").arg(i));
+        QDiagramGraphicsView* v = new QDiagramGraphicsView(p);
+        v->setObjectName(QString::fromUtf8("diagramGraphicsViewPage%1").arg(i));
+        v->setMinimumSize(QSize(250, 0));
+        v->setContextMenuPolicy(Qt::CustomContextMenu);
+        v->setDragMode(QGraphicsView::RubberBandDrag);
+        v->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+        v->setRubberBandSelectionMode(Qt::ContainsItemShape);
+        l->addWidget(v);
+		
+		connect(v, SIGNAL(zoomChanged(int)), this, SIGNAL(zoomChanged(int)));
+	    connect(v, SIGNAL(mouseScenePositionChanged(QPointF)), this, SIGNAL(mousePositionChanged(QPointF)));
+	    connect(v, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
+
+		ui->tabWidget->addTab(p, m_diagram->page(i)->name());
+		v->setScene(m_diagram->page(i));
+        v->setAlignment(m_alignment);
+		v->ensureVisible(0, 0, 1, 1);
+	}
 }
 
 void QDiagramView::setInteractive(bool allowed)
 {
-	ui->modePushButton->setVisible(allowed);
-    ui->diagramGraphicsView->setInteractive(allowed);
+	m_interactive = allowed;
+
+	for (int i = 0; i < ui->tabWidget->count(); i++){
+		QDiagramGraphicsView* v = ui->tabWidget->findChild<QDiagramGraphicsView*>();
+		if (v){
+			v->setInteractive(m_interactive);
+		}
+	}
 }
 
 void QDiagramView::setSnapSize(const QSizeF &size)
@@ -288,14 +308,9 @@ void QDiagramView::setSnapSize(const QSizeF &size)
     m_snapSize = size;
 }
 
-void QDiagramView::setSnapToGrid(bool on)
-{
-    m_snapToGrid = on;
-}
-
 QAbstractDiagramShape* QDiagramView::shapeAt(const QPoint & pos) const
 {
-	return qgraphicsitem_cast<QAbstractDiagramShape*>(graphicsView()->itemAt(pos));
+	return qgraphicsitem_cast<QAbstractDiagramShape*>(currentView()->itemAt(pos));
 }
 
 QSizeF QDiagramView::snapSize() const
@@ -303,38 +318,58 @@ QSizeF QDiagramView::snapSize() const
     return m_snapSize;
 }
 
-bool QDiagramView::snapToGrid() const
+void QDiagramView::setConnectorStyle(const QDiagramConnectorStyle & style)
 {
-    return m_snapToGrid;
+	QDiagramGraphicsView* v = currentView();
+	if (v){
+	    v->setConnectorStyle(style);
+	}
 }
 
-void QDiagramView::setMode(QDiagramGraphicsView::Mode mode)
+void QDiagramView::setGridVisible(bool visible)
 {
-    ui->diagramGraphicsView->setMode(mode);
+	QDiagramGraphicsView* v = currentView();
+	if (v){
+		v->showGrid(visible);
+	}
 }
 
-void QDiagramView::graphicsViewContextMenuRequestHandler(const QPoint &pos)
+void QDiagramView::setMode(QDiagramToolkit::PointerMode mode)
 {
-    emit graphicsViewContextMenuRequested(pos, ui->diagramGraphicsView->mapToScene(pos));
+	QDiagramGraphicsView* v = currentView();
+	if (v){
+	    v->setMode(mode);
+	}
 }
 
-void QDiagramView::zoomChanged(int percent)
+void QDiagramView::setSnapToGridEnabled(bool on)
 {
-    ui->zoomSlider->blockSignals(true);
-    if (percent < 200){
-        ui->zoomSlider->setValue(percent / 25 - 1);
-    } else {
-        ui->zoomSlider->setValue(percent / 200 + 6);
-    }
-    ui->zoomSlider->blockSignals(false);
-    ui->zoomLabel->setText(QString("%1%").arg(percent));
+	if (m_diagram){
+	    m_diagram->setSnapToGridEnabled(on);
+	}
 }
 
-void QDiagramView::zoomSliderValueChanged(int value)
+void QDiagramView::graphicsViewContextMenuRequestHandler(const QPoint & pos)
 {
-    if (value < 7){
-        ui->diagramGraphicsView->setZoom(25 * (value + 1));
-    } else {
-        ui->diagramGraphicsView->setZoom(200 * (value - 6));
-    }
+	QDiagramGraphicsView* v = qobject_cast<QDiagramGraphicsView*>(sender());
+	if (v){
+		emit graphicsViewContextMenuRequested(pos, v->mapToScene(pos));
+	}
+}
+
+void QDiagramView::setZoom(int percent)
+{
+	QDiagramGraphicsView* v = currentView();
+	if (v){
+		v->setZoom(percent);
+	}
+}
+
+int QDiagramView::zoom() const
+{
+	QDiagramGraphicsView* v = currentView();
+	if (v){
+		return v->zoom();
+	}
+	return 100;
 }

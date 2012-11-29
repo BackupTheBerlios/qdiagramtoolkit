@@ -1,5 +1,5 @@
 /******************************************************************************
-** Copyright (C) 2011 Martin Hoppe martin@2x2hoppe.de
+** Copyright (C) 2012 Martin Hoppe martin@2x2hoppe.de
 **
 ** This file is part of the QDiagram Toolkit (qdiagramlib)
 **
@@ -16,39 +16,32 @@
 ** You should have received a copy of the GNU Lesser General Public License
 ** along with qdialgramlib.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-#ifndef QDIAGRAMSHAPETOOLBOX_H
-#define QDIAGRAMSHAPETOOLBOX_H
-
-#include "qdiagramlib_global.h"
+#ifndef QDIAGRAMVIEWZOOMSLIDER_H
+#define QDIAGRAMVIEWZOOMSLIDER_H
 
 #include <QWidget>
 
-class QAbstractDiagram;
-class QAbstractDiagramPlugin;
+#include "qdiagramlib_global.h"
 
-namespace Ui {
-    class QDiagramShapeToolBox;
-}
+namespace Ui { class QDiagramViewZoomSlider; };
 
-class QDiagram;
-
-class QDIAGRAMLIBSHARED_EXPORT QDiagramShapeToolBox : public QWidget
+class QDIAGRAMLIBSHARED_EXPORT QDiagramViewZoomSlider : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit QDiagramShapeToolBox(QWidget *parent = 0);
-    ~QDiagramShapeToolBox();
-
-    void addShapes(QAbstractDiagram* diagram);
-
-    void addShapes(QAbstractDiagramPlugin* plugin, const QStringList & blockedShapes);
-    /**
-      * Removes the shape specified by the given @p name from the tool box.
-      */
-    void removeShape(const QString & name, const QString & plugin);
+	QDiagramViewZoomSlider(QWidget *parent = 0);
+	~QDiagramViewZoomSlider();
+public slots:
+	void setZoom(int percent);
+signals:
+	void zoomChanged(int percent);
+private slots:
+	void sliderValueChanged(int value);
+	void zoomInToolButtonClicked();
+	void zoomOutToolButtonClicked();
 private:
-    Ui::QDiagramShapeToolBox *ui;
+	Ui::QDiagramViewZoomSlider* ui;
 };
 
-#endif // QDIAGRAMSHAPETOOLBOX_H
+#endif // QDIAGRAMVIEWZOOMSLIDER_H

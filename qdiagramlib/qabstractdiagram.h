@@ -55,6 +55,8 @@ class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagram : public QObject
       * @see author() setAuthor()
       */
     Q_PROPERTY(QString author READ author WRITE setAuthor)
+	//! @property(snapToGrid)
+	Q_PROPERTY(bool snapToGrid READ isSnapToGridEnabled WRITE setSnapToGridEnabled)
     //! @property(title)
     /**
       * This property holds the diagram title.
@@ -72,13 +74,13 @@ public:
       */
     explicit QAbstractDiagram(QObject* parent = 0);
 	/**
-	 * 
+	 * Destroys the QAbstractDiagram object.
 	 */
 	~QAbstractDiagram();
-    /**
-      * Adds a new item from.
-      */
-    virtual QAbstractDiagramGraphicsItem* addItem(const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin = "default") = 0;
+	/**
+	 * Adds a new page, sets the name to @p name and returns the page's ID.
+	 */
+	int addPage(const QString & name = QString::null);
     /**
       * Adds the action @p action to the list of actions used to create a standard context menu.
       */
@@ -87,7 +89,7 @@ public:
       * Adds the plugin specified by the given @p name to the list of available plugins.
       * @see plugins()
       */
-    void addPlugin(const QString & name);
+	void addPlugin(const QString & name);
     /**
       * Adds a shape of the given @p style.
       */
@@ -102,6 +104,10 @@ public:
       */
     QString author() const;
 	/**
+	 *
+	 */
+	virtual QStringList blockedShapes() const;
+	/**
 	 * Clears the current selection.
 	 */
 	void clearSelection();
@@ -109,6 +115,11 @@ public:
       *
       */
     QList<QAbstractDiagramShapeConnector*> connectors() const;
+	/**
+	 * Returns the index of the current page.
+	 * @see setCurrentIndex(), pageCount()
+	 */
+	int currentPage() const;
 	/**
 	 * Returns the default value for the property of the specified @p type.
 	 * If no default value can be retrived, defaultValue return an invalid QVariant.
@@ -130,18 +141,32 @@ public:
       * Returns the coordinates of the given @point aligned to the current grid settings.
       */
     QPointF gridPos(const QPointF & point) const;
+	/**
+	 * Returns the index of @p page, or -1 if the item does not exist.
+	 */
+	int indexOf(QAbstractDiagramScene* page) const;
     /**
       * Returns true if the diagram is modified. Otherwise false.
       */
     bool isModified() const;
+
+	bool isSnapToGridEnabled() const;
     /**
       * Returns a list of diagram items.
       */
-    QList<QAbstractDiagramGraphicsItem*> items() const;
+    QList<QAbstractDiagramGraphicsItem*> items(int page = -1) const;
 	/**
 	 *
 	 */
-	QDiagramLayers* layers() const;
+	QDiagramLayers* layers(int page = 0) const;
+	/**
+	 * Returns the diagram page at the given @p index or 0 if no page exists at @p index.
+	 */
+	QAbstractDiagramScene* page(int index) const;
+	/**
+	 * Returns the number of pages in this diagram.
+	 */
+	int pageCount() const;
     /**
       * Returns the name of the plugin providing this diagram.
       */
@@ -160,9 +185,9 @@ public:
       */
     virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties ) = 0;
     /**
-      * Returns the current scene for the diagram.
+      * Returns the scene at the given @p page.
       */
-    QAbstractDiagramScene* scene() const;
+    QAbstractDiagramScene* scene(int page = 0) const;
 	/**
 	 * Selects the item specified by the given @p uuid.
 	 */
@@ -186,6 +211,10 @@ public:
       * @see author
       */
     void setAuthor(const QString & author);
+	/**
+	 * Sets the current index to @p index.
+	 */
+	void setCurrentIndex(int index);
 	/**
 	 * Sets the diagram @p title.
 	 * @see title()
@@ -231,10 +260,22 @@ signals:
       *
       */
     void contextMenuRequested(const QPointF & scenePos, const QPointF & screenPos);
+	/**
+	 * This signal is sent whenever the currentPage in the diagram changes either through user interaction or programmatically. The item's index is passed.
+	 */
+	void currentPageChanged(int index);
+	/**
+	 * This signal is sent whenever the currentPage in the diagram changes either through user interaction or programmatically. The page's name is passed.
+	 */
+	void currentPageChanged(const QString & name);
     /**
       * This signal is emitted when an item has been added to the diagram. The item's @p uuid is passed.
       */
     void itemAdded(const QString & uuid);
+	/**
+	 * This signal is emitted whenever a page is added to the diagram. The page's index is passed as parameter.
+	 */
+	void pageAdded(int index);
     /**
       * This signal is emitted by QDiagram whenever the selection changes. You can call selectedItems() to get the new list of selected items.
       */
@@ -245,6 +286,8 @@ signals:
     void shapeAdded(const QString & uuid);
 public slots:
     void print(QPrinter* printer);
+
+	void setSnapToGridEnabled(bool on);
 protected:
     friend class QAbstractDiagramScene;
     virtual void dragEnterEventHandler( QGraphicsSceneDragDropEvent* event ) = 0;
@@ -285,11 +328,17 @@ protected slots:
 private slots:
     void undoStackIndexChanged(int index);
 private:
+	typedef struct {
+		QDiagramLayers* layers;
+		QAbstractDiagramScene* page;
+	} pageData;
+	QList<pageData> m_pages;
     QString m_author;
+	int m_index;
     QList<QAction*> m_standardItemContextMenuActions;
-	QDiagramLayers* m_layers;
     QStringList m_plugins;
-    QAbstractDiagramScene* m_scene;
+	
+    //QAbstractDiagramScene* m_scene;
 	QDiagramStyleSheet* m_styleSheet;
 	QString m_title;
     QUndoStack* m_undostack;

@@ -32,6 +32,7 @@ class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramScene : public QGraphicsScene
 {
     Q_OBJECT
     Q_PROPERTY(QSize gridSize READ gridSize WRITE setGridSize)
+	Q_PROPERTY(QString name READ name WRITE setName)
     Q_PROPERTY(QColor selectionColor READ selectionColor WRITE setSelectionColor)
 public:
     explicit QAbstractDiagramScene(QAbstractDiagram* diagram = 0);
@@ -53,14 +54,26 @@ public:
       * Returns the item speicified by the given @p uuid or 0 if @p uuid cannot be retrieved.
       */
     QAbstractDiagramGraphicsItem* item( const QString & uuid ) const;
+	/**
+	 * Returns the name of this page.
+	 * @see setName()
+	 */
+	QString name() const;
     /**
       * Sets the grid @p size.
       */
     void setGridSize( const QSize & size );
+	/**
+	 * Sets the page's name to @p name.
+	 * @name()
+	 */
+	void setName(const QString & name);
     /**
       * Sets the selection @p color.
       */
     void setSelectionColor(const QColor & color);
+
+	void setSnapToGridEnabled(bool on);
 signals:
     void handleConnectItemsEvent(QAbstractDiagramShape* from, QAbstractDiagramShape* to, const QMap<QString,QVariant> & properties);
     void handleDragEnterEvent(QGraphicsSceneDragDropEvent *event);
@@ -81,6 +94,7 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 private:
+	QString m_name;
     QGraphicsItem* m_movingItem;
     QPointF m_oldPos;
     QColor m_selectionColor;

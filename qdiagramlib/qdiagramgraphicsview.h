@@ -30,9 +30,14 @@
 class QAbstractDiagramShape;
 class QDiagramShape;
 
+//! The QDiagramGraphicsView class provides a widget for displaying the contents of a QDiagram.
 class QDIAGRAMLIBSHARED_EXPORT QDiagramGraphicsView : public QGraphicsView
 {
     Q_OBJECT
+	//! @property(gridColor)
+	/**
+	 * This property holds the current grid color.
+	 */
     Q_PROPERTY(QColor gridColor READ gridColor WRITE setGridColor)
     //! @property(gridVisible)
     /**
@@ -42,10 +47,6 @@ class QDIAGRAMLIBSHARED_EXPORT QDiagramGraphicsView : public QGraphicsView
     Q_PROPERTY(bool gridVisible READ isGridVisible WRITE showGrid)
     //    Q_PROPERTY(int zoom READ zoom WRITE setZoom)
 public:
-    enum Mode {
-        Select,
-        Connect
-    };
     explicit QDiagramGraphicsView(QWidget* parent = 0);
     /**
       * Returns a pointer to the diagram that is currently visualized in the view. If no diagram is currently visualized, 0 is returned.
@@ -63,9 +64,7 @@ public:
       */
     bool isGridVisible() const;
 
-	Mode mode() const;
-
-    void setConnectorStyle(const QDiagramConnectorStyle & style);
+	QDiagramToolkit::PointerMode mode() const;
 
     void setConnectorName(const QString & name);
 
@@ -76,15 +75,13 @@ public:
       */
     void setGridColor( const QColor & color );
 
-    void setMode(QDiagramGraphicsView::Mode mode);
-    /**
-      * Sets the zoom factor in @p percent and scales the view.
-      **/
-    void setZoom( int percent );
+    void setMode(QDiagramToolkit::PointerMode mode);
     /**
       * Returns the shape at the given @p pos or 0 if no shape is found.
       */
     QAbstractDiagramShape* shapeAt(const QPoint & pos) const;
+
+	int zoom() const;
 public slots:
     /**
       * Zooms in on the diagram.
@@ -94,6 +91,14 @@ public slots:
       * Zooms out on the diagram.
       */
     void zoomOut();
+
+    void setConnectorStyle(const QDiagramConnectorStyle & style);
+
+    void showGrid(bool on);
+    /**
+      * Sets the zoom factor in @p percent and scales the view.
+      **/
+    void setZoom( int percent );
 signals:
     void connectorCompleted(QAbstractDiagramShapeConnector* connector);
     void connectorDropped(QAbstractDiagramShapeConnector* connector);
@@ -105,8 +110,6 @@ signals:
       * This signal is emitted when the view's scale has changed.
       */
     void zoomChanged(int percent);
-public slots:
-    void showGrid( bool on );
 protected:
     /**
       * Returns the connection point at position @p pos, which is in viewport coordinates.
@@ -124,7 +127,7 @@ private:
     QString m_connectorName;
     QDiagramConnectorStyle m_connectorStyle;
     QColor m_gridColor;
-    Mode m_mode;
+    QDiagramToolkit::PointerMode m_mode;
     bool m_showGrid;
     QSizeF m_gridSize;
     QPointF m_pos;

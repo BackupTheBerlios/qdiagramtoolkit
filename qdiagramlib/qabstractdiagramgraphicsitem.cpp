@@ -289,14 +289,7 @@ QVariant QAbstractDiagramGraphicsItem::itemChange(GraphicsItemChange change, con
 {
     QVariant mValue(value);
     if (change == QGraphicsItem::ItemPositionChange){
-        QPointF p = itemPositionChange(value).toPointF();
-        if (p.x() < 0){
-            p.setX(0);
-        }
-        if (p.y() <0){
-            p.setY(0);
-        }
-		return p;
+		return itemPositionChange(value);
     } else if (change == QGraphicsItem::ItemPositionHasChanged){
         return itemPositionHasChanged(value);
     } else if (change == QGraphicsItem::ItemSceneHasChanged){
@@ -317,15 +310,27 @@ QVariant QAbstractDiagramGraphicsItem::itemGeometryHasChanged(const QVariant & v
 	return value;
 }
 
-QVariant QAbstractDiagramGraphicsItem::itemPositionChange( const QVariant & value )
+QVariant QAbstractDiagramGraphicsItem::itemPositionChange(const QVariant & value)
 {
-	if (diagram() && diagram()->layers()->isLocked(this)){
-		return pos();
+	QPointF p = value.toPointF();
+	if (p.x() < 0){
+		p.setX(0);
 	}
-    return value;
+	if (p.y() <0){
+		p.setY(0);
+	}
+	if (diagram()){
+		if (diagram()->layers()->isLocked(this)){
+			return pos();
+		}
+		if (diagram()->isSnapToGridEnabled()){
+			p = diagram()->gridPos(p);
+		}
+	}
+	return p;
 }
 
-QVariant QAbstractDiagramGraphicsItem::itemPositionHasChanged( const QVariant & value )
+QVariant QAbstractDiagramGraphicsItem::itemPositionHasChanged(const QVariant & value)
 {
     QVariantMap m = m_properties.value("geometry").toMap();
     m["x"] = value.toPointF().x();
@@ -456,21 +461,11 @@ QMap<QString,QVariant> QAbstractDiagramGraphicsItem::properties() const
 
 QDiagramProperty QAbstractDiagramGraphicsItem::property( const QString & name ) const
 {
-	QDiagramMetaProperty metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
-	if (!metaProperty.isValid()){
-//		return m_dynamicProperties.value(name, QVariant());
+	QDiagramMetaProperty m = m_metadata->property(m_metadata->indexOfProperty(name));
+	if (m.isValid()){
+		return QDiagramProperty(this, m_metadata->indexOfProperty(name));
 	}
-	QVariant v = m_properties.value(name);
-	if (v.isNull()){
-		QAbstractDiagram* d = diagram();
-		if (d){
-//			return d->defaultValue(metaProperty.type());
-		} else {
-//			return QDiagramMetaData::defaultValue(metaProperty.type());
-		}
-	}
-//    return v;
-	return QDiagramProperty(this, m_metadata->indexOfProperty(name));
+	return QDiagramProperty();
 }
 
 QVariant QAbstractDiagramGraphicsItem::propertyValue(int index) const
@@ -490,24 +485,6 @@ QVariant QAbstractDiagramGraphicsItem::propertyValue(int index) const
 	}
 	return v;
 }
-
-//QVariant QAbstractDiagramGraphicsItem::property( const QString & name ) const
-//{
-//	qdiagrammetaproperty.h metaProperty = m_metadata->property(m_metadata->indexOfProperty(name));
-//	if (!metaProperty.isValid()){
-//		return m_dynamicProperties.value(name, QVariant());
-//	}
-//	QVariant v = m_properties.value(name);
-//	if (v.isNull()){
-//		QAbstractDiagram* d = diagram();
-//		if (d){
-//			return d->defaultValue(metaProperty.type());
-//		} else {
-//			return QDiagramMetaData::defaultValue(metaProperty.type());
-//		}
-//	}
-//    return v;
-//}
 
 void QAbstractDiagramGraphicsItem::restoreProperties(const QVariantMap & p)
 {

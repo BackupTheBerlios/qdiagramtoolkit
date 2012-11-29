@@ -28,6 +28,7 @@
 class QAbstractDiagramShape;
 class sdAbstractDiagramShapeConnectionPoint;
 
+// The QAbstractDiagramShapeConnectionPoint is the base class for all connection points.
 class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramShapeConnectionPoint : public QGraphicsItem
 {
 public:
@@ -93,6 +94,11 @@ public:
 	 * @remark The default implementation returns QVariantMap().
 	 */
 	virtual QVariantMap customConnectorProperties() const;
+	/**
+	 * Returns the default connector defined for this connection point.
+	 * @note The default implementation return 0.
+	 */
+	virtual QAbstractDiagramShapeConnector* defaultConnector() const;
     /**
       * Returns the connector's position in the diagram.
       */

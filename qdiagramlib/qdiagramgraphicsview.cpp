@@ -33,7 +33,7 @@ QDiagramGraphicsView::QDiagramGraphicsView(QWidget* parent) :
 {
     m_currentZoom = 100;
     m_gridColor = QColor(Qt::lightGray);
-    m_mode = QDiagramGraphicsView::Select;
+	m_mode = QDiagramToolkit::SelectItemsPointer;
     m_showGrid = true;
     m_gridSize = QSizeF(13, 13);
     m_shapeUnderCursor = 0;
@@ -46,9 +46,9 @@ QDiagramGraphicsView::QDiagramGraphicsView(QWidget* parent) :
 
 QAbstractDiagramShapeConnectionPoint* QDiagramGraphicsView::connectionPointAt(const QPoint & pos)
 {
-    Q_FOREACH(QGraphicsItem* mItem, items(pos)){
-        if (mItem->type() == QAbstractDiagramShapeConnectionPoint::Type){
-            return dynamic_cast<QAbstractDiagramShapeConnectionPoint*>(mItem);
+    Q_FOREACH(QGraphicsItem* i, items(pos)){
+        if (i->type() == QAbstractDiagramShapeConnectionPoint::Type){
+            return dynamic_cast<QAbstractDiagramShapeConnectionPoint*>(i);
         }
     }
     return 0;
@@ -83,10 +83,10 @@ void QDiagramGraphicsView::drawBackground(QPainter* painter, const QRectF & rect
         lines.append(QLine(realLeft, y, realRight, y));
 
     //painter->setRenderHint(QPainter::Antialiasing);
-    QPen mPen(m_gridColor);
-    mPen.setStyle(Qt::DotLine);
-    mPen.setCosmetic(true);
-    painter->setPen(mPen);
+    QPen p(m_gridColor);
+    p.setStyle(Qt::DotLine);
+    p.setCosmetic(true);
+    painter->setPen(p);
     painter->drawLines(lines.data(), lines.size());
 }
 
@@ -97,14 +97,14 @@ QColor QDiagramGraphicsView::gridColor() const
 
 QPointF QDiagramGraphicsView::gridPosition( const QPointF & pos, const QSizeF & grid ) const
 {
-    QPointF mPos(pos);
-    int mX = (pos.x() / grid.width());
-    mX *= grid.width();
-    int mY = (pos.y() / grid.height());
-    mY *= grid.height();
-    mPos.setX(mX - 1);
-    mPos.setY(mY - 1);
-    return mPos;
+    QPointF p(pos);
+    int x = (pos.x() / grid.width());
+    x *= grid.width();
+    int y = (pos.y() / grid.height());
+    y *= grid.height();
+    p.setX(x - 1);
+    p.setY(y - 1);
+    return p;
 }
 
 bool QDiagramGraphicsView::isGridVisible() const
@@ -112,14 +112,14 @@ bool QDiagramGraphicsView::isGridVisible() const
     return m_showGrid;
 }
 
-QDiagramGraphicsView::Mode QDiagramGraphicsView::mode() const
+QDiagramToolkit::PointerMode QDiagramGraphicsView::mode() const
 {
 	return m_mode;
 }
 
 void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
-    if (m_mode == QDiagramGraphicsView::Connect){
+    if (m_mode == QDiagramToolkit::ConnectItemsPointer){
 		QAbstractDiagramShapeConnectionPoint* cp = connectionPointAt(event->pos());
 		if (event->buttons().testFlag(Qt::LeftButton) && m_tempConnector){
 			QAbstractDiagramShape* shape = 0;
@@ -131,11 +131,6 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
 					cp = 0;
 				}
 			}
-            // Hide previous shape's connection points
-            if (m_shapeUnderCursor && m_shapeUnderCursor != shape){
-//
-//                m_shapeUnderCursor->setConnectionPointsVisible(false);
-            }
             // Show current shape's connection points
             if (shape){
                 shape->setConnectionPointsVisible(true);
@@ -143,7 +138,7 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
             //
             if (shape == 0){
                 m_tempEndConnectionPoint = 0;
-                m_tempConnector->setTemporaryEnd(mapToScene(event->pos()));
+				m_tempConnector->setTemporaryEnd(diagram()->gridPos(mapToScene(event->pos())));
                 setCursor(Qt::CrossCursor);
             } else {
                 if (cp == 0 && m_tempEndConnectionPoint == 0){
@@ -209,7 +204,7 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
 
 void QDiagramGraphicsView::mousePressEvent( QMouseEvent* event )
 {
-    if (event->button() == Qt::LeftButton && m_mode == Connect){
+	if (event->button() == Qt::LeftButton && m_mode == QDiagramToolkit::ConnectItemsPointer){
         QAbstractDiagramShapeConnectionPoint* cp = connectionPointAt(event->pos());
 		m_tempStartConnectionPoint = 0;
         if (cp != 0){
@@ -266,13 +261,7 @@ void QDiagramGraphicsView::mouseReleaseEvent(QMouseEvent* event )
         delete m_tempConnector;
         m_tempConnector = 0;
         //
-        if (m_tempStartConnectionPoint){
-//            m_tempStartConnectionPoint->parentShape()->setConnectionPointsVisible(false);
-        }
         m_tempStartConnectionPoint = 0;
-        if (m_tempEndConnectionPoint){
-//            m_tempEndConnectionPoint->parentShape()->setConnectionPointsVisible(false);
-        }
         m_tempEndConnectionPoint = 0;
         m_shapeUnderCursor = 0;
         //
@@ -297,7 +286,7 @@ void QDiagramGraphicsView::setGridColor( const QColor & color )
     update();
 }
 
-void QDiagramGraphicsView::setMode(QDiagramGraphicsView::Mode mode)
+void QDiagramGraphicsView::setMode(QDiagramToolkit::PointerMode mode)
 {
     m_mode = mode;
     if (m_tempConnector){
@@ -308,11 +297,11 @@ void QDiagramGraphicsView::setMode(QDiagramGraphicsView::Mode mode)
     Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram()->items()){
         QAbstractDiagramShape* s = qgraphicsitem_cast<QAbstractDiagramShape*>(i);
         if (s){
-            s->setConnectionPointsVisible(QDiagramGraphicsView::Connect == mode);
+            s->setConnectionPointsVisible(QDiagramToolkit::ConnectItemsPointer == mode);
         }
     }
 
-    if (m_mode == QDiagramGraphicsView::Connect){
+    if (m_mode == QDiagramToolkit::ConnectItemsPointer){
         setCursor(Qt::CrossCursor);
     } else {
         setCursor(Qt::ArrowCursor);
@@ -334,9 +323,9 @@ void QDiagramGraphicsView::setZoom( int percent )
 
 QAbstractDiagramShape* QDiagramGraphicsView::shapeAt(const QPoint & pos) const
 {
-    Q_FOREACH(QGraphicsItem* mItem, items(pos)){
-        if (mItem->type() == QAbstractDiagramShape::Type){
-            return dynamic_cast<QAbstractDiagramShape*>(mItem);
+    Q_FOREACH(QGraphicsItem* i, items(pos)){
+        if (i->type() == QAbstractDiagramShape::Type){
+            return dynamic_cast<QAbstractDiagramShape*>(i);
         }
     }
 
@@ -360,6 +349,11 @@ void QDiagramGraphicsView::wheelEvent(QWheelEvent* event)
     } else {
         QGraphicsView::wheelEvent(event);
     }
+}
+
+int QDiagramGraphicsView::zoom() const
+{
+	return m_currentZoom;
 }
 
 void QDiagramGraphicsView::zoomIn()

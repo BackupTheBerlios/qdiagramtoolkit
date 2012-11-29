@@ -39,6 +39,9 @@ class QDiagram;
 class QGraphicsScene;
 
 //! The QAbstractDiagramPlugin class provides an abstract base for custom QDiagram plugins.
+/**
+ * 
+ */
 class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramPlugin
 {
 public:
@@ -86,10 +89,6 @@ public:
       * Returns the plugin's name.
       */
     virtual QString name() const = 0;
-    /**
-      * Creates a new shape of the specified @p style and sets the shape's @p uuid and @p properties. Returns the shape as a QAbstractDiagramShape.
-      */
-    virtual QAbstractDiagramShape* restoreShape(const QString & uuid, const QString & style, const QMap<QString,QVariant> & properties, QGraphicsScene* scene) = 0;
     /**
       * Returns a list of actions defined for the shape specified by the given @p style.
       * @remarks

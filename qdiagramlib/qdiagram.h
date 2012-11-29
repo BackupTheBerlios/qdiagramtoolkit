@@ -50,8 +50,6 @@ public:
     explicit QDiagram(QObject* parent = 0);
 	
 	~QDiagram();
-
-    virtual QAbstractDiagramGraphicsItem* addItem(const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin = "default");
     /**
       *
       */

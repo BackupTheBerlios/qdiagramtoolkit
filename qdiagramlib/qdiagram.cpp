@@ -20,6 +20,7 @@
 #include "qdiagram.h"
 #include "qdiagram_p.h"
 
+#include <qabstractdiagram.h>
 #include <qabstractdiagramscene.h>
 
 #include <qdiagraminsertshapecommand.h>
@@ -41,25 +42,6 @@ QAbstractDiagram(parent)
 
 QDiagram::~QDiagram()
 {
-}
-
-QAbstractDiagramGraphicsItem* QDiagram::addItem(const QString & uuid, const QString & shape, const QMap<QString,QVariant> & properties, const QString & plugin)
-{
-    QUuid mUuid;
-    if (uuid.isEmpty()){
-        mUuid = QUuid::createUuid();
-    } else {
-        mUuid = QUuid(uuid);
-    }
-
-    QAbstractDiagramGraphicsItem* mItem = 0;
-    QAbstractDiagramPlugin* mPlugin = QDiagramPluginLoader::plugin(plugin);
-    if (mPlugin){
-        // TODO
-//        mItem = mPlugin->createShape(mUuid, shape, properties, scene());
-//        scene()->addItem(mItem);
-    }
-    return mItem;
 }
 
 void QDiagram::addConnection(QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style)
@@ -206,10 +188,10 @@ void QDiagram::connectItemsEventHandler( QDiagramShape* from, QDiagramShape* to,
 
 void QDiagram::itemMoved(QGraphicsItem* item, const QPointF & oldPos, const QPointF & newPos)
 {
-    QAbstractDiagramShape* mItem = dynamic_cast<QAbstractDiagramShape*>(item);
-    if (mItem){
-        QDiagramMoveShapeCommand * mCmd = new QDiagramMoveShapeCommand(this, mItem, oldPos, gridPos(newPos));
-        undoStack()->push(mCmd);
+    QAbstractDiagramShape* i = dynamic_cast<QAbstractDiagramShape*>(item);
+    if (i){
+        QDiagramMoveShapeCommand* c = new QDiagramMoveShapeCommand(this, i, oldPos, gridPos(newPos));
+        undoStack()->push(c);
     }
 }
 
@@ -250,7 +232,7 @@ QAbstractDiagramGraphicsItem *QDiagram::restoreItem(const QMap<QString,QVariant>
     if (p){
         item = p->createItem(metaData, properties, scene());
 
-		scene()->addItem(item);
+		page(currentPage())->addItem(item);
 		if (properties.value("layers").isNull()){
 			layers()->activeLayer()->add(item);
 		}

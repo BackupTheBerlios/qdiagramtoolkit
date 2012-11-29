@@ -13,213 +13,60 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="margin">
     <number>0</number>
    </property>
-   <item row="0" column="0" colspan="5">
-    <widget class="QDiagramGraphicsView" name="diagramGraphicsView">
-     <property name="minimumSize">
-      <size>
-       <width>250</width>
-       <height>0</height>
-      </size>
-     </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
      <property name="contextMenuPolicy">
       <enum>Qt::CustomContextMenu</enum>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     <property name="tabPosition">
+      <enum>QTabWidget::South</enum>
      </property>
-     <property name="dragMode">
-      <enum>QGraphicsView::RubberBandDrag</enum>
+     <property name="tabShape">
+      <enum>QTabWidget::Triangular</enum>
      </property>
-     <property name="viewportUpdateMode">
-      <enum>QGraphicsView::FullViewportUpdate</enum>
-     </property>
-     <property name="rubberBandSelectionMode">
-      <enum>Qt::ContainsItemShape</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="modePushButton">
-     <property name="icon">
-      <iconset resource="qdiagramlib.qrc">
-       <normaloff>:/qdiagram/cursor.default</normaloff>:/qdiagram/cursor.default</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>16</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>255</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <property name="spacing">
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <item>
-      <widget class="QToolButton" name="showGridToolButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="qdiagramlib.qrc">
-         <normaloff>:/qdiagram/grid.visible</normaloff>:/qdiagram/grid.visible</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="autoRaise">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="hideGridToolButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="qdiagramlib.qrc">
-         <normaloff>:/qdiagram/grid.invisible</normaloff>:/qdiagram/grid.invisible</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="autoRaise">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="3">
-    <widget class="QLabel" name="mousePositionLabel">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>0,0</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="4">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
-     </property>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
+     <widget class="QWidget" name="page0">
+      <attribute name="title">
+       <string>Tab 1</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="margin">
         <number>0</number>
        </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SetFixedSize</enum>
-       </property>
        <item>
-        <widget class="QToolButton" name="zoomOutToolButton">
-         <property name="text">
-          <string>-</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qdiagramlib.qrc">
-           <normaloff>:/qdiagram/zoom.out</normaloff>:/qdiagram/zoom.out</iconset>
-         </property>
-         <property name="autoRaise">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSlider" name="zoomSlider">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
+        <widget class="QDiagramGraphicsView" name="dummyGraphicsView">
+         <property name="minimumSize">
           <size>
-           <width>16777215</width>
-           <height>16777215</height>
+           <width>250</width>
+           <height>0</height>
           </size>
          </property>
-         <property name="minimum">
-          <number>0</number>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
          </property>
-         <property name="maximum">
-          <number>10</number>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
          </property>
-         <property name="value">
-          <number>3</number>
+         <property name="dragMode">
+          <enum>QGraphicsView::RubberBandDrag</enum>
          </property>
-         <property name="sliderPosition">
-          <number>3</number>
+         <property name="viewportUpdateMode">
+          <enum>QGraphicsView::FullViewportUpdate</enum>
          </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::NoTicks</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="zoomInToolButton">
-         <property name="text">
-          <string>+</string>
-         </property>
-         <property name="icon">
-          <iconset resource="qdiagramlib.qrc">
-           <normaloff>:/qdiagram/zoom.in</normaloff>:/qdiagram/zoom.in</iconset>
-         </property>
-         <property name="autoRaise">
-          <bool>true</bool>
+         <property name="rubberBandSelectionMode">
+          <enum>Qt::ContainsItemShape</enum>
          </property>
         </widget>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="zoomLabel">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>100%</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -233,25 +80,9 @@
  <resources>
   <include location="qdiagramlib.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>zoomSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>QDiagramView</receiver>
-   <slot>zoomSliderValueChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>331</x>
-     <y>288</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>zoomSliderValueChanged(int)</slot>
+  <slot>diagramTabContextMenuRequested(QPoint)</slot>
  </slots>
 </ui>
