@@ -50,8 +50,6 @@ public:
 
     QString name() const;
 
-    QAbstractDiagramShape* restoreShape(const QString & uuid, const QString & style, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
-
     QMap<QString,QVariant> defaultProperties(const QString & name) const;
 
     QStringList shapes(const QString & group = QString::null, QAbstractDiagram* diagram = 0) const;

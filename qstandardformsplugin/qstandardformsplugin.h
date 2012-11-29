@@ -25,9 +25,17 @@
 
 #include <qdiagramlinestyle.h>
 
-//! The QStandardFormsPlugin
+//! The QStandardFormsPlugin provides a set of basic shapes.
 /**
-  * @defgroup StandardForms Standard Forms
+  * @ingroup plugins
+  * @page stdforms Standard Forms
+  * \tableofcontents
+  * @section shape Shapes
+  * @subsection rectangle Rectangle
+  * @subsection circle Circle
+  * @subsection rrectangle Rounded Rectangle
+  * 
+  * 
   */
 class QSTANDARDFORMSPLUGINSHARED_EXPORT QStandardFormsPlugin : public QObject, public QAbstractDiagramPlugin
 {

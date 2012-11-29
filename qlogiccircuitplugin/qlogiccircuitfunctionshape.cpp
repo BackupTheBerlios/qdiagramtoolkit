@@ -158,7 +158,7 @@ QList<QAction*> QLogicCircuitFunctionShape::createActions(QWidget* parent)
 	QMenu* m = new QMenu(QObject::tr("Mode"), parent);
 	if (property("function") == "comparator" || property("function") == "computation"){
 		int index = metaData()->indexOfProperty("mode");
-        for (int i = 0; i < metaData()->property(index).enumerator().keys(); i++){
+        for (int i = 0; i < metaData()->property(index).enumerator().keyCount(); i++){
 			a = new QAction(metaData()->property(index).enumerator().key(i), parent);
 			QVariantMap p;
 			p["mode"] = metaData()->property(index).enumerator().value(i);

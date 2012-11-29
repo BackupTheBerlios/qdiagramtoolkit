@@ -143,12 +143,6 @@ QList<QDiagramLineStyle> QSysMLPlugin::lineStyles() const
     return styles;
 }
 
-QAbstractDiagramShape *QSysMLPlugin::restoreShape(const QString &uuid, const QString &style, const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
-{
-    // TODO obsolete
-    return 0;
-}
-
 QVariantMap QSysMLPlugin::metaData(const QString & name) const
 {
 	QVariantMap m;

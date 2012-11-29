@@ -57,8 +57,6 @@ public:
 	QVariantMap metaData(const QString & name) const;
 
     QString name() const;
-
-    QAbstractDiagramShape* restoreShape(const QString & uuid, const QString & style, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
     /**
       * Returns a list of actions defined for the shape specified by the given @p style.
       */

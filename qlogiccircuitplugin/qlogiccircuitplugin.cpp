@@ -308,11 +308,6 @@ QString QLogicCircuitPlugin::name() const
 	return QLogicCircuitPlugin::staticName();
 }
 
-QAbstractDiagramShape* QLogicCircuitPlugin::restoreShape(const QString & uuid, const QString & style, const QMap<QString,QVariant> & properties, QGraphicsScene* scene)
-{
-    return 0;
-}
-
 QList<QAction *> QLogicCircuitPlugin::shapeActions(const QString & style) const
 {
     QList<QAction*> a;

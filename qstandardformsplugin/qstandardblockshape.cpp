@@ -42,6 +42,7 @@ QAbstractDiagramShape(QStandardFormsPlugin::staticName(), itemClass, properties,
 
     setFlag(ItemIsMovable, true);
 
+	addProperty("alignment", QDiagramToolkit::Alignment, false, properties.value("alignment", Qt::AlignLeft));
     addProperty("background", QDiagramToolkit::Brush, false, properties.value("background"));
     addProperty("rotation", QDiagramToolkit::Angle, false, properties.value("rotation", 0.0));
     addProperty("lineStyle", QDiagramToolkit::LineStyle, false, properties.value("lineStyle"));
