@@ -3,5 +3,9 @@
         <file alias="qdiagramview">resources/qdiagramview.ico</file>
         <file alias="qdiagramshapetoolbox">resources/qdiagramshapetoolbox.ico</file>
         <file alias="shapes">resources/shapes.ico</file>
+        <file alias="qdiagrampointerpushbutton">resources/qdiagrampointerpushbutton.ico</file>
+        <file alias="qdiagramviewzoomslider">resources/zoomslider.ico</file>
+        <file alias="qdiagramgraphicsitempropertiesview">resources/qdiagramgraphicsitempropertiesview.ico</file>
+        <file alias="qdiagramviewcontrolpanel">resources/qdiagramviewcontrolpanel.ico</file>
     </qresource>
 </RCC>

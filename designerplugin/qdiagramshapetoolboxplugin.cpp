@@ -35,7 +35,7 @@ QString QDiagramShapeToolBoxPlugin::name() const
 
 QString QDiagramShapeToolBoxPlugin::group() const
 {
-    return QLatin1String("QDiagram");
+    return QLatin1String("QDiagramToolkit");
 }
 
 QIcon QDiagramShapeToolBoxPlugin::icon() const

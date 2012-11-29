@@ -36,7 +36,7 @@ QString QDiagramGraphicsItemPropertiesViewPlugin::name() const
 
 QString QDiagramGraphicsItemPropertiesViewPlugin::group() const
 {
-    return QLatin1String("QDiagram");
+    return QLatin1String("QDiagramToolkit");
 }
 
 QIcon QDiagramGraphicsItemPropertiesViewPlugin::icon() const
