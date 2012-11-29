@@ -10,6 +10,7 @@ class QDiagram;
 class QSignalMapper;
 
 class DiagramWindow;
+class QDiagramViewControlPanel;
 
 namespace Ui {
     class MainWindow;
@@ -36,10 +37,13 @@ public slots:
 
     void diagramViewContextMenuRequested(const QPoint & point, const QPointF &scenePos);
     void diagramItemAdded(QAbstractDiagramGraphicsItem* item);
+	void diagramTabContextMenuRequested(const QPoint & pos);
 
     void exitActionTriggered();
 
 	void groupActionTriggered();
+
+	void insertPageActionTriggered();
 
     void newActionTriggered();
 
@@ -66,6 +70,7 @@ public slots:
 private:
     void updateWindowMenu();
 
+	QDiagramViewControlPanel* controlPanel;
     QSignalMapper* windowMapper;
 
     Ui::MainWindow *ui;

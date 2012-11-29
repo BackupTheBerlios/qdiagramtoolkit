@@ -457,6 +457,21 @@
     <string>Ungroup</string>
    </property>
   </action>
+  <action name="insertPageAction">
+   <property name="text">
+    <string>Insert</string>
+   </property>
+  </action>
+  <action name="renamePageAction">
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
+  <action name="deletePageAction">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -873,6 +888,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>insertPageAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>insertPageActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>saveActionTriggered()</slot>
@@ -895,5 +926,6 @@
   <slot>scriptEditorActionTriggered()</slot>
   <slot>groupActionTriggered()</slot>
   <slot>ungroupActionTriggered()</slot>
+  <slot>insertPageActionTriggered()</slot>
  </slots>
 </ui>

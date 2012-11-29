@@ -119,6 +119,7 @@ void DiagramWindow::setDiagram(QDiagram* diagram)
     ui->diagramView->setDiagram(cDiagram);
     connect(cDiagram, SIGNAL(contentsChanged()), this, SLOT(diagramContentsChanged()));
     setWindowTitle(cDiagram->title());
+	ui->pointerPushButton->addConnector(cDiagram);
 }
 
 void DiagramWindow::ungroup()

@@ -17,7 +17,8 @@
 
 #include <qabstractdiagramgraphicsitem.h>
 #include <qabstractdiagramshapeconnector.h>
-#include "qdiagrampluginloader.h"
+#include <qdiagrampluginloader.h>
+#include <qdiagramviewcontrolpanel.h>
 
 
 #include "diagramwindow.h"
@@ -57,6 +58,10 @@ ui(new Ui::MainWindow)
 	qDebug() << "QDiagramIO" << QDiagramReader::supportedDiagramFormats();
 
 	updateWindowMenu();
+
+	controlPanel = new QDiagramViewControlPanel(this);
+	statusBar()->addPermanentWidget(controlPanel);
+	controlPanel->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -145,7 +150,7 @@ void MainWindow::diagramViewContextMenuRequested(const QPoint & point, const QPo
 	if (view){
 		QList<QAction*> actions;
 		QAbstractDiagramShape* shape = view->shapeAt(point);
-		QList<QGraphicsItem*> items = view->graphicsView()->items(point);
+		QList<QGraphicsItem*> items = view->currentView()->items(point);
 		QMenu menu;
 		if (shape){
 			actions = shape->createActions(&menu);
@@ -165,7 +170,7 @@ void MainWindow::diagramViewContextMenuRequested(const QPoint & point, const QPo
 		menu.addAction(ui->refreshAction);
 
 		ui->pasteAction->setData(scenePos);
-		QAction* a = menu.exec(view->graphicsView()->viewport()->mapToGlobal(point));
+		QAction* a = menu.exec(view->currentView()->viewport()->mapToGlobal(point));
 		if (a && shape){
 			shape->triggerAction(a->objectName(), a->data());
 		}
@@ -177,6 +182,16 @@ void MainWindow::diagramItemAdded(QAbstractDiagramGraphicsItem *item)
 	//    QMessageBox::information(this, tr("Item added"), QString(tr("UUID %1")).arg(item->uuid()), QMessageBox::Ok);
 }
 
+void MainWindow::diagramTabContextMenuRequested(const QPoint & pos)
+{
+	QWidget* w = qobject_cast<QWidget*>(sender());
+	QMenu m;
+	m.addAction(ui->insertPageAction);
+	m.addAction(ui->renamePageAction);
+	m.addAction(ui->deletePageAction);
+	m.exec(w->mapToGlobal(pos));
+}
+
 void MainWindow::exitActionTriggered()
 {
 	ui->mdiArea->closeAllSubWindows();
@@ -186,6 +201,13 @@ void MainWindow::exitActionTriggered()
 void MainWindow::groupActionTriggered()
 {
 	CALL_ACTION(group());
+}
+
+void MainWindow::insertPageActionTriggered()
+{
+	if (activeDiagram()){
+		activeDiagram()->setCurrentIndex(activeDiagram()->addPage());
+	}
 }
 
 void  MainWindow::newActionTriggered()
@@ -317,7 +339,7 @@ void MainWindow::sendToBackActionTriggered()
 void MainWindow::scriptEditorActionTriggered()
 {
 	QScriptEngine* engine = new QScriptEngine(this);
-	engine->importExtension("qdmf");
+	engine->importExtension("qdiagramtoolkit");
 	ScriptEditor* editor = new ScriptEditor(this);
 
 
@@ -357,6 +379,9 @@ void MainWindow::subWindowActivated( QMdiSubWindow* window )
 	ui->printPreviewAction->setEnabled(window != 0);
 	ui->saveAction->setEnabled(window != 0);
 	ui->saveAsImageAction->setEnabled(window != 0);
+
+	controlPanel->disconnect();
+	controlPanel->setEnabled(window != 0);
 	if (window == 0){
 		return;
 	}
@@ -365,8 +390,20 @@ void MainWindow::subWindowActivated( QMdiSubWindow* window )
 		undoStack = diagramWindow->diagram()->undoStack();
 
 		ui->diagramShapeToolBox->addShapes(diagramWindow->diagram());
-		//ui->diagramShapeToolBox->removeShape("output.analog", "Logic Circuit");
+		// Set current zoom level
+		controlPanel->setZoom(diagramWindow->diagramView()->zoom());
+		controlPanel->setGridVisible(diagramWindow->diagramView()->isGridVisible());
+		controlPanel->setSnapToGridEnabled(diagramWindow->diagramView()->isSnapToGridEnabled());
+
 		connect(diagramWindow->diagram(), SIGNAL(selectionChanged()), SLOT(selectionChanged()));
+
+		connect(diagramWindow->diagramView(), SIGNAL(diagramTabContextMenuRequested(QPoint)), this, SLOT(diagramTabContextMenuRequested(QPoint)));
+		connect(diagramWindow->diagramView(), SIGNAL(mousePositionChanged(QPointF)), controlPanel, SLOT(setMousePosition(QPointF)));
+		connect(diagramWindow->diagramView(), SIGNAL(zoomChanged(int)), controlPanel, SLOT(setZoom(int)));
+
+		connect(controlPanel, SIGNAL(zoomChanged(int)), diagramWindow->diagramView(), SLOT(setZoom(int)));
+		connect(controlPanel, SIGNAL(showGridToogled(bool)), diagramWindow->diagramView(), SLOT(setGridVisible(bool)));
+		connect(controlPanel, SIGNAL(snapToGridToogled(bool)), diagramWindow->diagramView(), SLOT(setSnapToGridEnabled(bool)));
 
 		ui->layersView->setDiagram(diagramWindow->diagram());
 	}
@@ -380,6 +417,7 @@ void MainWindow::subWindowActivated( QMdiSubWindow* window )
 	ui->undoView->setStack(undoStack);
 	ui->redoAction->setEnabled(undoStack && undoStack->index() > 0);
 	ui->undoAction->setEnabled(undoStack && undoStack->count() > 0);
+
 
 	updateWindowMenu();
 }
