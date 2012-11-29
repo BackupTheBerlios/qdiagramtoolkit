@@ -85,7 +85,7 @@ void QDiagramScriptExtensionPlugin::initialize(const QString & key, QScriptEngin
 QStringList QDiagramScriptExtensionPlugin::keys() const
 {
 	QStringList l;
-	l << "qdmf";
+	l << "qdiagramtoolkit";
 	return l;
 }
 
