@@ -107,7 +107,7 @@ bool QDiagramMetaEnum::isValid() const
 
 QString QDiagramMetaEnum::key(int index) const
 {
-    if (index < m_pairs.size()){
+    if (index != -1 && index < m_pairs.size()){
         return m_pairs.values().at(index);
     }
     return QString::null;
