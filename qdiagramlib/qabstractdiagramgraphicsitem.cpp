@@ -518,6 +518,7 @@ void QAbstractDiagramGraphicsItem::restoreProperties(const QVariantMap & p)
 				setZValue(it.value().toDouble());
 			}
 		} else {
+			addDynamicProperty(it.key(), it.value());
 			m_properties[it.key()] = it.value();
 		}
 	}
