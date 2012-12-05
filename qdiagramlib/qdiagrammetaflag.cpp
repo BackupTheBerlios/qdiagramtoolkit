@@ -72,6 +72,16 @@ bool QDiagramMetaFlag::isValid() const
     return !m_flags.isEmpty();
 }
 
+QMap<QString, int> QDiagramMetaFlag::masks(QDiagramToolkit::PropertyType type)
+{
+	QMap<QString, int>  m;
+	if (type == QDiagramToolkit::Alignment){
+		m["horizontal"] = Qt::AlignHorizontal_Mask;
+		m["vertical"] = Qt::AlignVertical_Mask;
+	}
+	return m;
+}
+
 QStringList QDiagramMetaFlag::matchingKeys(int value) const
 {
 	QStringList l;
@@ -89,4 +99,14 @@ int QDiagramMetaFlag::value(int index) const
         return m_flags.keys().at(index);
     }
     return 0;
+}
+
+int QDiagramMetaFlag::value(const QString & key) const
+{
+	for (int i = 0; i < m_flags.values().size(); i++){
+		if (m_flags.values().at(i) == key){
+			return m_flags.keys().at(i);
+		}
+	}
+	return 0;
 }

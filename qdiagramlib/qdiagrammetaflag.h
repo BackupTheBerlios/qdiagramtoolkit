@@ -43,6 +43,10 @@ public:
 	 */
     QString key(int index) const;
 	/**
+	 * Returns a map of flag masks defined for the given @p type.
+	 */
+	static QMap<QString, int> masks(QDiagramToolkit::PropertyType type);
+	/**
 	 * Returns a list of keys matching the given @p value.
 	 */
 	QStringList matchingKeys(int value) const;
@@ -50,6 +54,10 @@ public:
 	 * Returns the value at the given @p index or 0 if no value exists at @p index.
 	 */
     int value(int index) const;
+	/**
+	 * Returns the value for the given @p key.
+	 */
+	int value(const QString & key) const;
 private:
     friend class QDiagramMetaProperty;
     QDiagramMetaFlag(const QMap<int, QString> &flags);
