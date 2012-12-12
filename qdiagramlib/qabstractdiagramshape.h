@@ -27,6 +27,8 @@
 
 #include <qdiagramshapesizegrip.h>
 
+class QDiagramGraphicsTextItem;
+
 //! The QAbstractDiagramShape class is the base of all shapes in a QAbstractDiagram class.
 class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramShape : public QAbstractDiagramGraphicsItem
 {
@@ -78,6 +80,10 @@ public:
       * The default implementation return true.
       */
     virtual bool isConnectionAllowed(QAbstractDiagramShapeConnector* connector) const;
+	/**
+	 * @reimp QAbstractDiagramGraphicsItem::restoreProperties()
+	 */
+	virtual void QAbstractDiagramShape::restoreProperties(const QVariantMap & p);
 
     virtual void restoreFromProperties(const QVariantMap & properties);
 
@@ -93,6 +99,8 @@ public:
       * Return the shape's selection.
       */
     QColor selectionColor() const;
+
+	QDiagramGraphicsTextItem* textItem() const;
     /**
       * Returns the type of the QAbstractDiagramShapeConnectionPoint as an int.
       * @see QGraphicsItem::type()
@@ -126,6 +134,10 @@ protected:
     virtual QVariant itemPositionHasChanged( const QVariant & value );
 	virtual QVariant itemSceneHasChanged(const QVariant & value);
     virtual QVariant itemSelectedHasChanged( const QVariant & value );
+	/**
+	 * @reimp QGraphicsItem::keyPressEvent();
+	 */
+	virtual void keyPressEvent(QKeyEvent* event);
 
     virtual void paintConnectionPoints(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
@@ -147,6 +159,7 @@ private:
     bool m_connectionPointsVisible;
     QList<QAbstractDiagramShapeConnectionPoint*> m_connectionPoints;
     QList<QDiagramShapeSizeGripHandle*> m_handles;
+	QDiagramGraphicsTextItem* m_textItem;
 };
 
 Q_DECLARE_METATYPE(QAbstractDiagramShape*)

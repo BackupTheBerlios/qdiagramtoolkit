@@ -20,8 +20,9 @@
 #include "qabstractdiagramshape.h"
 
 #include "qabstractdiagramshapeconnectionpoint.h"
+#include "qdiagramgraphicstextitem.h"
 #include "qdiagrammetadata.h"
-#include "QDiagramMetaProperty.h"
+#include "qdiagrammetaproperty.h"
 #include "qdiagramshapeconnector.h"
 #include "qdiagramgraphicsscene.h"
 
@@ -33,6 +34,9 @@ QAbstractDiagramShape::QAbstractDiagramShape(QGraphicsItem* parent) :
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+	setFlag(QGraphicsItem::ItemIsFocusable);
+
+	m_textItem = new QDiagramGraphicsTextItem(this);
 }
 
 QAbstractDiagramShape::QAbstractDiagramShape(const QString & plugin, const QString & itemClass, const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
@@ -42,6 +46,10 @@ QAbstractDiagramShape::QAbstractDiagramShape(const QString & plugin, const QStri
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+	setFlag(QGraphicsItem::ItemIsFocusable);
+
+	m_textItem = new QDiagramGraphicsTextItem(this);
+//	m_textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
 }
 
 void QAbstractDiagramShape::addSizeGripHandle(QDiagramShapeSizeGripHandle* handle)
@@ -137,6 +145,29 @@ bool QAbstractDiagramShape::isConnectionAllowed(QAbstractDiagramShapeConnector* 
 {
     Q_UNUSED(connector);
     return true;
+}
+
+void QAbstractDiagramShape::keyPressEvent(QKeyEvent* event)
+{
+	QAbstractDiagramGraphicsItem::keyPressEvent(event);
+	if (textItem()){
+		if (!textItem()->textInteractionFlags().testFlag(Qt::TextEditable)){
+			QChar c(event->text().at(0));
+			if (c.isPrint()){
+				textItem()->setPlainText(event->text());
+				textItem()->setEditModeEnabled(true, QTextCursor::End);
+			}
+		}
+		event->accept();
+	}
+}
+
+void QAbstractDiagramShape::restoreProperties(const QVariantMap & p)
+{
+	QAbstractDiagramGraphicsItem::restoreProperties(p);
+	if (textItem()){
+		textItem()->restoreProperties(p);
+	}
 }
 
 void QAbstractDiagramShape::restoreFromProperties(const QVariantMap & properties)
@@ -246,6 +277,11 @@ QPainterPath QAbstractDiagramShape::shape() const
 bool QAbstractDiagramShape::connectionPointsAreVisible() const
 {
     return m_connectionPointsVisible;
+}
+
+QDiagramGraphicsTextItem* QAbstractDiagramShape::textItem() const
+{
+	return m_textItem;
 }
 
 void QAbstractDiagramShape::updateConnectedItems()
