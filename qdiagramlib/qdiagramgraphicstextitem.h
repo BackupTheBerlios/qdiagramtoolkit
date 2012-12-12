@@ -21,20 +21,64 @@
 
 #include <QObject>
 #include <QGraphicsTextItem>
+#include <QTextCursor>
 
 #include "qdiagramlib_global.h"
 
 class QAbstractDiagramGraphicsItem;
 
+//! The QDiagramGraphicsTextItem class provides a text item that you can add to a QDiagram to display formatted text.
 class QDIAGRAMLIBSHARED_EXPORT QDiagramGraphicsTextItem : public QGraphicsTextItem
 {
 	Q_OBJECT
 public:
     enum {
-        Type = QGraphicsItem::UserType + 4201
+        Type = QGraphicsItem::UserType + 4204
     };
-	explicit QDiagramGraphicsTextItem(const QString & property, QGraphicsItem* parent = 0);
+	/**
+	 * Constructs a QDiagramGraphicsTextItem. @p parent is passed to QDiagramGraphicsTextItem's constructor.
+	 */
+	QDiagramGraphicsTextItem(QGraphicsItem* parent = 0);
+	/**
+	 * Constructs a QDiagramGraphicsTextItem and sets the name of the property storing the text displayed to @p name. @p parent is passed to QDiagramGraphicsTextItem's constructor.
+	 */
+	QDiagramGraphicsTextItem(const QString & name, QGraphicsItem* parent = 0);
+	/**
+	 * Destroys the QDiagramGraphicsTextItem.
+	 */
 	~QDiagramGraphicsTextItem();
+	/**
+	 * Restores the QDiagramGraphicsTextItem from the given @p properties.
+	 */
+	void restoreProperties(const QVariantMap & properties);
+
+	void itemPropertyHasChanged(QAbstractDiagramGraphicsItem* item, const QString & name, const QVariant & value);
+	/**
+	 * If @p on is true, the edit mode is enabled.
+	 */
+	void setEditModeEnabled(bool on, QTextCursor::MoveOperation operation = QTextCursor::NoMove);
+	/**
+	 * Sets the text @p alignment.
+	 */
+	void setTextAlignment(Qt::Alignment alignment);
+	/**
+	 * Sets the @p name of the parent's property holding the item's text alignment.
+	 */
+	void setTextAlignmentProperty(const QString & name);
+	/**
+	 * Sets the @p name of the parent's property holding the item's text.
+	 */
+	void setTextProperty(const QString & name);
+	/**
+	 * Returns the name of the property holding the text alignment.
+	 * @see setTextAlignmentProperty()
+	 */
+	QString textAlignmentProperty() const;
+	/**
+	 * Returns the name of the property holding the text displayed.
+	 * @see setTextPropertyName()
+	 */
+	QString textProperty() const;
     /**
       * Returns the type of the QAbstractDiagramShapeConnectionPoint as an int.
       * @see QGraphicsItem::type()
@@ -43,12 +87,23 @@ public:
     {
         return Type;
     }
+	/**
+	 * Updates the text item's position according to the current alignment settings.
+	 */
+	void updatePosition();
 protected:
+	/**
+	 * @reimp QGraphicsTextItem::focusOutEvent()
+	 */
 	void focusOutEvent(QFocusEvent* event);
 private slots:
 	void documentContentsChanged();
 private:
-	QString m_property;
+	void updateAlignment(Qt::Alignment alignment);
+	void updateTextOption(Qt::Alignment alignment);
+
+	QString m_textProperty;
+	QString m_textAlignmentProperty;
 };
 
 #endif // QDIAGRAMGRAPHICSTEXTITEM_H
