@@ -132,19 +132,17 @@ bool QAbstractDiagramGraphicsItem::changeProperty(const QString & name, const QV
             m_brush = brush(value.toString());
         } else if (name == "geometry"){
 			if (value.canConvert(QVariant::RectF)){
-//                blockUndoCommands(true);
 	            prepareGeometryChange();
                 setPos(value.toRectF().x(), value.toRectF().y());
-                //blockUndoCommands(false);
 			} else if (value.canConvert(QVariant::Map)){
-                //blockUndoCommands(true);
                 prepareGeometryChange();
 		        setPos(value.toMap().value("x").toDouble(), value.toMap().value("y").toDouble());
-                //blockUndoCommands(false);
             }
+			m_properties[name] = value;
 			itemGeometryHasChanged(value);
-        }
-		m_properties[name] = value;
+		} else {
+			m_properties[name] = value;
+		}
 		itemPropertyHasChanged(name, value);
     }
     return true;
