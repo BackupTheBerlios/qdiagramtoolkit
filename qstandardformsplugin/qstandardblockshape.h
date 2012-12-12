@@ -21,12 +21,18 @@
 
 #include <qabstractdiagramshape.h>
 
+//! The class QStandardBlockShape implements a standard block shape.
+/**
+ */
 class QStandardBlockShape : public QAbstractDiagramShape
 {
 public:
+	/**
+	 *
+	 */
     QStandardBlockShape(const QString & itemClass, const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
 
-    QRectF boundingRect() const;
+	QRectF boundingRect() const;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     /**
@@ -35,7 +41,10 @@ public:
     QPainterPath shape() const;
 protected:
 	QVariant itemPropertyHasChanged(const QString &name, const QVariant &value);
-    void paintText(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event);
+
+	void paintText(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 };
 
 #endif // QSTANDARDBLOCKSHAPE_H

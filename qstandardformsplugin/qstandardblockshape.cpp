@@ -29,6 +29,8 @@
 
 #include "qstandardformsplugin.h"
 
+#include <qdiagramgraphicstextitem.h>
+
 #define CP_SIZE 8
 #define CP_HALFSIZE 4
 #define PI 3.14159265
@@ -42,13 +44,15 @@ QAbstractDiagramShape(QStandardFormsPlugin::staticName(), itemClass, properties,
 
     setFlag(ItemIsMovable, true);
 
-	addProperty("alignment", QDiagramToolkit::Alignment, false, properties.value("alignment", Qt::AlignLeft));
+	textItem()->setTextProperty("text");
+
     addProperty("background", QDiagramToolkit::Brush, false, properties.value("background"));
     addProperty("rotation", QDiagramToolkit::Angle, false, properties.value("rotation", 0.0));
     addProperty("lineStyle", QDiagramToolkit::LineStyle, false, properties.value("lineStyle"));
     addProperty("pen", QDiagramToolkit::Pen, false, properties.value("pen"));
 	addProperty("shadow", QDiagramToolkit::Shadow, false,  properties.value("shadow"));
     addProperty("text", QDiagramToolkit::Text, false, properties.value("text"));
+	addProperty("textAlignment", QDiagramToolkit::Alignment, false, properties.value("alignment", Qt::AlignCenter));
     addProperty("font", QDiagramToolkit::Font, false, properties.value("font"));
 
     if (metaData()->itemClass() == "rectangle"){
@@ -110,7 +114,18 @@ QVariant QStandardBlockShape::itemPropertyHasChanged(const QString &name, const 
 			e->setEnabled(s.isVisible());
 		}
 	}
+	textItem()->itemPropertyHasChanged(this, name, value);
     return QAbstractDiagramGraphicsItem::itemPropertyHasChanged(name, value);
+}
+
+void QStandardBlockShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+	if (event->button() == Qt::LeftButton){
+		textItem()->setTextWidth(geometry().width());
+		textItem()->updatePosition();
+		textItem()->setEditModeEnabled(true);
+	}
+	QAbstractDiagramShape::mouseDoubleClickEvent(event);
 }
 
 void QStandardBlockShape::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -128,7 +143,7 @@ void QStandardBlockShape::paint(QPainter *painter, const QStyleOptionGraphicsIte
     painter->setBrush(b);
     painter->drawPath(shape());
 
-    paintText(painter, option, widget);
+//    paintText(painter, option, widget);
     paintConnectionPoints(painter, option, widget);
     paintFocus(painter, option, widget);
 
