@@ -238,7 +238,9 @@ bool QDiagramProperty::cast_helper(const QVariant & v, QDiagramToolkit::Property
 
 QVariant QDiagramProperty::defaultValue(QDiagramToolkit::PropertyType type)
 {
-	if (type == QDiagramToolkit::Brush){
+	if (type == QDiagramToolkit::Alignment){
+		return int(Qt::AlignLeft | Qt::AlignTop);
+	} else if (type == QDiagramToolkit::Brush){
 		return toMap(QBrush(Qt::lightGray, Qt::SolidPattern));
 	} else if (type == QDiagramToolkit::Font){
 		return toMap(QFont());
@@ -593,6 +595,8 @@ QVariantMap QDiagramProperty::toMap(const QVariant & v)
 		for (int i = 0; i < s.propertyCount(); i++){
 			m[s.key(i)] = s.value(i);
 		}
+	} else if (v.canConvert(QVariant::Map)){
+		m = v.toMap();
 	}
 	return m;
 }
