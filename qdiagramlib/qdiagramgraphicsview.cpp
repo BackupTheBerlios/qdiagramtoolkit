@@ -167,7 +167,7 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
             m_shapeUnderCursor = shape;
 		} else {
 			if (cp){
-				if (cp->connectors().size() < cp->maxConnections()){
+				if (cp->connectors().size() < cp->maxConnections() || cp->maxConnections() == -1){
 					QAbstractDiagramPlugin* plugin = QDiagramPluginLoader::plugin(m_connectorStyle.plugin());
 					if (plugin){
 						// Start temporary connector
