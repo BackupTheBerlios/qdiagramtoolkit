@@ -99,12 +99,19 @@ bool QDiagramMetaProperty::isEnumeration(QDiagramToolkit::PropertyType type) con
 	return false;
 }
 
-bool QDiagramMetaProperty::isFlag(QDiagramToolkit::PropertyType type) const
+bool QDiagramMetaProperty::isFlag(QDiagramToolkit::PropertyType type)
 {
-	if (type == QDiagramToolkit::Orientation){
+	if (type == QDiagramToolkit::Alignment){
+		return true;
+	} else if (type == QDiagramToolkit::Orientation){
 		return true;
 	}
 	return false;
+}
+
+bool QDiagramMetaProperty::isFlag() const
+{
+	return isFlag(m_type);
 }
 
 bool QDiagramMetaProperty::isReadOnly() const

@@ -61,7 +61,9 @@ public:
 	 */
 	bool isEnumeration(QDiagramToolkit::PropertyType type) const;
 
-	bool isFlag(QDiagramToolkit::PropertyType type) const;
+	static bool isFlag(QDiagramToolkit::PropertyType type);
+
+	bool isFlag() const;
     /**
       * Returns true if the property is read-only. Otherwise false.
       */
