@@ -149,17 +149,26 @@ bool QAbstractDiagramShape::isConnectionAllowed(QAbstractDiagramShapeConnector* 
 
 void QAbstractDiagramShape::keyPressEvent(QKeyEvent* event)
 {
-	QAbstractDiagramGraphicsItem::keyPressEvent(event);
 	if (textItem()){
-		if (!textItem()->textInteractionFlags().testFlag(Qt::TextEditable)){
-			QChar c(event->text().at(0));
-			if (c.isPrint()){
-				textItem()->setPlainText(event->text());
-				textItem()->setEditModeEnabled(true, QTextCursor::End);
+		if (textItem()->textInteractionFlags().testFlag(Qt::TextEditorInteraction)){
+			if (event->key() == Qt::Key_Escape){
+				textItem()->setEditModeEnabled(false);
+				event->accept();
+				return;
+			}
+		} else {
+			if (!event->text().isEmpty()){
+				QChar c(event->text().at(0));
+				if (c.isPrint()){
+					textItem()->setPlainText(event->text());
+					textItem()->setEditModeEnabled(true, QTextCursor::End);
+					event->accept();
+					return;
+				}
 			}
 		}
-		event->accept();
 	}
+	QAbstractDiagramGraphicsItem::keyPressEvent(event);
 }
 
 void QAbstractDiagramShape::restoreProperties(const QVariantMap & p)
@@ -168,6 +177,7 @@ void QAbstractDiagramShape::restoreProperties(const QVariantMap & p)
 	if (textItem()){
 		textItem()->restoreProperties(p);
 	}
+	updateSizeGripHandles();
 }
 
 void QAbstractDiagramShape::restoreFromProperties(const QVariantMap & properties)
@@ -206,6 +216,14 @@ QVariant QAbstractDiagramShape::itemPositionHasChanged( const QVariant & value )
     updateConnectedItems();
     updateSizeGripHandles();
     return v;
+}
+
+QVariant QAbstractDiagramShape::itemPropertyHasChanged(const QString &name, const QVariant &value)
+{
+	if (textItem()){
+		textItem()->itemPropertyHasChanged(this, name, value);
+	}
+	return QAbstractDiagramGraphicsItem::itemPropertyHasChanged(name, value);
 }
 
 QVariant QAbstractDiagramShape::itemSceneHasChanged(const QVariant & value)

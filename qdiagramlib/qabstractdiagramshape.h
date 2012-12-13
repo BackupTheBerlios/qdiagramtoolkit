@@ -132,6 +132,7 @@ protected:
       * The @p value argument is the new position (the same as pos()), and QAbstractDiagramShape ignores the return value for this notification (i.e., a read-only notification).
       */
     virtual QVariant itemPositionHasChanged( const QVariant & value );
+	virtual QVariant itemPropertyHasChanged(const QString & name, const QVariant & value);
 	virtual QVariant itemSceneHasChanged(const QVariant & value);
     virtual QVariant itemSelectedHasChanged( const QVariant & value );
 	/**
