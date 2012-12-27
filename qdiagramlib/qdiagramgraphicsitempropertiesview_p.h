@@ -12,11 +12,19 @@ class QDiagramEndOfLineStyle;
 class QPropertiesModelItem
 {
 public:
+	enum ItemType {
+		Flag,
+		MaskedFlag,
+		Property
+	};
     QPropertiesModelItem(QAbstractDiagramGraphicsItem* graphicsItem);
     QPropertiesModelItem(QAbstractDiagramGraphicsItem* graphicsItem, int index, QPropertiesModelItem* parent = 0);
     QPropertiesModelItem(const QString & name, QPropertiesModelItem* parent);
     QPropertiesModelItem(const QString & name, int flag, QPropertiesModelItem* parent);
 	QPropertiesModelItem(const QString & name, QDiagramToolkit::PropertyType type, QPropertiesModelItem* parent);
+
+	QPropertiesModelItem(const QString & name, const QString & mask, const QPair<QString,int> & maskedFlag, QPropertiesModelItem* parent);
+
     ~QPropertiesModelItem();
 
     QPropertiesModelItem* child(int index) const;
@@ -30,6 +38,8 @@ public:
 	QDiagramMetaEnum metaEnumeration() const;
 
 	QDiagramMetaFlag metaFlag() const;
+
+	QDiagramMetaProperty metaProperty() const;
 
     Qt::ItemFlags flags() const;
 
@@ -46,6 +56,8 @@ public:
     QPropertiesModelItem* parent() const;
 
 	QDiagramProperty property() const;
+
+    QPropertiesModelItem* propertyItem() const;
 
     int row() const;
 
@@ -65,10 +77,12 @@ private:
     QMap<QString,QColor> m_colorNameMap;
 	int m_flag;
     int m_index;
+	QPair<QString,int> m_maskedFlag;
     QString m_name;
     QAbstractDiagramGraphicsItem* m_item;
     QPropertiesModelItem* m_parent;
 	QDiagramToolkit::PropertyType m_type;
+	ItemType m_itemType;
 };
 
 class QPropertiesModel : public QAbstractItemModel
