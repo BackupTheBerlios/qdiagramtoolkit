@@ -21,10 +21,12 @@
 
 #include "qabstractdiagramgraphicsitem.h"
 #include "qabstractdiagramshape.h"
+#include "qdiagrammetadata.h"
 
 QDiagramGraphicsTextItem::QDiagramGraphicsTextItem(QGraphicsItem* parent)
 	: QGraphicsTextItem(parent)
 {
+	m_defaultTextAlignment = Qt::AlignCenter;
 	m_textProperty = "text";
 	m_textAlignmentProperty = "textAlignment";
 	connect(document(), SIGNAL(contentsChanged()), SLOT(documentContentsChanged()));
@@ -33,6 +35,7 @@ QDiagramGraphicsTextItem::QDiagramGraphicsTextItem(QGraphicsItem* parent)
 QDiagramGraphicsTextItem::QDiagramGraphicsTextItem(const QString & name, QGraphicsItem* parent)
 	: QGraphicsTextItem(parent)
 {
+	m_defaultTextAlignment = Qt::AlignCenter;
 	m_textProperty = name;
 	m_textAlignmentProperty = "textAlignment";
 	connect(document(), SIGNAL(contentsChanged()), SLOT(documentContentsChanged()));
@@ -58,7 +61,11 @@ void QDiagramGraphicsTextItem::focusOutEvent(QFocusEvent* event)
 	setTextCursor(c);
 	QAbstractDiagramShape* p = qgraphicsitem_cast<QAbstractDiagramShape*>(parentItem());
 	if (p && !m_textProperty.isEmpty()){
-		p->setProperty(m_textProperty, document()->toHtml());
+		if (textPropertyType() == QDiagramToolkit::Text){
+			p->setProperty(m_textProperty, document()->toHtml());
+		} else if (textPropertyType() == QDiagramToolkit::String){
+			p->setProperty(m_textProperty, document()->toPlainText());
+		}
 	}
 }
 
@@ -67,8 +74,14 @@ void QDiagramGraphicsTextItem::itemPropertyHasChanged(QAbstractDiagramGraphicsIt
 	if (item == 0){
 		return;
 	}
-	if (name == m_textProperty){
-		setHtml(item->property(m_textProperty).toString());
+	if (name == m_textColorProperty){
+		setDefaultTextColor(qvariant_cast<QColor>(value));
+	} else if (name == m_textProperty){
+		if (textPropertyType() == QDiagramToolkit::Text){
+			setHtml(item->property(m_textProperty).toString());
+		} else if (textPropertyType() == QDiagramToolkit::String){
+			setPlainText(item->property(m_textProperty).toString());
+		}
 	} else if (name == m_textAlignmentProperty){
 		updatePosition();
 		setTextAlignment(static_cast<Qt::Alignment>(item->property(m_textAlignmentProperty).toInt()));
@@ -78,22 +91,48 @@ void QDiagramGraphicsTextItem::itemPropertyHasChanged(QAbstractDiagramGraphicsIt
 	}
 }
 
+QDiagramToolkit::PropertyType QDiagramGraphicsTextItem::textPropertyType() const
+{
+	QAbstractDiagramShape* p = qgraphicsitem_cast<QAbstractDiagramShape*>(parentItem());
+	if (p){
+		QDiagramMetaProperty m = p->metaData()->property(p->metaData()->indexOfProperty(m_textProperty));
+		return m.type();
+	}
+	return QDiagramToolkit::PropertyTypeInvalid;
+}
+
 void QDiagramGraphicsTextItem::restoreProperties(const QVariantMap & properties)
 {
-	setHtml(properties.value(m_textProperty).toString());
-	Qt::Alignment a = static_cast<Qt::Alignment>(properties.value(m_textAlignmentProperty, Qt::AlignCenter).toInt());
+	if (properties.contains(m_textColorProperty)){
+		setDefaultTextColor(qvariant_cast<QColor>(properties.value(m_textColorProperty)));
+	}
+	if (textPropertyType() == QDiagramToolkit::Text){
+		setHtml(properties.value(m_textProperty).toString());
+	} else if (textPropertyType() == QDiagramToolkit::String){
+		setPlainText(properties.value(m_textProperty).toString());
+	}
+	Qt::Alignment a = static_cast<Qt::Alignment>(properties.value(m_textAlignmentProperty, int(m_defaultTextAlignment)).toInt());
 	updateAlignment(a);
 	setTextAlignment(a);
 	updateTextOption(a);
 }
 
+void QDiagramGraphicsTextItem::setDefaultTextAlignment(Qt::Alignment alignment)
+{
+	m_defaultTextAlignment = alignment;
+}
+
 void QDiagramGraphicsTextItem::setEditModeEnabled(bool on, QTextCursor::MoveOperation operation)
 {
-	setTextInteractionFlags(Qt::TextEditable);
-	setFocus();
-	QTextCursor t = textCursor();
-	t.movePosition(QTextCursor::End);
-	setTextCursor(t);
+	if (on){
+		setTextInteractionFlags(Qt::TextEditorInteraction);
+		setFocus();
+		QTextCursor t = textCursor();
+		t.movePosition(QTextCursor::End);
+		setTextCursor(t);
+	} else {
+		setTextInteractionFlags(Qt::NoTextInteraction);
+	}
 }
 
 void QDiagramGraphicsTextItem::setTextAlignment(Qt::Alignment alignment)
@@ -111,6 +150,11 @@ void QDiagramGraphicsTextItem::setTextAlignment(Qt::Alignment alignment)
 void QDiagramGraphicsTextItem::setTextAlignmentProperty(const QString & name)
 {
 	m_textAlignmentProperty = name;
+}
+
+void QDiagramGraphicsTextItem::setTextColorProperty(const QString & name)
+{
+	m_textColorProperty = name;
 }
 
 void QDiagramGraphicsTextItem::setTextProperty(const QString & name)
@@ -137,6 +181,9 @@ void QDiagramGraphicsTextItem::updatePosition()
 		QRectF r = s->geometry();
 		r.moveTo(0, 0);
 		Qt::Alignment a = static_cast<Qt::Alignment>(s->property(m_textAlignmentProperty).toInt());
+		if (a == 0){
+			a = m_defaultTextAlignment;
+		}
 		if (a.testFlag(Qt::AlignHCenter)){
 			setTextWidth(-1);
 			setTextWidth(boundingRect().width());

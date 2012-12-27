@@ -23,7 +23,8 @@
 #include <QGraphicsTextItem>
 #include <QTextCursor>
 
-#include "qdiagramlib_global.h"
+#include <qdiagramlib_global.h>
+#include <qdiagramtoolkit.h>
 
 class QAbstractDiagramGraphicsItem;
 
@@ -54,6 +55,10 @@ public:
 
 	void itemPropertyHasChanged(QAbstractDiagramGraphicsItem* item, const QString & name, const QVariant & value);
 	/**
+	 * Sets the default text @p alignment. The default text alignment if text alignment property is not defined or does not exist.
+	 */
+	void setDefaultTextAlignment(Qt::Alignment alignment);
+	/**
 	 * If @p on is true, the edit mode is enabled.
 	 */
 	void setEditModeEnabled(bool on, QTextCursor::MoveOperation operation = QTextCursor::NoMove);
@@ -65,6 +70,8 @@ public:
 	 * Sets the @p name of the parent's property holding the item's text alignment.
 	 */
 	void setTextAlignmentProperty(const QString & name);
+	
+	void setTextColorProperty(const QString & name);
 	/**
 	 * Sets the @p name of the parent's property holding the item's text.
 	 */
@@ -99,9 +106,13 @@ protected:
 private slots:
 	void documentContentsChanged();
 private:
+	QDiagramToolkit::PropertyType textPropertyType() const;
+
 	void updateAlignment(Qt::Alignment alignment);
 	void updateTextOption(Qt::Alignment alignment);
 
+	Qt::Alignment m_defaultTextAlignment;
+	QString m_textColorProperty;
 	QString m_textProperty;
 	QString m_textAlignmentProperty;
 };
