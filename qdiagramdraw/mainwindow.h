@@ -64,6 +64,10 @@ public slots:
     void simulatorActionTriggered();
     void subWindowActivated( QMdiSubWindow* window );
 
+	void textBoldActionTriggered();
+	void textItalicActionTriggered();
+	void textUnderlineActionTriggered();
+
     void undoActionTriggered();
     void undoStackCanUndoChanged( bool canUndo );
 	void ungroupActionTriggered();

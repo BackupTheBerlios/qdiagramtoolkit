@@ -1,40 +1,44 @@
 <RCC>
-  <qresource prefix="/icons">
-    <file alias="actor">resources/actor48.ico</file>
-    <file alias="usecase">resources/usecase.ico</file>
-    <file alias="edit.cut">resources/cut.ico</file>
-    <file alias="edit.copy">resources/page_copy.ico</file>
-    <file alias="edit.paste">resources/page_paste.ico</file>
-    <file alias="view.refresh">resources/arrow_refresh.ico</file>
-    <file alias="diagram.new">resources/page.ico</file>
-    <file alias="diagr,.open">resources/page_edit.ico</file>
-    <file alias="diagram.save">resources/page_save.ico</file>
-    <file alias="print">resources/printer.ico</file>
-    <file alias="edit.redo">resources/arrow_redo.ico</file>
-    <file>resources/arrow_refresh.ico</file>
-    <file alias="edit.undo">resources/arrow_undo.ico</file>
-    <file alias="window.cascase">resources/application_cascade.ico</file>
-    <file alias="window.tile">resources/application_view_tile.ico</file>
-  </qresource>
-  <qresource prefix="/qdiagramdraw">
-    <file alias="shape.group">resources/shape_group.ico</file>
-    <file alias="shape.ungroup">resources/shape_ungroup.ico</file>
-    <file alias="autocomplete.function">resources/gear_in.ico</file>
-    <file alias="autocomplete.member">resources/brick.ico</file>
-    <file alias="shape.send_to_back">resources/shape_move_back.ico</file>
-    <file alias="script.unchanged">resources/script.ico</file>
-    <file alias="script.changed">resources/script_edit.ico</file>
-    <file alias="shape_bring_backward">resources/shape_move_backwards.ico</file>
-    <file alias="shape_bring_forward">resources/shape_move_forwards.ico</file>
-    <file alias="shape.bring_to_front">resources/shape_move_front.ico</file>
-  </qresource>
-  <qresource prefix="/qdiagramdraw/scripteditor">
-    <file alias="warning">resources/error.png</file>
-    <file alias="error">resources/exclamation.png</file>
-  </qresource>
-  <qresource prefix="/qdiagramdraw/autocomplete">
-    <file alias="object.property">resources/object_property.ico</file>
-    <file alias="object">resources/bricks.ico</file>
-    <file alias="object.method">resources/object_method.ico</file>
-  </qresource>
+    <qresource prefix="/icons">
+        <file alias="actor">resources/actor48.ico</file>
+        <file alias="usecase">resources/usecase.ico</file>
+        <file alias="edit.cut">resources/cut.ico</file>
+        <file alias="edit.copy">resources/page_copy.ico</file>
+        <file alias="edit.paste">resources/page_paste.ico</file>
+        <file alias="view.refresh">resources/arrow_refresh.ico</file>
+        <file alias="diagram.new">resources/page.ico</file>
+        <file alias="diagr,.open">resources/page_edit.ico</file>
+        <file alias="diagram.save">resources/page_save.ico</file>
+        <file alias="print">resources/printer.ico</file>
+        <file alias="edit.redo">resources/arrow_redo.ico</file>
+        <file>resources/arrow_refresh.ico</file>
+        <file alias="edit.undo">resources/arrow_undo.ico</file>
+        <file alias="window.cascase">resources/application_cascade.ico</file>
+        <file alias="window.tile">resources/application_view_tile.ico</file>
+    </qresource>
+    <qresource prefix="/qdiagramdraw">
+        <file alias="shape.group">resources/shape_group.ico</file>
+        <file alias="shape.ungroup">resources/shape_ungroup.ico</file>
+        <file alias="autocomplete.function">resources/gear_in.ico</file>
+        <file alias="autocomplete.member">resources/brick.ico</file>
+        <file alias="shape.send_to_back">resources/shape_move_back.ico</file>
+        <file alias="script.unchanged">resources/script.ico</file>
+        <file alias="script.changed">resources/script_edit.ico</file>
+        <file alias="shape_bring_backward">resources/shape_move_backwards.ico</file>
+        <file alias="shape_bring_forward">resources/shape_move_forwards.ico</file>
+        <file alias="shape.bring_to_front">resources/shape_move_front.ico</file>
+        <file alias="text.bold">resources/text_bold.ico</file>
+        <file alias="text.italic">resources/text_italic.ico</file>
+        <file alias="text.strikestrough">resources/text_strikethroungh.ico</file>
+        <file alias="text.underline">resources/text_underline.ico</file>
+    </qresource>
+    <qresource prefix="/qdiagramdraw/scripteditor">
+        <file alias="warning">resources/error.png</file>
+        <file alias="error">resources/exclamation.png</file>
+    </qresource>
+    <qresource prefix="/qdiagramdraw/autocomplete">
+        <file alias="object.property">resources/object_property.ico</file>
+        <file alias="object">resources/bricks.ico</file>
+        <file alias="object.method">resources/object_method.ico</file>
+    </qresource>
 </RCC>

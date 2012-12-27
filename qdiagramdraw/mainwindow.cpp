@@ -21,6 +21,7 @@
 #include <qdiagramviewcontrolpanel.h>
 
 
+#include <qdiagramgraphicstextitem.h>
 #include "diagramwindow.h"
 #include "qdiagramreader.h"
 #include "qdiagramview.h"
@@ -311,6 +312,17 @@ void MainWindow::selectionChanged()
 		if (diagram->selectedItems().isEmpty()){
 			ui->propertiesView->clear();
 		} else {
+			if (diagram->selectedItems().size() == 1){
+				QAbstractDiagramShape* s = qgraphicsitem_cast<QAbstractDiagramShape*>(diagram->selectedItems().first());
+				if (s){
+					if (s->textItem()->textInteractionFlags().testFlag(Qt::TextEditable)){
+						ui->textBoldAction->setEnabled(true);
+						ui->textBoldAction->setChecked(s->textItem()->textCursor().charFormat().fontWeight() == QFont::Bold);
+					}
+				} else {
+					ui->textBoldAction->setEnabled(false);
+				}
+			}
 			ui->propertiesView->showProperties(diagram->selectedItems());
 		}
 		ui->bringToFrontAction->setEnabled(!diagram->selectedItems().isEmpty());
@@ -430,6 +442,44 @@ void MainWindow::undoActionTriggered()
 void MainWindow::redoStackCanRedoChanged ( bool canRedo )
 {
 	ui->redoAction->setEnabled(canRedo);
+}
+
+void MainWindow::textBoldActionTriggered()
+{
+	DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+	if (w){
+		if (w->diagram()->selectedItems().size() == 1){
+			QAbstractDiagramShape* s = qgraphicsitem_cast<QAbstractDiagramShape*>(w->diagram()->selectedItems().at(0));
+			if (s){
+				if (s->textItem()->textInteractionFlags().testFlag(Qt::TextEditable)){
+					QTextCharFormat f = s->textItem()->textCursor().charFormat();
+					f.setFontWeight(QFont::Bold);
+					s->textItem()->textCursor().setCharFormat(f);
+				}
+			}
+		}
+	}
+}
+
+void MainWindow::textItalicActionTriggered()
+{
+	DiagramWindow* w = qobject_cast<DiagramWindow*>(ui->mdiArea->activeSubWindow()->widget());
+	if (w){
+		if (w->diagram()->selectedItems().size() == 1){
+			QAbstractDiagramShape* s = qgraphicsitem_cast<QAbstractDiagramShape*>(w->diagram()->selectedItems().at(0));
+			if (s){
+				if (s->textItem()->textInteractionFlags().testFlag(Qt::TextEditable)){
+					QTextCharFormat f = s->textItem()->textCursor().charFormat();
+					f.setFontItalic(true);
+					s->textItem()->textCursor().setCharFormat(f);
+				}
+			}
+		}
+	}
+}
+
+void MainWindow::textUnderlineActionTriggered()
+{
 }
 
 void MainWindow::undoStackCanUndoChanged ( bool canUndo )
