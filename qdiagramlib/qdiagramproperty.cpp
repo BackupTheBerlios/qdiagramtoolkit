@@ -162,10 +162,14 @@ bool QDiagramProperty::cast_helper(const QVariant & v, QDiagramToolkit::Property
 		*d = v.toDouble();
 		return true;
 	} else if (t == QDiagramToolkit::Font){
+		QFont *f = reinterpret_cast<QFont*>(ptr);
+		if (v.canConvert(QVariant::Font)){
+			*f = qvariant_cast<QFont>(v);
+			return true;
+		}
 		if (!v.canConvert(QVariant::Map)){
 			return false;
 		}
-		QFont *f = reinterpret_cast<QFont*>(ptr);
 		f->setFamily(v.toMap().value("family").toString());
 		f->setStyleName(v.toMap().value("style").toString());
 		f->setPointSizeF(v.toMap().value("size").toDouble());
@@ -310,6 +314,10 @@ QVariant QDiagramProperty::fromVariant(QDiagramToolkit::PropertyType type, const
 	} else if (type == QDiagramToolkit::ConnectionPoint){
 		if (value.canConvert<QDiagramConnectionPoint>()){
 			return toMap(value);
+		}
+	} else if (type == QDiagramToolkit::Font){
+		if (value.canConvert(QVariant::Font)){
+			return toMap(qvariant_cast<QFont>(value));
 		}
 	} else if (type == QDiagramToolkit::Int){
 		return value.toInt();
