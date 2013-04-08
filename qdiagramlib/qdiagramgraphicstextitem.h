@@ -49,6 +49,12 @@ public:
 	 */
 	~QDiagramGraphicsTextItem();
 	/**
+	 *
+	 */
+	QAbstractDiagram* diagram() const;
+
+	QAbstractDiagramShape* parentShape() const;
+	/**
 	 * Restores the QDiagramGraphicsTextItem from the given @p properties.
 	 */
 	void restoreProperties(const QVariantMap & properties);
@@ -115,6 +121,7 @@ private:
 	QString m_textColorProperty;
 	QString m_textProperty;
 	QString m_textAlignmentProperty;
+	QString m_textFontProperty;
 };
 
 #endif // QDIAGRAMGRAPHICSTEXTITEM_H

@@ -24,7 +24,7 @@
 #include "qdiagrammetadata.h"
 #include "qdiagrammetaproperty.h"
 #include "qdiagramshapeconnector.h"
-#include "qdiagramgraphicsscene.h"
+#include "qdiagramsheet.h"
 
 QAbstractDiagramShape::QAbstractDiagramShape(QGraphicsItem* parent) :
     QAbstractDiagramGraphicsItem(parent)
@@ -40,7 +40,7 @@ QAbstractDiagramShape::QAbstractDiagramShape(QGraphicsItem* parent) :
 }
 
 QAbstractDiagramShape::QAbstractDiagramShape(const QString & plugin, const QString & itemClass, const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), plugin, "shape", itemClass, parent)
+    QAbstractDiagramGraphicsItem(properties.value("uuid").toString(), plugin, "Shape", itemClass, parent)
 {
     m_connectionPointsVisible = false;
     setFlag(QGraphicsItem::ItemIsMovable);
@@ -171,6 +171,16 @@ void QAbstractDiagramShape::keyPressEvent(QKeyEvent* event)
 	QAbstractDiagramGraphicsItem::keyPressEvent(event);
 }
 
+QFont QAbstractDiagramShape::pointToPixel(const QFont & font) const
+{
+	QFont f(font);
+	QFontInfo fi(f);
+	if (f.pointSizeF() != -1){
+		f.setPixelSize(fi.pixelSize() * 10);
+	}
+	return f;
+}
+
 void QAbstractDiagramShape::restoreProperties(const QVariantMap & p)
 {
 	QAbstractDiagramGraphicsItem::restoreProperties(p);
@@ -258,8 +268,10 @@ void QAbstractDiagramShape::paintFocus(QPainter* painter, const QStyleOptionGrap
     painter->save();
     if (isSelected()){
         painter->setBrush(Qt::NoBrush);
-        QPen p(selectionColor());
-        p.setStyle(Qt::DotLine);
+		QPen p(QColor("cadetblue"));
+		p.setWidthF(5);
+		p.setStyle(Qt::DashDotDotLine);
+		setPen(p);
         painter->setPen(p);
         painter->drawRect(focusRect());
     }
@@ -268,7 +280,7 @@ void QAbstractDiagramShape::paintFocus(QPainter* painter, const QStyleOptionGrap
 
 QColor QAbstractDiagramShape::selectionColor() const
 {
-    QDiagramGraphicsScene* s = qobject_cast<QDiagramGraphicsScene*>(scene());
+    QDiagramSheet* s = qobject_cast<QDiagramSheet*>(sheet());
     if (s){
         return s->selectionColor();
     }

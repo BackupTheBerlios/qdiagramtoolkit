@@ -24,6 +24,8 @@
 class QLogicCircuitInputShape : public QAbstractDiagramShape
 {
 public:
+	QDIAGRAM_DECLARE_SHAPE(QLogicCircuitInputShape, Input);
+
     QLogicCircuitInputShape(QGraphicsItem* parent = 0);
 
     QLogicCircuitInputShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
@@ -33,15 +35,20 @@ public:
     //explicit QLogicCircuitInputShape(const QString & uuid, const QString & type, const QString & plugin, QGraphicsItem* parent = 0);
 
     QRectF boundingRect() const;
+	/**
+	 * Returns the default properties the for shape specified by the given @p id;
+	 */
+	static QVariantMap defaultProperties(const QString & id);
+	/**
+	 * Returns the shape's hot spot.
+	 */
+	static QPointF hotSpot(const QString & id);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     /**
       * Returns the shape of this item as a QPainterPath in local coordinates.
       */
     QPainterPath shape() const;
-protected:
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
 };
 
 #endif // QLOGICCIRCUITINPUTSHAPE_H

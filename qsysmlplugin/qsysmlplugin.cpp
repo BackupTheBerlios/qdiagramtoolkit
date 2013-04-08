@@ -25,61 +25,26 @@
 
 #include "qsysmlaction.h"
 #include "qsysmlblock.h"
+#include "qsysmlblockdiagram.h"
+#include "qsysmldiagram.h"
 #include "qsysmlcontrolflowconnector.h"
 #include "qsysmldataflowconnector.h"
 #include "qsysmlnode.h"
+#include "qsysmlport.h"
 
-QString QSysMLPlugin::name() const
-{
-	return QSysMLPlugin::staticName();
-}
-
-QList<QDiagramConnectorStyle> QSysMLPlugin::connectors() const
-{
-    QList<QDiagramConnectorStyle> l;
-
-    l << QDiagramConnectorStyle(name(), QIcon(":/qsysmlplugin/flow.control"), "Control Flow", "flow.control");
-    l << QDiagramConnectorStyle(name(), QIcon(":/qsysmlplugin/flow.data"), "Data Flow", "flow.data");
-    return l;
-}
-
-QAbstractDiagramGraphicsItem *QSysMLPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
-{
-    QAbstractDiagramGraphicsItem* item = 0;
-    if (!properties.contains("uuid")){
-        return 0;
-    }
-    if (metaData.value("itemType") == "connector"){
-		if (metaData.value("itemClass") == "flow.control"){
-			item = new QSysMLControlFlowConnector(properties);
-		} else if (metaData.value("itemClass") == "flow.data"){
-			item = new QSysMLDataFlowConnector(properties);
-		}
-    } else if (metaData.value("itemType") == "shape"){
-        if (metaData.value("itemClass") == "action"){
-            item = new QSysMLAction(properties);
-        } else if (metaData.value("itemClass") == "block"){
-            item = new QSysMLBlock(properties);
-        } else if (metaData.value("itemClass") == "node"){
-            item = new QSysMLNode(properties);
-        }
-    }
-    return item;
-}
-
-QDiagram *QSysMLPlugin::diagram(const QString & type, QObject *parent) const
-{
-    QDiagram* d = new QDiagram(parent);
-    d->addPlugin(name());
-    return d;
-}
-
-QStringList QSysMLPlugin::diagrams() const
-{
-    QStringList n;
-    n << "Activity Diagram";
-    return n;
-}
+//QDiagram *QSysMLPlugin::diagram(const QString & type, QObject *parent) const
+//{
+//    QSysMLDiagram* d = new QSysMLDiagram(parent);
+//    d->addPlugin(name());
+//    return d;
+//}
+//
+//QStringList QSysMLPlugin::diagrams() const
+//{
+//    QStringList n;
+//    n << "Activity Diagram";
+//    return n;
+//}
 
 QList<QDiagramEndOfLineStyle> QSysMLPlugin::endOfLineStyles() const
 {
@@ -95,217 +60,182 @@ QList<QDiagramEndOfLineStyle> QSysMLPlugin::endOfLineStyles() const
     return s;
 }
 
-QStringList QSysMLPlugin::groups(QAbstractDiagram *diagram) const
-{
-    QStringList g;
-    g  << tr("Blocks")
-       << tr("Nodes")
-       << "Actions";
-    return g;
-}
+//
+//QIcon QSysMLPlugin::icon(const QString &name) const
+//{
+//    if (name == "action"){
+//        return QIcon(":/qsysmlplugin/action");
+//    } else if (name == "action.accept_event"){
+//        return QIcon(":/qsysmlplugin/action.accept_event");
+//    } else if (name == "action.send_signal"){
+//        return QIcon(":/qsysmlplugin/action.send_signal");
+//    } else if (name == "block"){
+//        return QIcon(":/qsysmlplugin/block");
+//    } else if (name == "node.initial"){
+//        return QIcon(":/qsysmlplugin/node.initial");
+//    } else if (name == "node.final.activity"){
+//        return QIcon(":/qsysmlplugin/node.final.activity");
+//    } else if (name == "node.final.flow"){
+//        return QIcon(":/qsysmlplugin/node.final.flow");
+//    } else if (name == "node.fork.horizontal"){
+//        return QIcon(":/qsysmlplugin/node.fork_horizontal");
+//    } else if (name == "node.fork"){
+//        return QIcon(":/qsysmlplugin/node.fork");
+//    } else if (name == "node.join"){
+//        return QIcon(":/qsysmlplugin/node.join");
+//    } else if (name == "node.decision"){
+//        return QIcon(":/qsysmlplugin/node.decision");
+//    } else if (name == "node.merge"){
+//        return QIcon(":/qsysmlplugin/node.merge");
+//    } else if (name == "node.transition"){
+//        return QIcon(":/qsysmlplugin/node.transition");
+//    } else if (name == "port.input"){
+//        return QIcon(":/qsysmlplugin/port.input");
+//    } else if (name == "port.output"){
+//        return QIcon(":/qsysmlplugin/port.output");
+//    }
+//    return QIcon();
+//}
 
-QIcon QSysMLPlugin::icon(const QString &name) const
+void QSysMLPlugin::initialize()
 {
-    if (name == "action"){
-        return QIcon(":/qsysmlplugin/action");
-    } else if (name == "action.accept_event"){
-        return QIcon(":/qsysmlplugin/action.accept_event");
-    } else if (name == "action.send_signal"){
-        return QIcon(":/qsysmlplugin/action.send_signal");
-    } else if (name == "block"){
-        return QIcon(":/qsysmlplugin/block");
-    } else if (name == "node.initial"){
-        return QIcon(":/qsysmlplugin/node.initial");
-    } else if (name == "node.final.activity"){
-        return QIcon(":/qsysmlplugin/node.final.activity");
-    } else if (name == "node.final.flow"){
-        return QIcon(":/qsysmlplugin/node.final.flow");
-    } else if (name == "node.fork.horizontal"){
-        return QIcon(":/qsysmlplugin/node.fork_horizontal");
-    } else if (name == "node.fork"){
-        return QIcon(":/qsysmlplugin/node.fork");
-    } else if (name == "node.join"){
-        return QIcon(":/qsysmlplugin/node.join");
-    } else if (name == "node.decision"){
-        return QIcon(":/qsysmlplugin/node.decision");
-    } else if (name == "node.merge"){
-        return QIcon(":/qsysmlplugin/node.merge");
-    } else if (name == "node.transition"){
-        return QIcon(":/qsysmlplugin/node.transition");
-    }
-    return QIcon();
+	registerConnector<QSysMLControlFlowConnector>("flow.control", "Control Flow", QIcon(":/emcsplugin/flow.control"));
+	registerConnector<QSysMLDataFlowConnector>("flow.data", "data Flow", QIcon(":/emcsplugin/flow.data"));
+
+	registerDiagram<QSysMLDiagram>(tr("Activity Diagram"), QIcon());
+	registerDiagram<QSysMLBlockDiagram>(tr("Block Diagram"), QIcon());
+
+	registerShape<QSysMLAction>("action.default", tr("Actions"), tr("Action"), QIcon(":/qsysmlplugin/action"));
+	registerShape<QSysMLAction>("action.accept_event", tr("Actions"), tr("Accept Event Action"), QIcon(":/qsysmlplugin/action.accept_event"));
+	registerShape<QSysMLAction>("action.send_signal", tr("Actions"), tr("Send Signal Action"), QIcon(":/qsysmlplugin/action.send_signal"));
+
+	registerShape<QSysMLBlock>("block", tr("Block"), tr("Block"), QIcon(":/qsysmlplugin/block"));
+
+	registerShape<QSysMLNode>("node.decision", tr("Nodes"), tr("Decision Node"), QIcon(":/qsysmlplugin/node.decision"));
+	registerShape<QSysMLNode>("node.initial", tr("Nodes"), tr("Initial Node"), QIcon(":/qsysmlplugin/node.initial"));
+	registerShape<QSysMLNode>("node.final.activity", tr("Nodes"), tr("Final Activity Node"), QIcon(":/qsysmlplugin/node.final.activity"));
+	registerShape<QSysMLNode>("node.final.flow", tr("Nodes"), tr("Final Flow Node"), QIcon(":/qsysmlplugin/node.final.flow"));
+	registerShape<QSysMLNode>("node.fork", tr("Nodes"), tr("Fork"), QIcon(":/qsysmlplugin/node.fork"));
+	registerShape<QSysMLNode>("node.merge", tr("Nodes"), tr("Merge Node"), QIcon(":/qsysmlplugin/node.merge"));
+
+	registerShape<QSysMLPort>("port.input", tr("Block"), tr("Input"),QIcon(":/qsysmlplugin/port.input"));
+	registerShape<QSysMLPort>("port.output", tr("Block"), tr("Output"),QIcon(":/qsysmlplugin/port.output"));
 }
 
 QList<QDiagramLineStyle> QSysMLPlugin::lineStyles() const
 {
-    QList<QDiagramLineStyle> styles;
+    QList<QDiagramLineStyle> l;
+	QPen pen(Qt::black);
+	pen.setStyle(Qt::SolidLine);
+	pen.setWidthF(10.0);
+	l << QDiagramLineStyle(name(), "ControlFlowLineStyle", tr("Control Flow"), pen);
 
-    return styles;
+	pen = QPen(Qt::black);
+	pen.setStyle(Qt::SolidLine);
+	pen.setWidthF(10.0);
+	l << QDiagramLineStyle(name(), "DataFlowLineStyle", tr("Data Flow"), pen);
+    return l;
 }
 
-QVariantMap QSysMLPlugin::metaData(const QString & name) const
-{
-	QVariantMap m;
-	m["plugin"] = QSysMLPlugin::staticName();
-    if (name == "action"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "action";
-	} else if (name == "action.accept_event"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "action";
-	} else if (name == "action.send_signal"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "action";
-    } else if (name == "block"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "block";
-    } else if (name == "node.decision"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.initial"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.final.activity"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.final.flow"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.fork.horizontal"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.fork"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.join"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    } else if (name == "node.transition"){
-        m["itemType"] = "shape";
-        m["itemClass"] = "node";
-    }
 
-	return m;
-}
+//QMap<QString, QVariant> QSysMLPlugin::defaultProperties(const QString & name) const
+//{
+//    QMap<QString, QVariant> properties;
+//    if (name == "action"){
+//        properties["actionType"] = "default";
+//		properties["textFont"] = QDiagramProperty::toMap(QFont("Arial", 5));
+//    } else if (name == "action.accept_event"){
+//        properties["actionType"] = "event";
+//		properties["textFont"] = QFont("Arial", 5);
+//	} else if (name == "action.send_signal"){
+//        properties["actionType"] = "sendSignal";
+//		properties["textFont"] = QFont("Arial", 5);
+//    } else if (name == "block"){
+//        properties["blockType"] = "default";
+//	} else if (name == "flow.control"){
+//		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
+//		QPen pen(Qt::black);
+//		pen.setWidthF(2.0);
+//		pen.setStyle(Qt::DashLine);
+//		properties["lineColor"] = QDiagramProperty::toMap(pen);
+//	} else if (name == "node.decision"){
+//        properties["nodeType"] = "decision";
+//		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
+//		QPen pen(Qt::black);
+//		pen.setWidthF(2.0);
+//		pen.setStyle(Qt::SolidLine);
+//		properties["lineColor"] = QDiagramProperty::toMap(pen);
+//    } else if (name == "node.initial"){
+//		QBrush b(Qt::black);
+//		properties["background"] = QDiagramProperty::toMap(b);
+//        properties["nodeType"] = "initial";
+//    } else if (name == "node.final.activity"){
+//        properties["nodeType"] = "final.activity";
+//    } else if (name == "node.final.flow"){
+//        properties["nodeType"] = "final.flow";
+//    } else if (name == "node.fork.horizontal"){
+//        properties["nodeType"] = "fork";
+//        properties["alignment"] = Qt::Horizontal;
+//    } else if (name == "node.fork"){
+//        properties["nodeType"] = "fork";
+//        properties["alignment"] = Qt::Horizontal;
+//    } else if (name == "node.join"){
+//        properties["nodeType"] = "join";
+//        properties["alignment"] = Qt::Horizontal;
+//    } else if (name == "node.transition"){
+//        properties["nodeType"] = "transition";
+//		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
+//		QPen pen(Qt::black);
+//		pen.setWidthF(2.0);
+//		properties["lineColor"] = QDiagramProperty::toMap(pen);
+//    } else if (name == "port.input"){
+//		properties = Port::defaultProperties();
+//        properties["portType"] = "input";
+//    } else if (name == "port.output"){
+//		properties = Port::defaultProperties();
+//        properties["portType"] = "output";
+//    }
+//    return properties;
+//}
 
-QMap<QString, QVariant> QSysMLPlugin::defaultProperties(const QString & name) const
-{
-    QMap<QString, QVariant> properties;
-    if (name == "action"){
-        properties["actionType"] = "default";
-	} else if (name == "action.send_signal"){
-        properties["actionType"] = "sendSignal";
-    } else if (name == "block"){
-        properties["blockType"] = "default";
-	} else if (name == "flow.control"){
-		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
-		QPen pen(Qt::black);
-		pen.setWidthF(2.0);
-		pen.setStyle(Qt::DashLine);
-		properties["lineColor"] = QDiagramProperty::toMap(pen);
-	} else if (name == "node.decision"){
-        properties["nodeType"] = "decision";
-		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
-		QPen pen(Qt::black);
-		pen.setWidthF(2.0);
-		pen.setStyle(Qt::SolidLine);
-		properties["lineColor"] = QDiagramProperty::toMap(pen);
-    } else if (name == "node.initial"){
-        properties["nodeType"] = "initial";
-    } else if (name == "node.final.activity"){
-        properties["nodeType"] = "final.activity";
-    } else if (name == "node.final.flow"){
-        properties["nodeType"] = "final.flow";
-    } else if (name == "node.fork.horizontal"){
-        properties["nodeType"] = "fork";
-        properties["alignment"] = Qt::Horizontal;
-    } else if (name == "node.fork"){
-        properties["nodeType"] = "fork";
-        properties["alignment"] = Qt::Horizontal;
-    } else if (name == "node.join"){
-        properties["nodeType"] = "join";
-        properties["alignment"] = Qt::Horizontal;
-    } else if (name == "node.transition"){
-        properties["nodeType"] = "transition";
-		properties["font"] = QDiagramProperty::toMap(QFont("Arial", 10));
-		QPen pen(Qt::black);
-		pen.setWidthF(2.0);
-		properties["lineColor"] = QDiagramProperty::toMap(pen);
-    }
-    return properties;
-}
 
-QStringList QSysMLPlugin::shapes(const QString & group, QAbstractDiagram *diagram) const
-{
-    QStringList s;
-    QStringList ad;
-    QStringList ac;
-    QStringList bl;
-    if (group == tr("Blocks")){
-        bl << "block";
-        return bl;
-    } else if (group == tr("Nodes")){
-        ad << "node.initial"
-           << "node.final.flow"
-           << "node.final.activity"
-           << "node.fork.horizontal"
-           << "node.fork"
-           << "node.join"
-           << "node.decision"
-           << "node.merge"
-           << "node.transition";
-        return ad;
-    } else if (group == tr("Actions")){
-        ac << "action"
-          << "action.send_signal"
-          << "action.accept_event";
-        return ac;
-    } else if (group.isEmpty()){
-        s.append(ad);
-        s.append(ac);
-        s.append(bl);
-    }
-    return s;
-}
-
-QString QSysMLPlugin::staticName()
-{
-	return "SysML";
-}
-
-QString QSysMLPlugin::title(const QString & name) const
-{
-    if (name == "block"){
-        return tr("Block");
-    } else if (name == "node.initial"){
-        return tr("Initial Node");
-    } else if (name == "node.final.activity"){
-        return tr("Final Activity Node");
-    } else if (name == "node.final.flow"){
-        return tr("Final Flow Node");
-    } else if (name == "node.fork.horizontal"){
-        return tr("Fork Node (horizontal)");
-    } else if (name == "node.fork"){
-        return tr("Fork Node");
-    } else if (name == "node.join"){
-        return tr("Join Node");
-    } else if (name == "node.decision"){
-        return tr("Decision Node");
-    } else if (name == "parallelogramm"){
-        return tr("Parallelogramm");
-    } else if (name == "node.merge"){
-        return tr("Merge Node");
-    } else if (name == "node.transition"){
-        return tr("Transition Node");
-    } else if (name == "action"){
-        return tr("Action");
-    } else if (name == "action.send_signal"){
-        return tr("Send Signal Action");
-    } else if (name == "action.accept_event"){
-        return tr("Accept Event Action");
-    }
-    return QString::null;
-}
+//QString QSysMLPlugin::title(const QString & name) const
+//{
+//    if (name == "block"){
+//        return tr("Block");
+//    } else if (name == "node.initial"){
+//        return tr("Initial Node");
+//    } else if (name == "node.final.activity"){
+//        return tr("Final Activity Node");
+//    } else if (name == "node.final.flow"){
+//        return tr("Final Flow Node");
+//    } else if (name == "node.fork.horizontal"){
+//        return tr("Fork Node (horizontal)");
+//    } else if (name == "node.fork"){
+//        return tr("Fork Node");
+//    } else if (name == "node.join"){
+//        return tr("Join Node");
+//    } else if (name == "node.decision"){
+//        return tr("Decision Node");
+//    } else if (name == "parallelogramm"){
+//        return tr("Parallelogramm");
+//    } else if (name == "node.merge"){
+//        return tr("Merge Node");
+//    } else if (name == "node.transition"){
+//        return tr("Transition Node");
+//    } else if (name == "action"){
+//        return tr("Action");
+//    } else if (name == "action.send_signal"){
+//        return tr("Send Signal Action");
+//    } else if (name == "action.accept_event"){
+//        return tr("Accept Event Action");
+//    } else if (name == "port.input"){
+//        return tr("Input");
+//    } else if (name == "port.output"){
+//        return tr("Output");
+//    }
+//    return QString::null;
+//}
 
 QString QSysMLPlugin::toolTip(const QString & shape) const
 {

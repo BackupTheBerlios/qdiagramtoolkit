@@ -1,9 +1,31 @@
+/******************************************************************************
+** Copyright (C) 2013 Martin Hoppe martin@2x2hoppe.de
+**
+** This file is part of the QDiagram Toolkit (qdiagramlib)
+**
+** qdiagramlib is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as
+** published by the Free Software Foundation, either version 3 of the
+** License, or (at your option) any later version.
+**
+** qdiagramlib is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Leser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with qdialgramlib.  If not, see <http://www.gnu.org/licenses/>.
+******************************************************************************/
 #include "stdafx.h"
 #include "qsysmldataflowconnector.h"
 #include "qsysmlplugin.h"
 
+#include <qdiagramstylesheet.h>
+
+#define PI 3.14159265
+
 QSysMLDataFlowConnector::QSysMLDataFlowConnector(const QVariantMap & properties) :
-    QAbstractDiagramShapeConnector(QSysMLPlugin::staticName(), "default", properties)
+    QSysMLFlowConnector("flow.data", properties)
 {
 	restoreProperties(properties);
 }
@@ -39,10 +61,7 @@ bool QSysMLDataFlowConnector::canConnect(QAbstractDiagramShapeConnectionPoint* s
         return false;
     }
     //
-	if (startPoint->id() == "controlIn" && endPoint->id() == "controlOut"){
-		return true;
-	}
-	if (endPoint->id() == "controlIn" && startPoint->id() == "controlOut"){
+	if (startPoint->id().left(7) == "dataOut" && endPoint->id().left(6) == "dataIn"){
 		return true;
 	}
     return false;
@@ -56,53 +75,16 @@ QList<QPointF> QSysMLDataFlowConnector::defaultConnector() const
     QLineF lineEnd;
     QLineF lineStart;
 
-    line = QLineF(startPos(), endPos());
-
-    lineStart.setP1(startPos());
-    lineEnd.setP1(endPos());
-
-    //switch(orientationAtStart()){
-    //case QDiagramToolkit::East:
-    //    if (line.dx() < 20){
-    //        lineStart.setP2(startPos() + QPointF(20, 0));
-
-    //        lineEnd.setP2(lineEnd.p1() - QPointF(20, 0));
-    //        sections << QPointF(lineStart.p2().x(), lineStart.p1().y() + line.dy() / 2)
-    //                      << QPointF(lineEnd.p2().x(), lineEnd.p2().y() - line.dy() / 2);
-    //    } else {
-    //        lineStart.setP2(lineStart.p1() + QPointF(line.dx() / 2 , 0));
-
-    //        lineEnd.setP2(QPointF(lineStart.p2().x(), lineEnd.p1().y()));
-    //    }
-    //    break;
-    //case QDiagramToolkit::West:
-    //    if (line.dx() > -20){
-    //        lineStart.setP2(startPos() - QPointF(20, 0));
-
-    //        lineEnd.setP2(lineEnd.p1() + QPointF(20, 0));
-    //        sections << QPointF(lineStart.p2().x(), lineStart.p1().y() + line.dy() / 2)
-    //                      << QPointF(lineEnd.p2().x(), lineEnd.p2().y() - line.dy() / 2);
-    //    } else {
-    //        lineStart.setP2(lineStart.p1() + QPointF(line.dx() / 2 , 0));
-
-    //        lineEnd.setP2(QPointF(lineStart.p2().x(), lineEnd.p1().y()));
-    //    }
-    //    break;
-    //default:
-    //    break;
-    //}
-
-
-    //points.append(lineStart.p1());
-    //points.append(lineStart.p2());
-    //QListIterator<QPointF> it(sections);
-    //while(it.hasNext()){
-    //    points.append(it.next());
-    //}
-    //points.append(lineEnd.p2());
-    //points.append(lineEnd.p1());
-    points << startPos() << endPos();
-
+	if (connectionPointAtStart()){
+		points << QPointF(startPos().x() + connectionPointAtStart()->rect().width() / 2, startPos().y());
+	} else {
+		points << startPos();
+	}
+	if (connectionPointAtEnd()){
+	    points << QPointF(endPos().x() - connectionPointAtEnd()->rect().width(), startPos().y());
+	} else {
+		points << endPos();
+	}
 	return points;
 }
 
@@ -111,11 +93,22 @@ void QSysMLDataFlowConnector::paint(QPainter * painter, const QStyleOptionGraphi
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-	painter->setPen(Qt::SolidLine);
+	painter->save();
+	painter->setPen(diagram()->styleSheet()->lineStyle("DataFlowLineStyle").pen());
     drawPolyline(painter, m_breakPoints);
+
+	QLineF l(startPos(), endPos());
+	paintEndOfLine(painter, endPos(), l.angle() * 2 * PI / 360);
+
     if (isSelected()){
         paintBreakPoints(painter, m_breakPoints);
     }
+	painter->restore();
+
+	if (isSelected()){
+		paintFocus(painter, option, widget);
+    }
+
 }
 
 void QSysMLDataFlowConnector::paintBreakPoints(QPainter * painter, const QList<QPointF> & points)
@@ -131,6 +124,22 @@ void QSysMLDataFlowConnector::paintBreakPoints(QPainter * painter, const QList<Q
     painter->restore();
 }
 
+
+void QSysMLDataFlowConnector::paintEndOfLine(QPainter* painter, const QPointF & pos, double angle)
+{
+    double arrowSize = 50;
+    QPointF arrowP1 = pos - QPointF(sin(angle + PI / 3) * arrowSize,
+                                           cos(angle + PI / 3) * arrowSize);
+    QPointF arrowP2 = pos - QPointF(sin(angle + PI - PI / 3) * arrowSize,
+                                           cos(angle + PI - PI / 3) * arrowSize);
+
+    QPolygonF arrowHead;
+	arrowHead.clear();
+	arrowHead << pos << arrowP1 << arrowP2;
+	painter->drawLine(pos, arrowP1);
+	painter->drawLine(pos, arrowP2);
+}
+
 void QSysMLDataFlowConnector::updatePosition()
 {
     prepareGeometryChange();
@@ -138,4 +147,3 @@ void QSysMLDataFlowConnector::updatePosition()
     calcBoundingRect();
     update();
 }
-

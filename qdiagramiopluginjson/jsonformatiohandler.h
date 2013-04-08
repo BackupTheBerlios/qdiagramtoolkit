@@ -29,7 +29,7 @@ public:
 
     bool canRead() const;
 
-    QDiagram* read(QObject *parent);
+    QAbstractDiagram* read(QObject *parent);
 
     bool write(QAbstractDiagram *diagram);
 };

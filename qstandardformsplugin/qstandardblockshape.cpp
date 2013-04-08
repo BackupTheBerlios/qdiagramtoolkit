@@ -23,7 +23,7 @@
 #include <math.h>
 
 #include <qdiagramlinestyle.h>
-#include <QDiagramGraphicsItemShadow.h>
+#include <qdiagramgraphicsitemshadow.h>
 #include <qdiagramshapesizegrip.h>
 #include <qdiagramtextstyle.h>
 
@@ -31,14 +31,14 @@
 
 #include <qdiagramgraphicstextitem.h>
 
-#define CP_SIZE 8
-#define CP_HALFSIZE 4
+#define CP_SIZE 4
+#define CP_HALFSIZE 2
 #define PI 3.14159265
 
 QStandardBlockShape::QStandardBlockShape(const QString & itemClass, const QMap<QString, QVariant> &properties, QGraphicsItem* parent) :
 QAbstractDiagramShape(QStandardFormsPlugin::staticName(), itemClass, properties, parent)
 {
-	initGeometry(78, 78);
+	initGeometry(30, 30);
 	setGraphicsEffect(new QGraphicsDropShadowEffect());
 	graphicsEffect()->setEnabled(false);
 
@@ -53,7 +53,7 @@ QAbstractDiagramShape(QStandardFormsPlugin::staticName(), itemClass, properties,
 	addProperty("shadow", QDiagramToolkit::Shadow, false,  properties.value("shadow"));
     addProperty("text", QDiagramToolkit::Text, false, properties.value("text"));
 	addProperty("textAlignment", QDiagramToolkit::Alignment, false, properties.value("alignment", Qt::AlignCenter));
-    addProperty("font", QDiagramToolkit::Font, false, properties.value("font"));
+    addProperty("textFont", QDiagramToolkit::Font, false, properties.value("textFont"));
 
     if (metaData()->itemClass() == "rectangle"){
         addConnectionPoint(new QStandardBlockShapeConnectionPoint(this, "c1", QStandardBlockShapeConnectionPoint::Top));
@@ -157,7 +157,7 @@ void QStandardBlockShape::paintText(QPainter *painter, const QStyleOptionGraphic
     Q_UNUSED(widget);
     painter->save();
 
-	QFont f = qdiagramproperty_cast<QFont>(property("font"));
+	QFont f = qdiagramproperty_cast<QFont>(property("textFont"));
 	QString t = qdiagramproperty_cast<QString>(property("text"));
     painter->setFont(f);
     painter->drawText(shape().boundingRect(), Qt::AlignCenter, t);

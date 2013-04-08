@@ -23,20 +23,21 @@
 #include "qdiagram.h"
 #include "qdiagramlayers.h"
 #include "qdiagrammetadata.h"
+#include "qdiagramsheet.h"
 #include "qdiagramundocommand.h"
 #include "qdiagramchangepropertycommand.h"
 
 #include <json.h>
 
 QAbstractDiagramGraphicsItem::QAbstractDiagramGraphicsItem(QGraphicsItem* parent) :
-    QGraphicsItem(parent)
+    QGraphicsObject(parent)
 {
     m_blockUndoCommands = false;
     initMetaData("invalid", "invalid", "invalid", "invalid");
 }
 
 QAbstractDiagramGraphicsItem::QAbstractDiagramGraphicsItem(const QString & uuid, const QString & pluginName, const QString & itemType, const QString & itemClass, QGraphicsItem* parent) :
-    QGraphicsItem(parent)
+    QGraphicsObject(parent)
 {
     m_blockUndoCommands = false;
     initMetaData(uuid, pluginName, itemType, itemClass);
@@ -219,9 +220,9 @@ QBrush QAbstractDiagramGraphicsItem::brush(const QString & attrs)
 
 QAbstractDiagram* QAbstractDiagramGraphicsItem::diagram() const
 {
-    QAbstractDiagramScene* mScene = qobject_cast<QAbstractDiagramScene*>(scene());
-    if (mScene){
-        return mScene->diagram();
+    QDiagramSheet* s = qobject_cast<QDiagramSheet*>(sheet());
+    if (s){
+        return s->diagram();
     }
     return 0;
 }
@@ -256,31 +257,11 @@ void QAbstractDiagramGraphicsItem::initGeometry(qreal width, qreal height)
 void QAbstractDiagramGraphicsItem::initMetaData(const QString & uuid, const QString & pluginName, const QString & itemType, const QString & itemClass)
 {
     m_metadata = new QDiagramMetaData(pluginName, itemType, itemClass);
-
     m_metadata->addProperty("uuid", QDiagramToolkit::UUID, true);
     m_properties["uuid"] = uuid;
-//	m_values[m_metadata->indexOfProperty("uuid")] = QDiagramPropertyValue(QDiagramToolkit::UUID, uuid);
-
- //   m_metadata->addProperty("itemType", QDiagramToolkit::String, true);
- //   m_properties["itemType"] = type;
-	//m_values[m_metadata->indexOfProperty("itemType")] = QDiagramPropertyValue(QDiagramToolkit::String, type);
-
     m_metadata->addProperty("geometry", QDiagramToolkit::Rect, false);
-//	m_values[m_metadata->indexOfProperty("geometry")] = QDiagramPropertyValue(QDiagramToolkit::Rect);
-
-//    m_metadata->addProperty("pen", QDiagramToolkit::Pen, false);
-//	m_values[m_metadata->indexOfProperty("pen")] = QDiagramPropertyValue(QDiagramToolkit::Pen);
-
-	//QVariantMap m;
-
-	//QPen p;
-	//p.setColor(Qt::black);
-	//p.setWidthF(1.0);
-	//p.setStyle(Qt::SolidLine);
-	//m_properties["pen"] = QDiagramProperty::toMap(p);
-
     m_metadata->addProperty("zlevel", QDiagramToolkit::Int, false);
-//	m_values[m_metadata->indexOfProperty("zlevel")] = QDiagramPropertyValue(QDiagramToolkit::Int);
+	m_properties["zlevel"] = 100;
 }
 
 QVariant QAbstractDiagramGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)
@@ -321,8 +302,8 @@ QVariant QAbstractDiagramGraphicsItem::itemPositionChange(const QVariant & value
 		if (diagram()->layers()->isLocked(this)){
 			return pos();
 		}
-		if (diagram()->isSnapToGridEnabled()){
-			p = diagram()->gridPos(p);
+		if (diagram()->isSnapEnabled()){
+			p = diagram()->snapPos(p);
 		}
 	}
 	return p;
@@ -351,6 +332,7 @@ QVariant QAbstractDiagramGraphicsItem::itemPropertyHasChanged( const QString & n
     if (name == "geometry"){
         updateSizeGripHandles();
     }
+	sheet()->emitItemPropertyChanged(this, name);
     return value;
 }
 
@@ -379,6 +361,11 @@ QVariant QAbstractDiagramGraphicsItem::itemZValueHasChanged(const QVariant &valu
 QDiagramMetaData* QAbstractDiagramGraphicsItem::metaData() const
 {
     return m_metadata;
+}
+
+QDiagramSheet* QAbstractDiagramGraphicsItem::sheet() const
+{
+	return qobject_cast<QDiagramSheet*>(scene());
 }
 
 bool QAbstractDiagramGraphicsItem::parse(const QString &data)

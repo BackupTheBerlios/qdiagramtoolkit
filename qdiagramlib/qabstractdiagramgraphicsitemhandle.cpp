@@ -19,7 +19,7 @@
 #include "stdafx.h"
 #include "qabstractdiagramgraphicsitemhandle.h"
 
-#include "qabstractdiagramscene.h"
+#include "qdiagramsheet.h"
 
 QAbstractDiagramGraphicsItemHandle::QAbstractDiagramGraphicsItemHandle(QGraphicsItem *parent) :
     QGraphicsRectItem(parent)
@@ -29,10 +29,10 @@ QAbstractDiagramGraphicsItemHandle::QAbstractDiagramGraphicsItemHandle(QGraphics
 QPointF QAbstractDiagramGraphicsItemHandle::alignToGrid( const QPointF & pos ) const
 {
     QPointF p(pos);
-    QAbstractDiagramScene* s = qobject_cast<QAbstractDiagramScene*>(scene());
-    if (s && s->isSnapToGridEnabled()){
-        p.setX(s->gridSize().width() * (int)(p.x() / s->gridSize().width()));
-        p.setY(s->gridSize().height() * (int)(p.y() / s->gridSize().height()));
+    QDiagramSheet* s = qobject_cast<QDiagramSheet*>(scene());
+    if (s && s->isSnapEnabled()){
+        p.setX(s->snapSize().width() * (int)(p.x() / s->snapSize().width()));
+        p.setY(s->snapSize().height() * (int)(p.y() / s->snapSize().height()));
     }
     return p;
 }

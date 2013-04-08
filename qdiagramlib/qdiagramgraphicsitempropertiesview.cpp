@@ -377,7 +377,7 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 				return QString("%1%").arg(value().toInt());
 			} else if (type() == QDiagramToolkit::Rect){
 				return QString("(%1, %2) %3 x %4")
-					.arg(value(true).toMap().value("x").toInt())
+					.arg(value(true).toMap().value("x").toDouble())
 					.arg(value(true).toMap().value("y").toInt())
 					.arg(value(true).toMap().value("width").toInt())
 					.arg(value(true).toMap().value("height").toInt());

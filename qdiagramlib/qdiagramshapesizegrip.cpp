@@ -19,15 +19,18 @@
 #include "stdafx.h"
 #include "qdiagramshapesizegrip.h"
 
-#include "qabstractdiagramscene.h"
 #include "qabstractdiagramshape.h"
+#include "qdiagramsheet.h"
 
 QDiagramShapeSizeGripHandle::QDiagramShapeSizeGripHandle(QDiagramShapeSizeGripHandle::HandlePosition position, QGraphicsItem* parent) :
-    QGraphicsRectItem(0, 0, 6, 6, parent)
+    QGraphicsRectItem(0, 0, 30, 30, parent)
 {
     m_active = false;
     m_posFlag = position;
-	setBrush(QBrush(Qt::darkCyan));
+	setBrush(QBrush(QColor("azure")));
+	QPen p(QColor("cadetblue"));
+	p.setWidthF(5);
+	setPen(p);
 
     setAcceptsHoverEvents(true);
     if (m_posFlag & QDiagramShapeSizeGripHandle::Bottom || m_posFlag & QDiagramShapeSizeGripHandle::Top){
@@ -60,9 +63,9 @@ void QDiagramShapeSizeGripHandle::updatePosition()
     } else if (m_posFlag & QDiagramShapeSizeGripHandle::BottomRight){
         setPos(parentItem()->boundingRect().width() - boundingRect().width(), parentItem()->boundingRect().height() - boundingRect().height());
     } else if (m_posFlag & QDiagramShapeSizeGripHandle::Left){
-        setPos(0, parentItem()->boundingRect().center().y() - boundingRect().height() / 2);
+		setPos(rect().width() / -2, parentItem()->boundingRect().center().y() - boundingRect().height() / 2);
     } else if (m_posFlag & QDiagramShapeSizeGripHandle::Right){
-        setPos(parentItem()->boundingRect().width() - boundingRect().width(), parentItem()->boundingRect().center().y() - boundingRect().height() / 2);
+        setPos(parentItem()->boundingRect().width() - boundingRect().width() / 2, parentItem()->boundingRect().center().y() - boundingRect().height() / 2);
     } else if (m_posFlag & QDiagramShapeSizeGripHandle::Top){
         setPos(parentItem()->boundingRect().center().x() - boundingRect().width() / 2, 0);
     } else if (m_posFlag & QDiagramShapeSizeGripHandle::TopLeft){
@@ -74,18 +77,18 @@ void QDiagramShapeSizeGripHandle::updatePosition()
 
 qreal QDiagramShapeSizeGripHandle::alignHorizontal(qreal value)
 {
-    QAbstractDiagramScene* sc = qobject_cast<QAbstractDiagramScene*>(scene());
-    if (sc && sc->isSnapToGridEnabled()){
-        return sc->gridSize().width() * (int)(value / sc->gridSize().width());
+    QDiagramSheet* sc = qobject_cast<QDiagramSheet*>(scene());
+    if (sc && sc->isSnapEnabled()){
+        return sc->snapSize().width() * (int)(value / sc->snapSize().width());
     }
     return value;
 }
 
 qreal QDiagramShapeSizeGripHandle::alignVertical(qreal value)
 {
-    QAbstractDiagramScene* sc = qobject_cast<QAbstractDiagramScene*>(scene());
-    if (sc && sc->isSnapToGridEnabled()){
-        return sc->gridSize().height() * (int)(value / sc->gridSize().height());
+    QDiagramSheet* sc = qobject_cast<QDiagramSheet*>(scene());
+    if (sc && sc->isSnapEnabled()){
+        return sc->snapSize().height() * (int)(value / sc->snapSize().height());
     }
     return value;
 }
@@ -165,7 +168,7 @@ void QDiagramShapeSizeGripHandle::mousePressEvent(QGraphicsSceneMouseEvent* even
 void QDiagramShapeSizeGripHandle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton){
-//        QAbstractDiagramScene* sc = qobject_cast<QAbstractDiagramScene*>(scene());
+//        QAbstractDiagramSheet* sc = qobject_cast<QAbstractDiagramSheet*>(sheet());
 //        QAbstractDiagramShape* sp = dynamic_cast<QAbstractDiagramShape*>(parentItem());
 //        if (sp && sc){
 //            if (m_pos == QDiagramShapeSizeGripHandle::Bottom){

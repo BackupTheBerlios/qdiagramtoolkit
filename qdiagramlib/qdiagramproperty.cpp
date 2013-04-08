@@ -143,10 +143,20 @@ bool QDiagramProperty::cast_helper(const QVariant & v, QDiagramToolkit::Property
 		}
 		return true;
 	} else if (t == QDiagramToolkit::Color){
-		if (!v.canConvert(QVariant::String)){
-			return false;
-		}
 		QColor* c = reinterpret_cast<QColor*>(ptr);
+		if (v.canConvert(QVariant::Map)){
+			c->setRedF(v.toMap().value("red").toDouble());
+			c->setBlueF(v.toMap().value("blue").toDouble());
+			c->setGreenF(v.toMap().value("green").toDouble());
+			if (v.toMap().contains("alpha")){
+				c->setAlphaF(v.toMap().value("alpha").toDouble());
+			}
+			return true;
+		}
+		if (v.canConvert(QVariant::Color)){
+			*c = qvariant_cast<QColor>(v);
+			return true;
+		}
 		c->setNamedColor(v.toString());
 		return true;
 	} else if (t == QDiagramToolkit::ConnectionPoint){
@@ -170,13 +180,17 @@ bool QDiagramProperty::cast_helper(const QVariant & v, QDiagramToolkit::Property
 		if (!v.canConvert(QVariant::Map)){
 			return false;
 		}
-		f->setFamily(v.toMap().value("family").toString());
-		f->setStyleName(v.toMap().value("style").toString());
-		f->setPointSizeF(v.toMap().value("size").toDouble());
-		f->setBold(v.toMap().value("bold").toBool());
-		f->setItalic(v.toMap().value("italic").toBool());
-		f->setUnderline(v.toMap().value("underline").toBool());
-		f->setStrikeOut(v.toMap().value("strikeout").toBool());
+		QVariantMap m = v.toMap();
+		f->setFamily(m.value("family").toString());
+		if (!m.value("style").toString().isEmpty()){
+			f->setStyleName(m.value("style").toString());
+		}
+//		f->setPixelSize(m.value("size").toDouble());
+		f->setPointSize(m.value("size").toDouble());
+		f->setBold(m.value("bold").toBool());
+		f->setItalic(m.value("italic").toBool());
+		f->setUnderline(m.value("underline").toBool());
+		f->setStrikeOut(m.value("strikeout").toBool());
 		return true;
 	} else if (t == QDiagramToolkit::LineStyle){
 		QDiagramLineStyle* s = reinterpret_cast<QDiagramLineStyle*>(ptr);
@@ -382,6 +396,16 @@ QDiagramMetaData* QDiagramProperty::metaData() const
 	return 0;
 }
 
+qreal QDiagramProperty::pixelToPoint(int pixel)
+{
+	return pixel * 0.75;
+}
+
+qreal QDiagramProperty::pointToPixel(qreal point)
+{
+	return point * 1.333333333;
+}
+
 QDiagramProperty QDiagramProperty::property(const QString & name) const
 {
 	QAbstractDiagramGraphicsItem* i = item();
@@ -546,7 +570,7 @@ QVariantMap QDiagramProperty::toMap() const
 {
 	QAbstractDiagramGraphicsItem* i = item();
 	if (i && d->index != -1){
-		return value().toMap();
+		return toMap(value());
 	}
 	return QVariantMap();
 }
@@ -570,11 +594,17 @@ QVariantMap QDiagramProperty::toMap(const QVariant & v)
 		QDiagramConnectionPoint c = qvariant_cast<QDiagramConnectionPoint>(v);
 		m["uuid"] = c.uuid();
 		m["id"] = c.id();
+	} else if (v.type() == QVariant::Color){
+		QColor c = qvariant_cast<QColor>(v);
+		m["red"] = c.redF();
+		m["green"] = c.greenF();
+		m["blue"] = c.blueF();
+		m["alpha"] = c.alphaF();
 	} else if (v.type() == QVariant::Font){
 		QFont f = qvariant_cast<QFont>(v);
 		m["family"] = f.family();
 		m["style"] = f.styleName();
-		m["size"] = f.pointSizeF();
+		m["size"] = f.pointSize();
 		m["bold"] = f.bold();
 		m["italic"] = f.italic();
 		m["underline"] = f.underline();

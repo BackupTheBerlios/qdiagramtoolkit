@@ -32,6 +32,7 @@ class QDiagramGraphicsTextItem;
 //! The QAbstractDiagramShape class is the base of all shapes in a QAbstractDiagram class.
 class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramShape : public QAbstractDiagramGraphicsItem
 {
+	Q_OBJECT
 public:
     enum {
         Type = QGraphicsItem::UserType + 4201
@@ -81,6 +82,10 @@ public:
       */
     virtual bool isConnectionAllowed(QAbstractDiagramShapeConnector* connector) const;
 	/**
+	 *
+	 */
+	QFont pointToPixel(const QFont & font) const;
+	/**
 	 * @reimp QAbstractDiagramGraphicsItem::restoreProperties()
 	 */
 	virtual void QAbstractDiagramShape::restoreProperties(const QVariantMap & p);
@@ -99,7 +104,9 @@ public:
       * Return the shape's selection.
       */
     QColor selectionColor() const;
-
+	/**
+	 * Return the item paint the shape's text.
+	 */
 	QDiagramGraphicsTextItem* textItem() const;
     /**
       * Returns the type of the QAbstractDiagramShapeConnectionPoint as an int.

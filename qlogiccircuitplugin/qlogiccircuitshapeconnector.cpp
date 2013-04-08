@@ -21,6 +21,11 @@
 
 #include "qlogiccircuitplugin.h"
 
+#include "qlogiccircuitfunctionshape.h"
+#include "qlogiccircuitgateshape.h"
+#include "qlogiccircuitinputshape.h"
+#include "qlogiccircuitoutputshape.h"
+#include "qlogiccircuitparametershape.h"
 //												Shape at End
 // Shape Start	Property Name	Property Value
 // Input		Signal Type		Analog
@@ -29,6 +34,7 @@
 QLogicCircuitShapeConnector::QLogicCircuitShapeConnector(const QVariantMap & properties) :
     QAbstractDiagramShapeConnector(QLogicCircuitPlugin::staticName(), "default", properties)
 {
+	addProperty("lineStyle", QDiagramToolkit::Pen, true, properties.value("lineStyle"));
 	restoreProperties(properties);
 }
 
@@ -64,86 +70,90 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
     }
     //
     //
-    if (startPoint->parentShape()->metaData()->itemClass() == "gate"){
-		if (endPoint->parentShape()->metaData()->itemClass() == "output" && endPoint->connections().size() < endPoint->maxConnections()){
+	if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
+		if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass() && endPoint->connections().size() < endPoint->maxConnections()){
 			return true;
-		} else if (endPoint->parentShape()->metaData()->itemClass() == "input"){
+		} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitInputShape::staticItemClass()){
 			return true;
 		}
-        // Gate to gate
+        // Gate to Gate
         if (startPoint->orientation() == QDiagramToolkit::East && endPoint->orientation() == QDiagramToolkit::West){
             if (endPoint->connections().size() < endPoint->maxConnections()){
-                // Output to input
+                // Output to Input
                 return true;
             }
         }
-    } else if (startPoint->parentShape()->metaData()->itemClass() == "function"){
+    } else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
         if (startPoint->parentShape()->property("function") == "comparator"){
-            if (endPoint->parentShape()->metaData()->itemClass() == "output"){
+			if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+                if (endPoint->id() == "trigger"){
+                    return true;
+                }
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
                 if (endPoint->parentShape()->property("signalType") == "digital"){
                     return true;
                 }
-			} else if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
 				return true;
-			} else if (endPoint->parentShape()->metaData()->itemClass() == "parameter"){
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitParameterShape::staticItemClass()){
                 if (endPoint->parentShape()->property("signalType") == "analog"){
                     return true;
                 }
             }
         } else if (startPoint->parentShape()->property("function") == "operatingHoursCounter"){
-            if (endPoint->parentShape()->metaData()->itemClass() == "output"){
+            if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
                 if (endPoint->parentShape()->property("signalType") == "analog"){
                     return true;
                 }
             }
         } else if (startPoint->parentShape()->property("function") == "timer"){
-            if (endPoint->parentShape()->metaData()->itemClass() == "output"){
+            if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
                 if (endPoint->parentShape()->property("signalType") == "digital"){
                     return true;
                 }
-			} else if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
 				return true;
 			}
         }
-    } else if (startPoint->parentShape()->metaData()->itemClass() == "input"){
+    } else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitInputShape::staticItemClass()){
         if (startPoint->parentShape()->property("signalType").toString() == "analog"){
-            if (endPoint->parentShape()->metaData()->itemClass() == "function"){
-                if (endPoint->parentShape()->property("function") == "comparator"){
+            if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+                if (endPoint->parentShape()->property("Function") == "comparator"){
                     return true;
                 }
             }
         } else if (startPoint->parentShape()->property("signalType").toString() == "digital"){
-            if (endPoint->parentShape()->metaData()->itemClass() == "function"){
-				if (endPoint->parentShape()->property("function") == "timer"){
+            if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+				if (endPoint->parentShape()->property("Function") == "timer"){
 					if (endPoint->id() == "trigger"){
 						return true;
 					}
 				}
-			} else if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
                 return true;
             }
         }
-    } else if (startPoint->parentShape()->metaData()->itemClass() == "parameter"){
+	} else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitParameterShape::staticItemClass()){
         if (startPoint->parentShape()->property("signalType").toString() == "analog"){
-	        if (endPoint->parentShape()->metaData()->itemClass() == "function"){
-				if (endPoint->parentShape()->property("function") == "comparator"){
+			if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+				if (endPoint->parentShape()->property("Function") == "comparator"){
 					return true;
-				} else if (endPoint->parentShape()->property("function").toString() == "timer"){
+				} else if (endPoint->parentShape()->property("Function").toString() == "timer"){
 					if (endPoint->id() == "parameter"){
 						return true;
 					}
 				}
 			}
 		} else if (startPoint->parentShape()->property("signalType").toString() == "digital"){
-	        if (endPoint->parentShape()->metaData()->itemClass() == "gate"){
+	        if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
 				return true;
 			}
 		}
 	} else if (startPoint->parentShape()->metaData()->itemClass() == "value"){
-		if (endPoint->parentShape()->metaData()->itemClass() == "function"){
-			if (endPoint->parentShape()->property("function") == "comparator"){
+		if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+			if (endPoint->parentShape()->property("Function") == "comparator"){
 				return true;
-			} else if (endPoint->parentShape()->property("function") == "timer"){
+			} else if (endPoint->parentShape()->property("Function") == "timer"){
 				if (endPoint->id() == "parameter"){
 					return true;
 				}
@@ -213,10 +223,12 @@ void QLogicCircuitShapeConnector::paint(QPainter * painter, const QStyleOptionGr
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
-    if (startConnectionPoint() && startConnectionPoint()->parentShape()->property("state").toBool()){
+    if (connectionPointAtStart() && connectionPointAtStart()->parentShape()->property("state").toBool()){
         painter->setPen(Qt::green);
     }
-	painter->setPen(Qt::black);
+	QPen pen(Qt::black);
+	pen.setWidthF(5);
+	painter->setPen(pen);
     drawPolyline(painter, m_breakPoints);
     if (isSelected()){
         paintBreakPoints(painter, m_breakPoints);
@@ -230,8 +242,14 @@ void QLogicCircuitShapeConnector::paintBreakPoints(QPainter * painter, const QLi
     }
     painter->save();
     painter->setBrush(QBrush(Qt::red));
-    for (int iPoints = 1; iPoints < points.size() - 1; iPoints++){
-        painter->drawRect(points.at(iPoints).x() - 2, points.at(iPoints).y() - 2, 4, 4);
+    for (int iPoints = 0; iPoints < points.size(); iPoints++){
+		if (iPoints == 0){
+			painter->drawRect(points.at(iPoints).x(), points.at(iPoints).y() - 15, 30, 30);
+		} else if (iPoints == points.size() - 1){
+			painter->drawRect(points.at(iPoints).x() - 30, points.at(iPoints).y() - 15, 30, 30);
+		} else {
+			painter->drawRect(points.at(iPoints).x() - 15, points.at(iPoints).y() - 15, 30, 30);
+		}
     }
     painter->restore();
 }

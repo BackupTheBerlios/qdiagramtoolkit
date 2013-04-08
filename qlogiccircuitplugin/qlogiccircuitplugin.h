@@ -20,61 +20,101 @@
 #define QLOGICCIRCUITPLUGIN_H
 
 #include <qabstractdiagramplugin.h>
-
-//! The QLogicCircuitPlugin
+#include <qdiagramtoolkit.h>
+//! @ingroup plugins The QLogicCircuitPlugin provides a set of shapes for logic circuits.
 /**
-  * @defgroup QLogicCircuitPlugin Logic Circuit
+  * @section lcshape Shapes
+  * <table>
+  * <tr>
+  * <th>Shape</th>
+  * <th>Description</th>
+  * <th>Id</th>
+  * <th>Class</th>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_gate_and.png</td>
+  * <td><b>AND-gate</b></td>
+  * <td>gate.and</td>
+  * <td>QLogicCircuitGateShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_gate_nand.png</td>
+  * <td><b>NAND-gate</b></td>
+  * <td>gate.nand</td>
+  * <td>QLogicCircuitGateShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_gate_nor.png</td>
+  * <td><b>NOR-gate</b></td>
+  * <td>gate.nor</td>
+  * <td>QLogicCircuitGateShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_gate_not.png</td>
+  * <td><b>NOT-gate</b><br/>Inverts the input signal</td>
+  * <td>gate.not</td>
+  * <td>QLogicCircuitGateShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_gate_xor.png</td>
+  * <td><b>XOR-gate</b></td>
+  * <td>gate.xor</td>
+  * <td>QLogicCircuitGateShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_gate_xnor.png</td>
+  * <td><b>XOR-gate</b></td>
+  * <td>gate.xnor</td>
+  * <td>QLogicCircuitGateShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_func_comp.png</td>
+  * <td><b>Comparator</b><br/>Compares analog input X with Y</td>
+  * <td>function.comparator</td>
+  * <td>QLogicCircuitFunctionShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_func_counter.png</td>
+  * <td><b>Counter</b></td>
+  * <td>function.counter</td>
+  * <td>QLogicCircuitFunctionShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_func_oph_counter.png</td>
+  * <td><b>Operating Hours Counter</b></td>
+  * <td>function.counter.oph</td>
+  * <td>QLogicCircuitFunctionShape</td>
+  * </tr>
+  * <tr>
+  * <td>@image html lc_func_timer.png</td>
+  * <td><b>Timer</b></td>
+  * <td>function.timer</td>
+  * <td>QLogicCircuitFunctionShape</td>
+  * </tr>
+  * </table>
   */
 class QLogicCircuitPlugin : public QObject, public QAbstractDiagramPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QAbstractDiagramPlugin)
 public:
-    QList<QDiagramConnectorStyle> connectors() const;
+	QDIAGRAM_DECLARE_PLUGIN(QLogicCircuitPlugin, "Logic Circuit");
 
     QAbstractDiagramShapeConnector* createConnection(const QString & uuid, QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QString & style);
 
-    QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
-
-    QDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
-
-    QStringList diagrams() const;
-
     QList<QDiagramEndOfLineStyle> endOfLineStyles() const;
-    /**
-      * Returns the list of groups provided by the plugin.
-      */
-    QStringList groups(QAbstractDiagram* diagram = 0) const;
 
-    QPointF hotSpot(const QVariantMap & metaData, const QVariantMap & properties) const;
-    /**
-      * Returns the icon for the connector of shape specified by the given @p name.
-      */
-    QIcon icon(const QString & name) const;
+	void initialize();
 
     QList<QDiagramLineStyle> lineStyles() const;
-
-	QVariantMap metaData(const QString & name) const;
-
-    QString name() const;
     /**
       * Returns a list of actions defined for the shape specified by the given @p style.
       */
     QList<QAction*> shapeActions(const QString & style) const;
     /**
-      * Returns a list of names for the shapes provided by the logic circuit plugin.
-      */
-    QStringList shapes(const QString & group = QString::null, QAbstractDiagram* diagram = 0) const;
-    /**
-      * Returns the default properties for the shape specified by the given @p name.
-      */
-    QMap<QString,QVariant> defaultProperties(const QString & name) const;
-
-	static QString staticName();
-    /**
       * Returns the (user-readable) title of the connector or shape specified by the given @p name.
       */
-    QString title(const QString & name) const;
+    //QString title(const QString & name) const;
     /**
       * Returns the @p shape's tool tip.
       */

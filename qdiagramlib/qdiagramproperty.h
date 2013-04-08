@@ -137,6 +137,10 @@ public:
 	static QString toString(Qt::PenStyle style);
 	
 	static QString toString(Qt::BrushStyle style);
+
+	static qreal pixelToPoint(int pixel);
+
+	static qreal pointToPixel(qreal point);
 private:
 	friend class QAbstractDiagramGraphicsItem;
 
@@ -191,6 +195,11 @@ template<typename T> inline T qdiagramproperty_cast(QDiagramProperty & p)
 		return t;
 	}
 	return T();
+}
+
+template<typename T> inline T qdiagramproperty_cast(QVariant p)
+{
+	return qdiagramproperty_cast<T>(QDiagramProperty(qdiagramPropertyType<T>(), p));
 }
 
 Q_DECLARE_METATYPE(QDiagramProperty)

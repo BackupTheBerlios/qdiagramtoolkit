@@ -29,6 +29,7 @@
 #include <qdiagrammetaproperty.h>
 #include <qdiagrampluginloader.h>
 #include <qdiagramgraphicsitemshadow.h>
+#include <qdiagramsheet.h>
 
 #include "json.h"
 
@@ -50,7 +51,7 @@ bool JSONFormatIOHandler::canRead() const
     return false;
 }
 
-QDiagram* JSONFormatIOHandler::read(QObject *parent)
+QAbstractDiagram* JSONFormatIOHandler::read(QObject *parent)
 {
     if (device() == 0){
         return 0;
@@ -64,7 +65,7 @@ QDiagram* JSONFormatIOHandler::read(QObject *parent)
 	QVariantMap dmap = m.value("diagram").toMap();
 
 	QVariantMap mmap = dmap.value("metaData").toMap();
-	QVariantMap pages = dmap.value("pages").toMap();
+	QVariantMap pages = dmap.value("sheets").toMap();
 
     if (mmap.value("type").isNull()){
         return 0;
@@ -72,7 +73,7 @@ QDiagram* JSONFormatIOHandler::read(QObject *parent)
     if (mmap.value("plugin").isNull()){
         return 0;
     }
-    QDiagram* dm = 0;
+    QAbstractDiagram* dm = 0;
     dm = QDiagramPluginLoader::diagram(mmap.value("plugin").toString(), mmap.value("type").toString(), parent);
     if (dm == 0){
         return 0;
@@ -86,14 +87,14 @@ QDiagram* JSONFormatIOHandler::read(QObject *parent)
 	// Set diagram properties
 	QVariantMap pmap = dmap.value("properties").toMap();
 
-	QMapIterator<QString,QVariant> page(pages);
-	while(page.hasNext()){
-		page.next();
-		if (!page.hasPrevious()){
-			dm->page(0)->setName(page.key());
+	QMapIterator<QString,QVariant> sheet(pages);
+	while(sheet.hasNext()){
+		sheet.next();
+		if (!sheet.hasPrevious()){
+			dm->sheet(0)->setName(sheet.key());
 		} else {
 		}
-		QVariantMap items = page.value().toMap().value("items").toMap();
+		QVariantMap items = sheet.value().toMap().value("items").toMap();
 		QMapIterator<QString,QVariant> item(items);
 		while(item.hasNext()){
 			item.next();
@@ -101,7 +102,7 @@ QDiagram* JSONFormatIOHandler::read(QObject *parent)
 			QVariantMap properties = item.value().toMap().value("properties").toMap();
 			dm->restoreItem(metaData, properties);
 		}
-		QMapIterator<QString,QVariant> layers(page.value().toMap().value("layers").toMap());
+		QMapIterator<QString,QVariant> layers(sheet.value().toMap().value("layers").toMap());
 		while(layers.hasNext()){
 			layers.next();
 			dm->layers()->add(layers.key());
@@ -117,44 +118,22 @@ QDiagram* JSONFormatIOHandler::read(QObject *parent)
 				l->setLocked(layers.value().toMap().value("locked").toBool());
 			}
 		}
+		QVariantMap properties = sheet.value().toMap().value("properties").toMap();
+		if (properties.value("paperOrientation") == "landscape"){
+			dm->currentSheet()->setPaperOrientation(QDiagramToolkit::Landscape);
+		}
+		if (properties.value("paperSize") == "A0"){
+			dm->currentSheet()->setPaperSize(QDiagramToolkit::A0);
+		} else if (properties.value("paperSize") == "A1"){
+			dm->currentSheet()->setPaperSize(QDiagramToolkit::A1);
+		} else if (properties.value("paperSize") == "A2"){
+			dm->currentSheet()->setPaperSize(QDiagramToolkit::A2);
+		} else if (properties.value("paperSize") == "A3"){
+			dm->currentSheet()->setPaperSize(QDiagramToolkit::A3);
+		} else if (properties.value("paperSize") == "A4"){
+			dm->currentSheet()->setPaperSize(QDiagramToolkit::A4);
+		}
 	}
-	//QMapIterator<QString,QVariant> it(lsmap);
-	//while(it.hasNext()){
-	//	it.next();
-	//	dm->layers()->add(it.key());
-	//}
-
- //   Q_FOREACH(QVariant i, mmap.value("plugins").toList()){
- //       dm->addPlugin(i.toString());
- //   }
-	//QVariantMap pmap = dmap.value("properties").toMap();
-
- //   dm->setTitle(dmap.value("title").toString());
- //   
-	//QVariantMap items = dmap.value("items").toMap();
- //   it = QMapIterator<QString,QVariant>(items);
- //   while(it.hasNext()){
- //       it.next();
-	//	QVariantMap mm = it.value().toMap().value("metaData").toMap();
-	//	QVariantMap pm = it.value().toMap().value("properties").toMap();
- //       dm->restoreItem(mm, pm);
- //   }
-
-	//it = QMapIterator<QString,QVariant>(lsmap);
-	//while(it.hasNext()){
-	//	it.next();
-	//	QDiagramLayer* l = dm->layers()->layer(it.key());
-	//	if (l){
-	//		l->setVisible(it.value().toMap().value("visible").toBool());
-	//		Q_FOREACH(QString uuid, it.value().toMap().value("items").toStringList()){
-	//			QAbstractDiagramGraphicsItem* i = dm->findItemByUuid(uuid);
-	//			if (i){
-	//				l->add(i);
-	//			}
-	//		}
-	//		l->setLocked(it.value().toMap().value("locked").toBool());
-	//	}
-	//}
     return dm;
 }
 
@@ -165,7 +144,7 @@ bool JSONFormatIOHandler::write(QAbstractDiagram *diagram)
 	
 	QVariantMap pages;
 	QStringList order;
-	for (int i = 0; i < diagram->pageCount(); i++){
+	for (int i = 0; i < diagram->sheetCount(); i++){
 		QVariantMap page;
 	    QVariantMap items;
 		//
@@ -202,8 +181,28 @@ bool JSONFormatIOHandler::write(QAbstractDiagram *diagram)
 			lsmap[diagram->layers()->layer(j)->name()] = lmap;
 		}
 		page["layers"] = lsmap;
-		pages[diagram->page(i)->name()] = page;
-		order << diagram->page(i)->name();
+
+		QVariantMap pmap;
+		if (diagram->sheet(i)->paperSize() == QDiagramToolkit::A0){
+			pmap["paperSize"] = "A0";
+		} else if (diagram->sheet(i)->paperSize() == QDiagramToolkit::A1){
+			pmap["paperSize"] = "A1";
+		} else if (diagram->sheet(i)->paperSize() == QDiagramToolkit::A2){
+			pmap["paperSize"] = "A2";
+		} else if (diagram->sheet(i)->paperSize() == QDiagramToolkit::A3){
+			pmap["paperSize"] = "A3";
+		} else if (diagram->sheet(i)->paperSize() == QDiagramToolkit::A4){
+			pmap["paperSize"] = "A4";
+		}
+		if (diagram->sheet(i)->paperOrientation() == QDiagramToolkit::Landscape){
+			pmap["paperOrientation"] = "landscape";
+		} else {
+			pmap["paperOrientation"] = "portrait";
+		}
+		page["properties"] = pmap;
+
+		pages[diagram->sheet(i)->name()] = page;
+		order << diagram->sheet(i)->name();
 	}
 	pages["order"] = order;
 
@@ -211,16 +210,16 @@ bool JSONFormatIOHandler::write(QAbstractDiagram *diagram)
 	QVariantMap pmap;
 
     mmap["type"] = diagram->type();
-    mmap["plugin"] = diagram->plugin();
+    mmap["plugin"] = diagram->pluginName();
     mmap["plugins"] = diagram->plugins();
 
     pmap["title"] = diagram->title();
 	pmap["author"] = diagram->author();
-
+	
     QVariantMap dmap;
 	dmap["metaData"] = mmap;
 	dmap["properties"] = pmap;
-	dmap["pages"] = pages;
+	dmap["sheets"] = pages;
 	//dmap["items"] = imap;
 	//dmap["layers"] = lsmap;
 

@@ -21,7 +21,6 @@
 #include "qdiagramgraphicsitem_p.h"
 
 #include "qdiagramshapeconnector.h"
-#include "qdiagramgraphicsscene.h"
 #include "qdiagramundocommand.h"
 #include "qdiagramshapeconnectionpoint.h"
 

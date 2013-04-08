@@ -27,6 +27,8 @@
 class QLogicCircuitShapeConnector : public QAbstractDiagramShapeConnector
 {
 public:
+	QDIAGRAM_DECLARE_CONNECTOR(QLogicCircuitShapeConnector)
+
 	QLogicCircuitShapeConnector(const QVariantMap & properties);
     /**
       * Constructs a QLogicCircuitShapeConnector with the given @p uuid and @p style.

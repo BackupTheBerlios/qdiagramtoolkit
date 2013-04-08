@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QDiagram;
+class QAbstractDiagram;
 class QDiagramView;
 
 namespace Ui {
@@ -18,11 +18,11 @@ public:
     explicit DiagramWindow(QWidget *parent = 0);
     ~DiagramWindow();
 
-    QDiagram* diagram() const;
+    QAbstractDiagram* diagram() const;
 
     QDiagramView *diagramView() const;
 
-    void setDiagram(QDiagram* diagram);
+    void setDiagram(QAbstractDiagram* diagram);
 public slots:
 	void group();
 
@@ -40,7 +40,7 @@ public slots:
 private slots:
     void diagramContentsChanged();
 private:
-    QDiagram* cDiagram;
+    QAbstractDiagram* cDiagram;
     Ui::DiagramWindow *ui;
 };
 

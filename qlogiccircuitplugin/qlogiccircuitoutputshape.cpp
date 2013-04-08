@@ -22,8 +22,8 @@
 
 #include "qlogiccircuitplugin.h"
 
-#define GATE_BASE_SIZE 13.0
-#define GATE_CP_SIZE 6.0
+#define GATE_BASE_SIZE 50.0
+#define GATE_CP_SIZE 40.0
 
 QLogicCircuitOutputShapeConnectionPoint::QLogicCircuitOutputShapeConnectionPoint(QAbstractDiagramShape* shape) :
     QAbstractDiagramShapeConnectionPoint(shape, "in", QDiagramToolkit::West, 1)
@@ -42,7 +42,7 @@ void QLogicCircuitOutputShapeConnectionPoint::paint(QPainter *painter, const QSt
     Q_UNUSED(option);
     Q_UNUSED(widget);
     painter->save();
-    painter->drawRoundedRect(rect(), 2, 2);
+    painter->drawRect(rect());
     painter->restore();
 }
 
@@ -69,11 +69,14 @@ QLogicCircuitOutputShape::QLogicCircuitOutputShape(QGraphicsItem* parent) :
 }
 
 QLogicCircuitOutputShape::QLogicCircuitOutputShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "output", properties, parent)
+QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitOutputShape::staticItemClass(), properties, parent)
 {
-	initGeometry(182, 26);
+	initGeometry(900, 100);
     addProperty("name", QDiagramToolkit::String, false, properties.value("name", "<output>").toString());
     addProperty("signalType", QDiagramToolkit::String, true, properties.value("signalType").toString());
+	addProperty("textColor", QDiagramToolkit::Font, true, properties.value("textColor"));
+	addProperty("textFont", QDiagramToolkit::Font, true, properties.value("textFont"));
+	addProperty("lineStyle", QDiagramToolkit::Pen, true, properties.value("lineStyle"));
 
 	restoreProperties(properties);
 
@@ -89,36 +92,53 @@ QRectF QLogicCircuitOutputShape::boundingRect() const
     return r;
 }
 
-void QLogicCircuitOutputShape::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+QVariantMap QLogicCircuitOutputShape::defaultProperties(const QString & id)
 {
-//    setConnectionPointsVisible(true);
+	QVariantMap p;
+
+	p["textColor"] = "black";
+	QFont f("Arial");
+	f.setPointSizeF(4);
+	p["textFont"] = QDiagramProperty::toMap(f);
+
+	QPen pen(Qt::black);
+	pen.setWidthF(5);
+	p["lineStyle"] = QDiagramProperty::toMap(pen);
+
+	if (id == "output.analog"){
+        p["signalType"] = "analog";
+    } else if (id == "output.digital"){
+        p["signalType"] = "digital";
+	}
+	return p;
 }
 
-void QLogicCircuitOutputShape::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+QPointF QLogicCircuitOutputShape::hotSpot(const QString & id)
 {
-//    setConnectionPointsVisible(false);
+	return QPointF(0, -50);
 }
 
 void QLogicCircuitOutputShape::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setPen(pen());
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+	painter->setPen(qdiagramproperty_cast<QPen>(property("lineStyle")));
     painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
     painter->drawPath(shape());
     if (property("signalType").toString() == "analog"){
         int offset = geometry().height() + geometry().height() / 4;
         painter->save();
         QPainterPath p;
-		p.moveTo(1 + offset, 7);
-		p.lineTo(1 + offset, 19);
-		p.moveTo(1 + offset, 13);
-		p.lineTo(19 + offset, 13);
+		p.moveTo(10 + offset, 20);
+		p.lineTo(10 + offset, 80);
+		p.moveTo(10 + offset, 50);
+		p.lineTo(100 + offset, 50);
 
-		p.moveTo(1 + offset, 13);
-		p.lineTo(4 + offset, 9);
-		p.lineTo(7 + offset, 16);
-		p.lineTo(10 + offset, 8);
-		p.lineTo(15 + offset, 18);
-		p.lineTo(19 + offset, 7);
+		p.moveTo(10 + offset, 50);
+		p.lineTo(30 + offset, 30);
+		p.lineTo(60 + offset, 70);
+		p.lineTo(90 + offset, 20);
 
         painter->drawPath(p);
         painter->restore();
@@ -126,29 +146,30 @@ void QLogicCircuitOutputShape::paint(QPainter *painter, const QStyleOptionGraphi
         int offset = geometry().height() + geometry().height() / 4;
         painter->save();
         QPainterPath p;
-        p.moveTo(1 + offset, 19);
-        p.lineTo(5 + offset, 19);
-        p.lineTo(5 + offset, 7);
-        p.lineTo(15 + offset, 7);
-        p.lineTo(15 + offset, 19);
-        p.lineTo(19 + offset, 19);
-        painter->drawPath(p);
+        p.moveTo(10 + offset, 80);
+        p.lineTo(30 + offset, 80);
+        p.lineTo(30 + offset, 20);
+        p.lineTo(80 + offset, 20);
+        p.lineTo(80 + offset, 80);
+        p.lineTo(100 + offset, 80);
+
+		painter->drawPath(p);
         painter->restore();
-        QFont mFont;
-        mFont.setFamily("Arial");
-        mFont.setPixelSize(8);
-        painter->setFont(mFont);
-        QRectF mRect(boundingRect());
-        mRect.setWidth(26 + offset);
-        mRect.moveTop(3);
-        painter->drawText(mRect, Qt::AlignRight, "1\n0");
+
+		QFont f = pointToPixel(QFont("Arial", 3));
+        painter->setFont(f);
+        QRectF r(boundingRect());
+        r.setWidth(150 + offset);
+		r.adjust(0, 7, 0, 0);
+        painter->drawText(r, Qt::AlignRight, "1\n0");
     }
-    QFont mFont;
-    mFont.setFamily("Arial");
-    mFont.setPixelSize(10);
-    painter->setFont(mFont);
-    QRectF mRect(boundingRect().adjusted(0, 0, -GATE_BASE_SIZE / 2, 0));
-    painter->drawText(mRect, Qt::AlignRight | Qt::AlignVCenter, property("name").toString());
+
+	painter->setFont(pointToPixel(qdiagramproperty_cast<QFont>(property("textFont"))));
+
+	painter->setPen(qdiagramproperty_cast<QPen>(property("textColor")));
+	
+    QRectF r(boundingRect().adjusted(0, 0, -GATE_BASE_SIZE / 2, 0));
+    painter->drawText(r, Qt::AlignRight | Qt::AlignVCenter, property("name").toString());
     paintConnectionPoints(painter, option, widget);
 
     paintFocus(painter, option, widget);

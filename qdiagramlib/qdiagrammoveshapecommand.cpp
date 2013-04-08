@@ -19,6 +19,7 @@
 #include "stdafx.h"
 #include "qdiagrammoveshapecommand.h"
 
+#include "qdiagramsheet.h"
 
 QDiagramMoveShapeCommand::QDiagramMoveShapeCommand(QAbstractDiagram* diagram, QAbstractDiagramShape* item, const QPointF & oldPos, const QPointF & newPos, QUndoCommand* parent ) :
     QDiagramUndoCommand(diagram, item->uuid(), "default", parent)
@@ -49,7 +50,7 @@ void QDiagramMoveShapeCommand::undo()
     QAbstractDiagramGraphicsItem* mItem = diagram()->findItemByUuid(uuid());
     if (mItem){
         mItem->setPos(cOldPos);
-        diagram()->scene()->update();
+        diagram()->currentSheet()->update();
     }
 }
 

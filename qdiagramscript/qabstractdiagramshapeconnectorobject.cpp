@@ -29,10 +29,10 @@ static QScriptValue ctor(QScriptContext* context, QScriptEngine* engine)
 	return engine->newVariant(qVariantFromValue(i));
 }
 
-DEF_PROPERTY_GETTER(QAbstractDiagramShapeConnector, end, endConnectionPoint);
+DEF_PROPERTY_GETTER(QAbstractDiagramShapeConnector, end, connectionPointAtEnd);
 DEF_PROPERTY_SETTER_READONLY(QAbstractDiagramShapeConnector, end);
 
-DEF_PROPERTY_GETTER(QAbstractDiagramShapeConnector, start, startConnectionPoint);
+DEF_PROPERTY_GETTER(QAbstractDiagramShapeConnector, start, connectionPointAtStart);
 DEF_PROPERTY_SETTER_READONLY(QAbstractDiagramShapeConnector, start);
 
 //static QScriptValue get_end(QScriptContext* context, QScriptEngine* engine)

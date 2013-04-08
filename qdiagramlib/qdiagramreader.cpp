@@ -233,9 +233,9 @@ QByteArray QDiagramReader::format() const
      return d->format;
 }
 
-QDiagram* QDiagramReader::read(QObject *parent)
+QAbstractDiagram* QDiagramReader::read(QObject *parent)
 {
-    QDiagram* diagram = 0;
+    QAbstractDiagram* diagram = 0;
     if (!d->handler && !d->initHandler()){
         return 0;
     }

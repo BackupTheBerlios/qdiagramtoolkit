@@ -25,6 +25,8 @@
 
 #include <qabstractdiagramshapeconnectionpoint.h>
 
+class QDiagramGraphicsTextItem;
+
 //! The QAbstractDiagramShapeConnector provides an abstract base class for all connectors.
 /**
   *
@@ -32,6 +34,7 @@
   */
 class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramShapeConnector : public QAbstractDiagramGraphicsItem
 {
+	Q_OBJECT
 public:
     enum {
         Type = QGraphicsItem::UserType + 4202
@@ -48,6 +51,8 @@ public:
       * Destroys the QAbstractDiagramShapeConnector.
       */
     ~QAbstractDiagramShapeConnector();
+
+	virtual QList<QPointF> breakPoints() const = 0;
     /**
       * Returns true if this connector can connect to the connection points @p start and @end. Otherwise false.
       * canConnect() can be used to implemented directed connection, to prevent e.g input to input connections between shapes.
@@ -59,6 +64,16 @@ public:
 	 *
 	 */
 	virtual bool canStartWith(QAbstractDiagramShapeConnectionPoint* cp) const;
+    /**
+      * Returns the connection point at the end of this connector.
+      * @see connectionPointAtStart()
+      */
+    QAbstractDiagramShapeConnectionPoint* connectionPointAtEnd() const;
+    /**
+      * Returns the connection point at the start of this connector.
+      * @see connectionPointAtEnd()
+      */
+    QAbstractDiagramShapeConnectionPoint* connectionPointAtStart() const;
 	/**
 	 * Disconnects all connector attached to this connection point.
 	 */
@@ -69,11 +84,6 @@ public:
       */
     QPointF endPos() const;
     /**
-      * Returns the connection point at the end of this connector.
-      * @see startConnectionPoint()
-      */
-    QAbstractDiagramShapeConnectionPoint* endConnectionPoint() const;
-    /**
       * Returns true if the connector represents a temporary connection. Otherwise false.
       */
     bool isTemporary() const;
@@ -82,7 +92,7 @@ public:
       */
     QDiagramToolkit::ConnectionPointOrientation orientationAtEnd() const;
     /**
-      *
+      * Return the connector's orientation at the start position.
       */
     QDiagramToolkit::ConnectionPointOrientation orientationAtStart() const;
 
@@ -91,11 +101,8 @@ public:
 	void reconnect();
 
     virtual void restoreFromProperties(const QMap<QString,QVariant> & properties);
-    /**
-      * Returns the connection point at the start of this connector.
-      * @see endConnectionPoint()
-      */
-    QAbstractDiagramShapeConnectionPoint* startConnectionPoint() const;
+
+	void setConnectionPointAtStart(QAbstractDiagramShapeConnectionPoint* point);
     /**
       * Sets a temporary start @p position with the given @p orientation.
       */
@@ -120,7 +127,7 @@ public:
       */
     virtual void updatePosition() = 0;
 protected:
-    void drawPolyline(QPainter* painter, const QList<QPointF> & points);
+    virtual void drawPolyline(QPainter* painter, const QList<QPointF> & points);
 
     QPointF intersectPoint(QGraphicsItem* item, const QLineF & line) const;
     QPointF intersectPoint(const QPointF & pos, const QPolygonF & diagramShape, const QLineF & line) const;
@@ -144,20 +151,21 @@ protected:
 	/**
 	 * Returns the connector's text item.
 	 */
-	QGraphicsTextItem* textItem() const;
+	QDiagramGraphicsTextItem* textItem() const;
 	/**
 	 * Updates the text item's position and is called from itemPropertyHasChanged().
 	 * @remark The default implementation does nothing.
 	 */
 	virtual void updateTextItemPosition();
 private:
+	bool m_tempConnectionPointAtStart;
     QAbstractDiagramShapeConnectionPoint* m_connectionPointAtStart;
     QAbstractDiagramShapeConnectionPoint* m_connectionPointAtEnd;
     QPointF m_tempStartPos;
     QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtStart;
     QPointF m_tempEndPos;
     QDiagramToolkit::ConnectionPointOrientation m_tempOrientationAtEnd;
-	QGraphicsTextItem* m_textItem;
+	QDiagramGraphicsTextItem* m_textItem;
 };
 
 Q_DECLARE_METATYPE(QAbstractDiagramShapeConnector*)

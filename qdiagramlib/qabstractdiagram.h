@@ -32,10 +32,10 @@
 #include <qdiagramconnectorstyle.h>
 
 class QAbstractDiagramGraphicsItem;
-class QAbstractDiagramScene;
 class QAbstractDiagramShape;
 class QAbstractDiagramShapeConnectionPoint;
 class QAbstractDiagramShapeConnector;
+class QDiagramSheet;
 class QDiagramStyleSheet;
 
 class QGraphicsItem;
@@ -55,8 +55,8 @@ class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagram : public QObject
       * @see author() setAuthor()
       */
     Q_PROPERTY(QString author READ author WRITE setAuthor)
-	//! @property(snapToGrid)
-	Q_PROPERTY(bool snapToGrid READ isSnapToGridEnabled WRITE setSnapToGridEnabled)
+	//! @property(snap)
+	Q_PROPERTY(bool snap READ isSnapEnabled WRITE setSnapEnabled)
     //! @property(title)
     /**
       * This property holds the diagram title.
@@ -72,15 +72,19 @@ public:
     /**
       * Constructs a QAbstractDiagram with the given @p parent.
       */
-    explicit QAbstractDiagram(QObject* parent = 0);
+    explicit QAbstractDiagram(const QString & pluginName, QObject* parent = 0);
 	/**
 	 * Destroys the QAbstractDiagram object.
 	 */
 	~QAbstractDiagram();
+
+    void addConnection(QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style);
+
+	virtual QString addShape(const QString & plugin, const QString & id, const QPointF & pos);
 	/**
-	 * Adds a new page, sets the name to @p name and returns the page's ID.
+	 * Adds a new sheet, sets the name to @p name and returns the sheet's ID.
 	 */
-	int addPage(const QString & name = QString::null);
+	int addSheet(const QString & name = QString::null);
     /**
       * Adds the action @p action to the list of actions used to create a standard context menu.
       */
@@ -93,16 +97,22 @@ public:
     /**
       * Adds a shape of the given @p style.
       */
-    virtual QString addShape(const QString & style, const QPointF & pos, const QMap<QString,QVariant> & properties, const QString & plugin = "default") = 0;
+    //virtual QString addShape(const QString & style, const QPointF & pos, const QMap<QString,QVariant> & properties, const QString & plugin = "default") = 0;
     /**
       * Adds a connection between the specified @p start and @p end connection points.
       */
-    virtual void addConnection(QAbstractDiagramShapeConnectionPoint* start, QAbstractDiagramShapeConnectionPoint* end, const QDiagramConnectorStyle & style) = 0;
+    //virtual void addConnection(QAbstractDiagramShapeConnectionPoint* start, QAbstractDiagramShapeConnectionPoint* end, const QDiagramConnectorStyle & style) = 0;
     /**
       * Returns the author's name.
       * @see setAuthor()
       */
     QString author() const;
+    /**
+      * Begins a restore operation.
+      *
+      * When a diagram is restored it means that any previous data reported from the diagram is now invalid and has to be queried for again.
+      */
+    virtual void beginRestoreDiagram();
 	/**
 	 *
 	 */
@@ -115,11 +125,12 @@ public:
       *
       */
     QList<QAbstractDiagramShapeConnector*> connectors() const;
+
+	QString connectShapes(const QString & fromShape, const QString & fromCP, const QString & toShape, const QString & toCP, const QDiagramConnectorStyle & style);
 	/**
-	 * Returns the index of the current page.
-	 * @see setCurrentIndex(), pageCount()
+	 * Returns the current sheet.
 	 */
-	int currentPage() const;
+	QDiagramSheet* currentSheet() const;
 	/**
 	 * Returns the default value for the property of the specified @p type.
 	 * If no default value can be retrived, defaultValue return an invalid QVariant.
@@ -133,24 +144,26 @@ public:
       *
       */
     QList<QDiagramEndOfLineStyle> endOfLineStyles() const;
+	/**
+	 *
+	 */
+    virtual void endRestoreDiagram();
     /**
       * Returns the item specified by the given @p uuid or 0 if @p uuid does not exsist.
       */
     QAbstractDiagramGraphicsItem* findItemByUuid( const QString & uuid ) const;
-    /**
-      * Returns the coordinates of the given @point aligned to the current grid settings.
-      */
-    QPointF gridPos(const QPointF & point) const;
 	/**
 	 * Returns the index of @p page, or -1 if the item does not exist.
 	 */
-	int indexOf(QAbstractDiagramScene* page) const;
+	int indexOf(QDiagramSheet* sheet) const;
     /**
       * Returns true if the diagram is modified. Otherwise false.
       */
     bool isModified() const;
-
-	bool isSnapToGridEnabled() const;
+	/**
+	 * Returns true if the snap mode is enabled.
+	 */
+	bool isSnapEnabled() const;
     /**
       * Returns a list of diagram items.
       */
@@ -159,18 +172,29 @@ public:
 	 *
 	 */
 	QDiagramLayers* layers(int page = 0) const;
+
+    static QDiagramLineStyle lineStyle(const QString & id);
+    /**
+      *
+      */
+    static QList<QDiagramLineStyle> linesStyles();
 	/**
-	 * Returns the diagram page at the given @p index or 0 if no page exists at @p index.
+	 * Returns the diagram sheet at the given @p index or 0 if no sheet exists at @p index.
 	 */
-	QAbstractDiagramScene* page(int index) const;
+	QDiagramSheet* sheet(int index) const;
 	/**
 	 * Returns the number of pages in this diagram.
 	 */
-	int pageCount() const;
+	int sheetCount() const;
+	/**
+	 * Returns the orientation of the page at the given @p index.
+	 * Returns QDiagramToolkit::Portrait if no page exsist at @p index.
+	 */
+	QDiagramToolkit::PaperOrientation paperOrientation(int index) const;
     /**
       * Returns the name of the plugin providing this diagram.
       */
-    virtual QString plugin() const = 0;
+    QString pluginName() const;
     /**
       * Returns a list of plugins available for the diagram.
       * @see addPlugin()
@@ -179,15 +203,15 @@ public:
     /**
       * Removes the item specified by the given @uuid.
       */
-    virtual bool removeItem( const QString & uuid ) = 0;
+    virtual bool removeItem( const QString & uuid );
     /**
       * Restores an item from a repository or from the undo stack.
       */
-    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties ) = 0;
-    /**
-      * Returns the scene at the given @p page.
-      */
-    QAbstractDiagramScene* scene(int page = 0) const;
+    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties );
+    ///**
+    //  * Returns the scene at the given @p index.
+    //  */
+    //QAbstractDiagramSheet* sheet(int index = 0) const;
 	/**
 	 * Selects the item specified by the given @p uuid.
 	 */
@@ -228,6 +252,14 @@ public:
 	 *
 	 */
 	QList<QAbstractDiagramShape*> shapes() const;
+	/**
+	 * Returns the shape at the given position @p pos, or 0 if no shape exists at @p pos.
+	 */
+	QAbstractDiagramShape* shapeAt(const QPointF & pos) const;
+    /**
+      * Returns the coordinates of the given @point aligned to the current snap settings.
+      */
+    QPointF snapPos(const QPointF & point) const;
     /**
       * @see addItemContextMenuAction();
       */
@@ -255,27 +287,35 @@ signals:
     /**
       * This signal is emitted whenever the diagram's content changes; for example, when an item is inserted or deleted, or when formatting is applied.
       */
-    void contentsChanged();
+    void contentsChanged(int page);
     /**
       *
       */
     void contextMenuRequested(const QPointF & scenePos, const QPointF & screenPos);
 	/**
-	 * This signal is sent whenever the currentPage in the diagram changes either through user interaction or programmatically. The item's index is passed.
+	 * This signal is sent whenever the currentSheet in the diagram changes either through user interaction or programmatically. The item's index is passed.
 	 */
-	void currentPageChanged(int index);
+	void currentSheetChanged(int index);
 	/**
-	 * This signal is sent whenever the currentPage in the diagram changes either through user interaction or programmatically. The page's name is passed.
+	 * This signal is sent whenever the currentSheet in the diagram changes either through user interaction or programmatically. The page's name is passed.
 	 */
-	void currentPageChanged(const QString & name);
+	void currentSheetChanged(const QString & name);
     /**
       * This signal is emitted when an item has been added to the diagram. The item's @p uuid is passed.
       */
     void itemAdded(const QString & uuid);
+    void itemAdded(QAbstractDiagramShape* item);
+	/**
+	 *
+	 */
+	void itemPropertyChanged(QAbstractDiagramGraphicsItem* item, const QString & name);
+    void itemRestored(QAbstractDiagramGraphicsItem* item);
 	/**
 	 * This signal is emitted whenever a page is added to the diagram. The page's index is passed as parameter.
 	 */
 	void pageAdded(int index);
+
+	void propertiesChanged();
     /**
       * This signal is emitted by QDiagram whenever the selection changes. You can call selectedItems() to get the new list of selected items.
       */
@@ -287,11 +327,41 @@ signals:
 public slots:
     void print(QPrinter* printer);
 
-	void setSnapToGridEnabled(bool on);
+	void setSnapEnabled(bool on);
 protected:
-    friend class QAbstractDiagramScene;
-    virtual void dragEnterEventHandler( QGraphicsSceneDragDropEvent* event ) = 0;
-    virtual void contextMenuEventHandler(QGraphicsSceneContextMenuEvent* event) = 0;
+    friend class QDiagramSheet;
+    /**
+      * This event handler, for event event, can be reimplemented to receive drag enter events for this diagram.
+      * Drag enter events are generated as the cursor enters the item's area.
+      *
+      * The default implementation does nothing.
+      */
+    virtual void contextMenuEventHandler(QGraphicsSceneContextMenuEvent* event);
+    /**
+      * This event handler, for event event, can be reimplemented to receive drag enter events for this diagram.
+      * Drag enter events are generated as the cursor enters the item's area.
+      */
+    virtual void dragEnterEventHandler(QGraphicsSceneDragDropEvent* event);
+    /**
+      * This event handler, for event event, can be reimplemented to receive drag leave events for this diagram.
+      * Drag leave events are generated as the cursor leaves the diagram's area.
+      * Most often you will not need to reimplement this function, but it can be useful for resetting state in your item (e.g., highlighting).
+      *
+      * @see dragEnterEventHandler() dragMoveEventHandler() dropEventHandler()
+      */
+    virtual void dragLeaveEventHandler( QGraphicsSceneDragDropEvent* event );
+    /**
+      * This event handler, for event event, can be reimplemented to receive drag move events for this diagram.
+      * Drag move events are generated as the cursor moves around inside the diagram's area.
+      * Most often you will not need to reimplement this function; it is used to indicate that only parts of the item can accept drops.
+      */
+    virtual void dragMoveEventHandler( QGraphicsSceneDragDropEvent* event );
+    /**
+      * This event handler, for event event, can be reimplemented in a subclass to receive drop events for the diagram.
+      */
+    virtual void dropEventHandler( QGraphicsSceneDragDropEvent* event );
+
+	virtual void drawDiagramFrame(QPainter* painter, QDiagramSheet* sheet);
 protected slots:
     /**
       * This event handler, for event event, can be reimplemented to receive drag enter events for this diagram.
@@ -308,7 +378,7 @@ protected slots:
       * The default implementation does nothing.
       * @see dragEnterEventHandler() dragMoveEventHandler() dropEventHandler()
       */
-    virtual void dragLeaveEventHandler( QGraphicsSceneDragDropEvent* event ) = 0;
+    //virtual void dragLeaveEventHandler( QGraphicsSceneDragDropEvent* event );
     /**
       * This event handler, for event event, can be reimplemented to receive drag move events for this diagram.
       * Drag move events are generated as the cursor moves around inside the diagram's area.
@@ -316,29 +386,31 @@ protected slots:
       *
       * The default implementation does nothing.
       */
-    virtual void dragMoveEventHandler( QGraphicsSceneDragDropEvent* event ) = 0;
+    //virtual void dragMoveEventHandler( QGraphicsSceneDragDropEvent* event );
     /**
       * This event handler, for event event, can be reimplemented in a subclass to receive drop events for the diagram.
       *
       * The default implementation does nothing.
       */
-    virtual void dropEventHandler( QGraphicsSceneDragDropEvent* event ) = 0;
+    //virtual void dropEventHandler( QGraphicsSceneDragDropEvent* event ) = 0;
 
-    virtual void itemMoved(QGraphicsItem* findItemByUuid, const QPointF & oldPos, const QPointF & newPos) = 0;
+    virtual void itemMoved(QGraphicsItem* findItemByUuid, const QPointF & oldPos, const QPointF & newPos);
+
+	virtual void itemRestoredHandler(QAbstractDiagramGraphicsItem* findItemByUuid);
 private slots:
+	void pageContentsChanged();
     void undoStackIndexChanged(int index);
 private:
 	typedef struct {
 		QDiagramLayers* layers;
-		QAbstractDiagramScene* page;
-	} pageData;
-	QList<pageData> m_pages;
+		QDiagramSheet* sheet;
+	} sheetData;
+	QList<sheetData> m_sheets;
     QString m_author;
 	int m_index;
     QList<QAction*> m_standardItemContextMenuActions;
+	QString m_pluginName;
     QStringList m_plugins;
-	
-    //QAbstractDiagramScene* m_scene;
 	QDiagramStyleSheet* m_styleSheet;
 	QString m_title;
     QUndoStack* m_undostack;

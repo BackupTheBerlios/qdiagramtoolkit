@@ -70,12 +70,12 @@ void QDiagramViewControlPanel::setMousePosition(const QPointF & pos)
     ui->mousePositionLabel->setText(QString("%1,%2").arg(pos.toPoint().x()).arg(pos.toPoint().y()));
 }
 
-void QDiagramViewControlPanel::setSnapToGridEnabled(bool on)
+void QDiagramViewControlPanel::setSnapEnabled(bool on)
 {
 	if (m_snapToGrid != on){
 		m_snapToGrid = on;
 		updateIcons();
-		emit snapToGridToogled(m_snapToGrid);
+		emit snapToogled(m_snapToGrid);
 	}
 }
 
@@ -84,7 +84,7 @@ void QDiagramViewControlPanel::setZoom(int percent)
 	ui->zoomSlider->setZoom(percent);
 }
 
-bool QDiagramViewControlPanel::snapToGridEnabled() const
+bool QDiagramViewControlPanel::snapEnabled() const
 {
 	return m_snapToGrid;
 }
@@ -93,7 +93,7 @@ void QDiagramViewControlPanel::snapToolButtonClicked()
 {
 	m_snapToGrid = !m_snapToGrid;
 	updateIcons();
-	emit snapToGridToogled(m_snapToGrid);
+	emit snapToogled(m_snapToGrid);
 }
 
 void QDiagramViewControlPanel::updateIcons()

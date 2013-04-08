@@ -25,15 +25,9 @@
 
 #include <qdiagramlinestyle.h>
 
-//! The QStandardFormsPlugin provides a set of basic shapes.
+//! @ingroup plugins The QStandardFormsPlugin provides a set of basic shapes.
 /**
-  * @ingroup plugins
-  * @page stdforms Standard Forms
-  * \tableofcontents
-  * @section shape Shapes
-  * @subsection rectangle Rectangle
-  * @subsection circle Circle
-  * @subsection rrectangle Rounded Rectangle
+  * 
   * 
   * 
   */
@@ -44,9 +38,9 @@ class QSTANDARDFORMSPLUGINSHARED_EXPORT QStandardFormsPlugin : public QObject, p
 public:
     QList<QDiagramConnectorStyle> connectors() const;
 
-    QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
+    QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties);
 
-    QDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
+    QAbstractDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
 
     QStringList diagrams() const;
 

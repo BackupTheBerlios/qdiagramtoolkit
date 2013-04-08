@@ -107,7 +107,7 @@ public:
       * Reads a diagram from the device. On success, the diagram that was read is returned; otherwise, a null pointer is returned.
       * You can then call error() to find the type of error that occurred, or errorString() to get a human readable description of the error.
       */
-    QDiagram* read(QObject* parent = 0);
+    QAbstractDiagram* read(QObject* parent = 0);
     /**
       * Sets QDiagramReader's device to @p device. If a device has already been set, the old device is removed from QDiagramReader and is otherwise left unchanged.
       *

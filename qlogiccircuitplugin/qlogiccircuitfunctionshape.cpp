@@ -25,8 +25,8 @@
 
 #include "qlogiccircuitplugin.h"
 
-#define BASE_SIZE 13.0
-#define GATE_CP_SIZE 8.0
+#define BASE_SIZE 50.0
+#define GATE_CP_SIZE 40.0
 
 
 QLogicCircuitFunctionInputConnectionPoint::QLogicCircuitFunctionInputConnectionPoint(QAbstractDiagramShape* shape, const QString & id, int index, int maxConnections) :
@@ -46,7 +46,7 @@ void QLogicCircuitFunctionInputConnectionPoint::paint(QPainter *painter, const Q
     Q_UNUSED(option);
     Q_UNUSED(widget);
     painter->save();
-    painter->drawRoundedRect(rect(), 2, 2);
+    painter->drawRect(rect());
     painter->restore();
 }
 
@@ -77,7 +77,7 @@ void QLogicCircuitFunctionOutputConnectionPoint::paint(QPainter *painter, const 
     Q_UNUSED(widget);
     painter->save();
     painter->setBrush(Qt::red);
-    painter->drawRoundedRect(rect(), 2, 2);
+    painter->drawRect(rect());
     painter->restore();
 }
 
@@ -92,14 +92,19 @@ QLogicCircuitFunctionShape::QLogicCircuitFunctionShape(QGraphicsItem *parent) :
 }
 
 QLogicCircuitFunctionShape::QLogicCircuitFunctionShape(const QMap<QString, QVariant> &properties, QGraphicsItem *parent) :
-    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "function", properties, parent)
+QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitFunctionShape::staticItemClass(), properties, parent)
 {
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
+	initGeometry(300, 200);
 
     addProperty("function", QDiagramToolkit::String, true, properties.value("function").toString());
+	addProperty("background", QDiagramToolkit::Brush, true, properties.value("background"));
+	addProperty("textColor", QDiagramToolkit::Color, true, properties.value("textColor"));
+	addProperty("textFont", QDiagramToolkit::Font, true, properties.value("textFont"));
+	addProperty("lineStyle", QDiagramToolkit::Pen, true, properties.value("lineStyle"));
 
     if (properties.value("function").toString() == "comparator"){
         QMap<int,QString> pairs;
@@ -172,19 +177,57 @@ QList<QAction*> QLogicCircuitFunctionShape::createActions(QWidget* parent)
 	return l;
 }
 
+QVariantMap QLogicCircuitFunctionShape::defaultProperties(const QString & id)
+{
+	QVariantMap p;
+
+	p["textColor"] = "black";
+	QFont f("Arial");
+	f.setPointSizeF(4);
+	p["textFont"] = QDiagramProperty::toMap(f);
+
+	QPen pen(Qt::black);
+	pen.setWidthF(5);
+	p["lineStyle"] = QDiagramProperty::toMap(pen);
+
+	QBrush brush(Qt::white);
+	p["background"] = QDiagramProperty::toMap(brush);
+
+    if (id == "flipflop.asyncron"){
+        p["function"] = "comparator";
+    } else if (id == "function.comparator"){
+        p["function"] = "comparator";
+    } else if (id == "function.computation"){
+        p["function"] = "computation";
+    } else if (id == "function.counter"){
+        p["function"] = "counter";
+    } else if (id == "function.counter.operating_hours"){
+        p["function"] = "operatingHoursCounter";
+    } else if (id == "function.timer"){
+        p["function"] = "timer";
+        p["mode"] = "delay";
+        p["time"] = 5;
+	}
+	return p;
+}
+
+QPointF QLogicCircuitFunctionShape::hotSpot(const QString & id)
+{
+	Q_UNUSED(id);
+	return QPointF(0, -BASE_SIZE);
+}
+
 void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    painter->setPen(pen());
-    painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
+    painter->setPen(qdiagramproperty_cast<QPen>(property("lineStyle")));
+	painter->setBrush(qdiagramproperty_cast<QBrush>(property("background")));
     painter->drawPath(shape());
-    QFont font;
-    font.setFamily("Arial");
-    font.setPixelSize(10);
-    painter->setFont(font);
 
+	painter->setFont(pointToPixel(qdiagramproperty_cast<QFont>(property("textFont"))));
+	
     if (property("function").toString() == "comparator"){
         if (property("mode").toInt() == 0){
             painter->drawText(boundingRect(), Qt::AlignHCenter, "=");
@@ -202,9 +245,10 @@ void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGrap
     } else if (property("function").toString() == "computation"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "S");
     } else if (property("function").toString() == "timer"){
-		QString t = QString("T%1\n%2sec").arg(property("mode").toString()).arg(property("time").toString());
+		QString t = QString("T%1\n%2s").arg(property("mode").toString()).arg(property("time").toString());
         painter->drawText(boundingRect(), Qt::AlignHCenter, t);
-		painter->drawText(BASE_SIZE + 5, BASE_SIZE * 3, "P");
+		QFontMetrics fm(painter->font());
+		painter->drawText(BASE_SIZE + fm.width('I'), BASE_SIZE * 3 + fm.height() / 2 - 5, "P");
     }
     paintConnectionPoints(painter, option, widget);
     paintFocus(painter, option, widget);

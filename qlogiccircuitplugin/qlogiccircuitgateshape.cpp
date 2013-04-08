@@ -22,8 +22,8 @@
 
 #include "qlogiccircuitplugin.h"
 
-#define GATE_BASE_SIZE 13.0
-#define GATE_CP_SIZE 8.0
+#define GATE_BASE_SIZE 50.0
+#define GATE_CP_SIZE 40.0
 
 QLogicGateInputConnectionPoint::QLogicGateInputConnectionPoint(QAbstractDiagramShape* shape, const QString & id, int index, int maxConnections) :
     QAbstractDiagramShapeConnectionPoint(shape, id, QDiagramToolkit::West, maxConnections)
@@ -42,7 +42,7 @@ void QLogicGateInputConnectionPoint::paint(QPainter *painter, const QStyleOption
     Q_UNUSED(option);
     Q_UNUSED(widget);
     painter->save();
-    painter->drawRoundedRect(rect(), 2, 2);
+    painter->drawRect(rect());
     painter->restore();
 }
 
@@ -72,7 +72,7 @@ void QLogicGateOutputConnectionPoint::paint(QPainter *painter, const QStyleOptio
     Q_UNUSED(widget);
     painter->save();
     painter->setBrush(Qt::red);
-    painter->drawRoundedRect(rect(), 2, 2);
+    painter->drawRect(rect());
     painter->restore();
 }
 
@@ -91,19 +91,20 @@ QLogicCircuitGateShape::QLogicCircuitGateShape(QGraphicsItem* parent) :
 }
 
 QLogicCircuitGateShape::QLogicCircuitGateShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "gate", properties, parent)
+    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitGateShape::staticItemClass(), properties, parent)
 {
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
     setAcceptHoverEvents(true);
-	initGeometry(78, 52);
+	initGeometry(300, 200);
 
     addProperty("gateType", QDiagramToolkit::String, true, properties.value("gateType").toString());
+	addProperty("textFont", QDiagramToolkit::Font, true, properties.value("textFont"));
     addProperty("showState", QDiagramToolkit::Bool, false, false);
 
     if (properties.value("gateType").toString() == "not"){
-        addProperty("inputs", QDiagramToolkit::Int, false, 1);
+        addProperty("inputs", QDiagramToolkit::Int, true, 1);
         addConnectionPoint(new QLogicGateInputConnectionPoint(this, "in1", 0, 1));
     } else {
         addProperty("inputs", QDiagramToolkit::Int, false, properties.value("inputs", 2).toInt());
@@ -163,19 +164,43 @@ QList<QAction*> QLogicCircuitGateShape::createActions(QWidget* parent)
 	return l;
 }
 
-QPoint QLogicCircuitGateShape::hotSpot() const
+QVariantMap QLogicCircuitGateShape::defaultProperties(const QString & id)
 {
-    return QPoint(0, geometry().height() / (property("inputs").toInt() * 2));
+	QVariantMap p;
+
+	p["textColor"] = "black";
+	QFont f("Arial");
+	f.setPointSizeF(4);
+	p["textFont"] = QDiagramProperty::toMap(f);
+
+	QPen pen(Qt::black);
+	pen.setWidthF(5);
+	p["lineStyle"] = QDiagramProperty::toMap(pen);
+
+	QBrush brush(Qt::white);
+	p["background"] = QDiagramProperty::toMap(brush);
+
+	if (id == "gate.and"){
+        p["gateType"] = "and";
+    } else if (id == "gate.or"){
+        p["gateType"] = "or";
+    } else if (id == "gate.nand"){
+        p["gateType"] = "nand";
+    } else if (id == "gate.nor"){
+        p["gateType"] = "nor";
+    } else if (id == "gate.not"){
+        p["gateType"] = "not";
+    } else if (id == "gate.xnor"){
+        p["gateType"] = "xnor";
+    } else if (id == "gate.xor"){
+        p["gateType"] = "xor";
+	}
+	return p;
 }
 
-void QLogicCircuitGateShape::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+QPointF QLogicCircuitGateShape::hotSpot(const QString & id)
 {
-//    setConnectionPointsVisible(true);
-}
-
-void QLogicCircuitGateShape::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
-//    setConnectionPointsVisible(false);
+	return QPointF(0, -GATE_BASE_SIZE);
 }
 
 QList<QAbstractDiagramShapeConnector*> QLogicCircuitGateShape::inputs() const
@@ -242,31 +267,28 @@ void QLogicCircuitGateShape::paint(QPainter* painter, const QStyleOptionGraphics
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    painter->setPen(pen());
-    painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
+	painter->setPen(qdiagramproperty_cast<QPen>(property("lineStyle")));
+	painter->setBrush(qdiagramproperty_cast<QBrush>(property("background")));
     painter->drawPath(shape());
-    QFont mFont;
-    mFont.setFamily("Arial");
-    mFont.setPixelSize(12);
-    painter->setFont(mFont);
+	painter->setFont(pointToPixel(qdiagramproperty_cast<QFont>(property("textFont"))));
     if (property("gateType").toString() == "and"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "&");
     } else if (property("gateType").toString() == "nand"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "&");
-        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 5, boundingRect().center().y()), 5, 5);
+        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 20, boundingRect().center().y()), 20, 20);
     } else if (property("gateType").toString() == "or"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, ">=1");
     } else if (property("gateType").toString() == "nor"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, ">=1");
-        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 5, boundingRect().center().y()), 5, 5);
+        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 20, boundingRect().center().y()), 20, 20);
     } else if (property("gateType").toString() == "not"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "1");
-        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 5, boundingRect().center().y()), 5, 5);
+        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 20, boundingRect().center().y()), 20, 20);
     } else if (property("gateType").toString() == "xor"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "=1");
     } else if (property("gateType").toString() == "xnor"){
         painter->drawText(boundingRect(), Qt::AlignHCenter, "=1");
-        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 5, boundingRect().center().y()), 5, 5);
+        painter->drawEllipse(QPoint(5 * GATE_BASE_SIZE + 20, boundingRect().center().y()), 20, 20);
     }
     paintConnectionPoints(painter, option, widget);
     paintFocus(painter, option, widget);

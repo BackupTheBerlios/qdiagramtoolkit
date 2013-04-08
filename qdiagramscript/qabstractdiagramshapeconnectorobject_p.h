@@ -35,6 +35,10 @@ public:
 	{
 		return QRectF();
 	};
+	QList<QPointF> breakPoints() const
+	{
+		return QList<QPointF>();
+	}
 	void paint(QPainter *,const QStyleOptionGraphicsItem *,QWidget *)
 	{
 	};

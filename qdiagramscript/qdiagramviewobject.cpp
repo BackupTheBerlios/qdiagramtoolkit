@@ -37,7 +37,7 @@ static QScriptValue setDiagram(QScriptContext* context, QScriptEngine* engine)
 {
 	DECLARE_SELF(QDiagramView, setDiagram);
 	if (context->argumentCount() == 1){
-		QDiagram* d = qscriptvalue_cast<QDiagram*>(context->argument(0));
+		QAbstractDiagram* d = qscriptvalue_cast<QAbstractDiagram*>(context->argument(0));
 		if (d){
 			self->setDiagram(d);
 		}

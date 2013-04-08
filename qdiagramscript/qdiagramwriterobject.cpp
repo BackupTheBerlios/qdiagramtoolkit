@@ -53,7 +53,7 @@ static QScriptValue write(QScriptContext* context, QScriptEngine* engine)
 {
 	DECLARE_SELF(QDiagramWriter, write);
 	if (context->argumentCount() == 1){
-		QDiagram* d = qscriptvalue_cast<QDiagram*>(context->argument(0));
+		QAbstractDiagram* d = qscriptvalue_cast<QAbstractDiagram*>(context->argument(0));
 		if (d){
 			return qScriptValueFromValue(engine, self->write(d));
 		}

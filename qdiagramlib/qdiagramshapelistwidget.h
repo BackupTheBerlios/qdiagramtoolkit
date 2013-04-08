@@ -31,7 +31,12 @@ class QDIAGRAMLIBSHARED_EXPORT QDiagramShapeListWidget : public QListWidget
 public:
     explicit QDiagramShapeListWidget(QWidget *parent = 0);
 
-    void addShape(const QIcon & icon, const QString & title, const QVariantMap & metaData, const QVariantMap & properties);
+	//void addShape(const QString & plugin, const QString & id, const QString & title, const QIcon & icon);
+
+    void addShape(const QString & plugin, const QString & itemClass, const QString & title, const QVariantMap & properties, const QIcon & icon);
+
+	void addShape(const QString & id, const QString & plugin, const QString & title, const QIcon & icon);
+
     void removeShape(const QString & itemClass, const QString & plugin);
     void startDrag(Qt::DropActions supportedActions);
 signals:

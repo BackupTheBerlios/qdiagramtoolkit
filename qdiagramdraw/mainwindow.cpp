@@ -22,11 +22,11 @@
 
 
 #include <qdiagramgraphicstextitem.h>
+#include <qdiagrampagesetupdialog.h>
 #include "diagramwindow.h"
 #include "qdiagramreader.h"
 #include "qdiagramview.h"
-
-#include "qlogiccircuitsimulator.h"
+#include <qdiagramsheet.h>
 
 #include "autocompletemodel.h"
 #include "scripteditor.h"
@@ -70,7 +70,7 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-QDiagram* MainWindow::activeDiagram() const
+QAbstractDiagram* MainWindow::activeDiagram() const
 {
 	if (ui->mdiArea->activeSubWindow() == 0){
 		return 0;
@@ -92,7 +92,7 @@ DiagramWindow *MainWindow::activeDiagramWindow() const
 
 void MainWindow::bringForwardActionTriggered()
 {
-	QDiagram* diagram = activeDiagram();
+	QAbstractDiagram* diagram = activeDiagram();
 	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
 		i->bringForward();
 	}
@@ -100,7 +100,7 @@ void MainWindow::bringForwardActionTriggered()
 
 void MainWindow::bringToFrontActionTriggered()
 {
-	QDiagram* diagram = activeDiagram();
+	QAbstractDiagram* diagram = activeDiagram();
 	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
 		i->bringToFront();
 	}
@@ -136,13 +136,6 @@ void MainWindow::cutActionTriggered()
 			w->diagramView()->cut();
 		}
 	}
-	//    QDiagram* diagram = activeDiagram();
-	//    if (diagram){
-	//        if (!diagram->selectedItems().isEmpty()){
-	//            QString uuid = diagram->selectedItems().first()->uuid();
-	//            diagram->removeItem(uuid);
-	//        }
-	//    }
 }
 
 void MainWindow::diagramViewContextMenuRequested(const QPoint & point, const QPointF & scenePos)
@@ -207,7 +200,7 @@ void MainWindow::groupActionTriggered()
 void MainWindow::insertPageActionTriggered()
 {
 	if (activeDiagram()){
-		activeDiagram()->setCurrentIndex(activeDiagram()->addPage());
+		activeDiagram()->setCurrentIndex(activeDiagram()->addSheet());
 	}
 }
 
@@ -229,7 +222,7 @@ void  MainWindow::newActionTriggered()
 		return;
 	}
 	QAbstractDiagramPlugin* p = QDiagramPluginLoader::plugin(pn);
-	QDiagram* d = p->diagram(dn);
+	QAbstractDiagram* d = p->diagram(dn);
 	connect(d, SIGNAL(itemRestored(QAbstractDiagramGraphicsItem*)), this, SLOT(diagramItemAdded(QAbstractDiagramGraphicsItem*)));
 
 	DiagramWindow* w = new DiagramWindow();
@@ -252,12 +245,23 @@ void MainWindow::openActionTriggered()
 		QAbstractDiagram* d = reader.read();
 		if (d){
 			DiagramWindow* w = new DiagramWindow();
-			w->setDiagram((QDiagram*)d);
+			w->setDiagram(d);
 			connect(w->diagramView(), SIGNAL(graphicsViewContextMenuRequested(QPoint,QPointF)), this, SLOT(diagramViewContextMenuRequested(QPoint,QPointF)));
 
 			ui->mdiArea->addSubWindow(w);
 			w->show();
 		}
+	}
+}
+
+void MainWindow::pageSetupActionTriggered()
+{
+	if (activeDiagram()){
+		QDiagramPageSetupDialog* d = new QDiagramPageSetupDialog(activeDiagram(), this);
+		if (d->exec()){
+
+		}
+		delete d;
 	}
 }
 
@@ -277,6 +281,9 @@ void MainWindow::printPreviewActionTriggered()
 		return;
 	}
 	QPrinter p(QPrinter::HighResolution);
+	if (activeDiagram()->currentSheet()->paperOrientation() == QDiagramToolkit::Landscape){
+		p.setOrientation(QPrinter::Landscape);
+	}
 	QPrintPreviewDialog* d = new QPrintPreviewDialog(&p, this);
 
 	connect(d, SIGNAL(paintRequested(QPrinter*)), activeDiagram(), SLOT(print(QPrinter*)));
@@ -301,7 +308,7 @@ void MainWindow::saveAsImageActionTriggered()
 
 void MainWindow::selectionChanged()
 {
-	QDiagram* diagram = activeDiagram();
+	QAbstractDiagram* diagram = activeDiagram();
 
 	ui->copyAction->setEnabled(false);
 	ui->cutAction->setEnabled(false);
@@ -334,7 +341,7 @@ void MainWindow::selectionChanged()
 
 void MainWindow::sendBackwardActionTriggered()
 {
-	QDiagram* diagram = activeDiagram();
+	QAbstractDiagram* diagram = activeDiagram();
 	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
 		i->sendBackward();
 	}
@@ -342,7 +349,7 @@ void MainWindow::sendBackwardActionTriggered()
 
 void MainWindow::sendToBackActionTriggered()
 {
-	QDiagram* diagram = activeDiagram();
+	QAbstractDiagram* diagram = activeDiagram();
 	Q_FOREACH(QAbstractDiagramGraphicsItem* i, diagram->selectedItems()){
 		i->sendToBack();
 	}
@@ -374,14 +381,6 @@ void MainWindow::scriptEditorActionTriggered()
 	delete engine;
 }
 
-void MainWindow::simulatorActionTriggered()
-{
-	QLogicCircuitSimulator* sim = new QLogicCircuitSimulator(this);
-	sim->setDiagram(activeDiagram());
-	sim->exec();
-	delete sim;
-}
-
 void MainWindow::subWindowActivated( QMdiSubWindow* window )
 {
 	QUndoStack* undoStack = 0;
@@ -405,7 +404,7 @@ void MainWindow::subWindowActivated( QMdiSubWindow* window )
 		// Set current zoom level
 		controlPanel->setZoom(diagramWindow->diagramView()->zoom());
 		controlPanel->setGridVisible(diagramWindow->diagramView()->isGridVisible());
-		controlPanel->setSnapToGridEnabled(diagramWindow->diagramView()->isSnapToGridEnabled());
+		controlPanel->setSnapEnabled(diagramWindow->diagramView()->isSnapEnabled());
 
 		connect(diagramWindow->diagram(), SIGNAL(selectionChanged()), SLOT(selectionChanged()));
 
@@ -415,7 +414,7 @@ void MainWindow::subWindowActivated( QMdiSubWindow* window )
 
 		connect(controlPanel, SIGNAL(zoomChanged(int)), diagramWindow->diagramView(), SLOT(setZoom(int)));
 		connect(controlPanel, SIGNAL(showGridToogled(bool)), diagramWindow->diagramView(), SLOT(setGridVisible(bool)));
-		connect(controlPanel, SIGNAL(snapToGridToogled(bool)), diagramWindow->diagramView(), SLOT(setSnapToGridEnabled(bool)));
+		connect(controlPanel, SIGNAL(snapToogled(bool)), diagramWindow->diagramView(), SLOT(setSnapEnabled(bool)));
 
 		ui->layersView->setDiagram(diagramWindow->diagram());
 	}

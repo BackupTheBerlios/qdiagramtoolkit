@@ -25,18 +25,130 @@
 
 class QAbstractDiagramShapeConnector;
 
+//! The QLogicCircui	tGateShape provides a shape showing logic gates.
+/**
+ * @section AND-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_and.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>and</td><td></td>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadWrite</td><td>2</td><td>min. value: 2</td>
+ * </tr>
+ * </table>
+ *
+ * @section NAND-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_nand.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>nand</td><td></td>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadWrite</td><td>2</td><td>min. value: 2</td>
+ * </tr>
+ * </table>
+ *
+ * @section NOR-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_nor.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>nor</td><td></td>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadWrite</td><td>2</td><td>min. value: 2</td>
+ * </tr>
+ * </table>
+ *
+ * @section NOT-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_not.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>not</td><td></td>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadOnly</td><td>1</td><td></td>
+ * </tr>
+ *
+ * @section OR-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_or.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>or</td><td></td>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadOnly</td><td>1</td><td></td>
+ * </tr>
+ *
+ * @section XNOR-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_xnor.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>xnor</td><td></td>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadOnly</td><td>1</td><td></td>
+ *
+ * @section XOR-Gate
+ * @subsection Shape
+ * <table>
+ * <tr><td>@image html lc_gate_xor.png</td></tr>
+ * </table>
+ * @subsection Properties
+ * <table>
+ * <tr>
+ * <th>Name</th><th>Type</th><th>R/W</th><th>Default</th><th>Remarks</th>
+ * </tr>
+ * <tr><td>gateType</td><td>String</td><td>ReadOnly</td><td>xor</td><td></td>
+ * </tr>
+ * <tr><td>inputs</td><td>Integer</td><td>ReadOnly</td><td>1</td><td></td>
+ * </tr>
+ * </table>
+ */
 class QLogicCircuitGateShape : public QAbstractDiagramShape
 {
 public:
-    explicit QLogicCircuitGateShape(QGraphicsItem* parent = 0);
+	QDIAGRAM_DECLARE_SHAPE(QLogicCircuitGateShape, Gate)
+
+	explicit QLogicCircuitGateShape(QGraphicsItem* parent = 0);
 
     explicit QLogicCircuitGateShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
 
     QRectF boundingRect() const;
 
 	QList<QAction*> createActions(QWidget* parent);
-
-    QPoint hotSpot() const;
+	/**
+	 * Returns the default properties the for shape specified by the given @p id;
+	 */
+	static QVariantMap defaultProperties(const QString & id);
+	/**
+	 * Returns the shape's hot spot.
+	 */
+	static QPointF hotSpot(const QString & id);
 
 	QList<QAbstractDiagramShapeConnector*> inputs() const;
 
@@ -48,8 +160,6 @@ public:
 
 	void triggerAction(const QString & name, const QVariant & data);
 protected:
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
     QVariant itemPropertyChange( const QString & name, const QVariant & value);
     QVariant itemPropertyHasChanged( const QString & name, const QVariant & value);
     void paintState(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

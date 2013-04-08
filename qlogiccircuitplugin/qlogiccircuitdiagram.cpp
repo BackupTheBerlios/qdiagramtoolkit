@@ -1,17 +1,35 @@
-#include "StdAfx.h"
+/******************************************************************************
+** Copyright (C) 2011 Martin Hoppe martin@2x2hoppe.de
+**
+** This file is part of the QDiagram Toolkit (qdiagramlib)
+**
+** qdiagramlib is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as
+** published by the Free Software Foundation, either version 3 of the
+** License, or (at your option) any later version.
+**
+** qdiagramlib is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Leser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with qdialgramlib.  If not, see <http://www.gnu.org/licenses/>.
+******************************************************************************/
+#include "stdafx.h"
 #include "qlogiccircuitdiagram.h"
 
 #include <qabstractdiagramgraphicsitem.h>
 #include <qabstractdiagramshapeconnector.h>
 #include <qabstractdiagramshapeconnectionpoint.h>
+#include <qdiagramsheet.h>
 
-#include <qlogiccircuitgateshape.h>
-#include <qlogiccircuitoutputshape.h>
-
-QLogicCircuitDiagram::QLogicCircuitDiagram(QObject *parent)
-	: QDiagram(parent)
+QLogicCircuitDiagram::QLogicCircuitDiagram(const QString & pluginName, QObject *parent)
+	: QAbstractDiagram(pluginName, parent)
 {
 	addPlugin("Logic Circuit");
+	sheet(0)->setPaperSize(QDiagramToolkit::A3);
+	sheet(0)->setPaperOrientation(QDiagramToolkit::Landscape);
 
 	connect(this, SIGNAL(contentsChanged()), this, SLOT(render()));
 }
@@ -21,77 +39,3 @@ QLogicCircuitDiagram::~QLogicCircuitDiagram()
 
 }
 
-QString QLogicCircuitDiagram::plugin() const
-{
-    return QLatin1String("Logic Circuit");
-}
-
-void QLogicCircuitDiagram::render()
-{
-	qDebug() << toText();
-}
-
-QString QLogicCircuitDiagram::type() const
-{
-    return QLatin1String("Logic Circuit");
-}
-
-QString QLogicCircuitDiagram::toText() const
-{
-	QString t;
-	Q_FOREACH(QAbstractDiagramGraphicsItem* i, items()){
-		QAbstractDiagramShape* s = qgraphicsitem_cast<QAbstractDiagramShape*>(i);
-		if (s && s->metaData()->itemClass() == "output"){
-			t += toText(s);
-		}
-	}
-	return t;
-}
-
-QString QLogicCircuitDiagram::toText(QAbstractDiagramShape* s) const
-{
-	QString t;
-	if (s->metaData()->itemClass() == "output"){
-		if (s->connectionPoints(QDiagramToolkit::West).size() == 1){
-			QList<QAbstractDiagramShapeConnectionPoint::Connection> c = s->connectionPoints(QDiagramToolkit::West).at(0)->connections();
-			if (c.size() == 1){
-				if (s == c.at(0).connector->startConnectionPoint()->parentShape()){
-					t = toText(c.at(0).connector->endConnectionPoint()->parentShape());
-				} else {
-					t = toText(c.at(0).connector->startConnectionPoint()->parentShape());
-				}
-			}
-		}
-	} else if (s->metaData()->itemClass() == "function"){
-		if (s->property("function") == "timer"){
-			t += QString("DELAY %1sec ").arg(s->property("time").toString());
-			QAbstractDiagramShapeConnectionPoint* p = s->connectionPoint("trigger");
-			if (p){
-				QAbstractDiagramShape* cs;
-				if (p->connections().size() == 1){
-					if (p->connections().at(0).connector->startConnectionPoint()->parentShape() == s){
-						cs = p->connections().at(0).connector->endConnectionPoint()->parentShape();
-					} else {
-						cs = p->connections().at(0).connector->startConnectionPoint()->parentShape();
-					}
-					t += toText(cs);
-				}
-			}
-		}
-	} else if (s->metaData()->itemClass() == "gate"){
-		Q_FOREACH(QAbstractDiagramShapeConnectionPoint* p, s->connectionPoints(QDiagramToolkit::West)){
-			Q_FOREACH(QAbstractDiagramShapeConnectionPoint::Connection c, p->connections()){
-				if (s->property("gateType").toString() == "and"){
-					if (s == c.connector->startConnectionPoint()->parentShape()){
-						t += QString("AND %1").arg(toText(c.connector->endConnectionPoint()->parentShape()));
-					} else {
-						t += QString("AND %1").arg(toText(c.connector->startConnectionPoint()->parentShape()));
-					}
-				}
-			}
-		}
-	} else if (s->metaData()->itemClass() == "input"){
-		t = QString("%1 \n").arg(s->property("name").toString());
-	}
-	return t;
-}

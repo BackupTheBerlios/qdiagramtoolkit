@@ -24,8 +24,8 @@
 
 #include "qlogiccircuitplugin.h"
 
-#define GATE_BASE_SIZE 13.0
-#define GATE_CP_SIZE 6.0
+#define GATE_BASE_SIZE 50.0
+#define GATE_CP_SIZE 40.0
 
 QLogicCircuitParameterShapeConnectionPoint::QLogicCircuitParameterShapeConnectionPoint(QAbstractDiagramShape* shape) :
     QAbstractDiagramShapeConnectionPoint(shape, "inp1", QDiagramToolkit::East)
@@ -43,35 +43,31 @@ void QLogicCircuitParameterShapeConnectionPoint::paint(QPainter *painter, const 
     Q_UNUSED(option);
     Q_UNUSED(widget);
     painter->save();
-    painter->drawRoundedRect(rect(), 2, 2);
+    painter->drawRect(rect());
     painter->restore();
 }
 
 void QLogicCircuitParameterShapeConnectionPoint::updatePosition()
 {
     QRectF r;
-    r.setLeft(parentShape()->geometry().width() - parentShape()->geometry().height() / 4);
-    r.setTop(parentShape()->geometry().height() / 2 - parentShape()->geometry().height() / 8);
-    r.setWidth(parentShape()->geometry().height() / 4);
-    r.setHeight(parentShape()->geometry().height() / 4);
+	r.setLeft(parentShape()->geometry().width() - GATE_CP_SIZE);
+	r.setTop(parentShape()->geometry().height() / 2 - GATE_CP_SIZE / 2);
+	r.setWidth(GATE_CP_SIZE);
+	r.setHeight(GATE_CP_SIZE);
     setRect(r);
 }
 
 QLogicCircuitParameterShape::QLogicCircuitParameterShape(const QMap<QString, QVariant> & properties, QGraphicsItem* parent) :
-    QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), "parameter", properties, parent)
+QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitParameterShape::staticItemClass(), properties, parent)
 {
-	initGeometry(182, 26);
+	initGeometry(900, 100);
 	m_textItem = new QDiagramGraphicsTextItem("name", this);
-	//m_textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
-
+	m_textItem->setTextColorProperty("textColor");
     addProperty("name", QDiagramToolkit::String, false, properties.value("name", "<input>"));
     addProperty("signalType", QDiagramToolkit::String, true, properties.value("signalType").toString());
-	//if (properties.value("signalType") == "digital"){
-	//	addProperty("state", QDiagramToolkit::Bool, false, properties.value("state", false).toBool());
-	//} else {
-	//	addProperty("value", QDiagramToolkit::Double, false, properties.value("value", 0.0).toDouble());
-	//	addProperty("unit", QDiagramToolkit::String, false, properties.value("string").toString());
-	//}
+	addProperty("textColor", QDiagramToolkit::Color, true, properties.value("textColor"));
+	addProperty("textFont", QDiagramToolkit::Font, true, properties.value("textFont"));
+	addProperty("lineStyle", QDiagramToolkit::Pen, true, properties.value("lineStyle"));
 
 	m_textItem->setPlainText(properties.value("name", "<input>").toString());
 
@@ -89,34 +85,59 @@ QRectF QLogicCircuitParameterShape::boundingRect() const
     return r;
 }
 
+QPointF QLogicCircuitParameterShape::hotSpot(const QString & id)
+{
+	Q_UNUSED(id);
+	return QPoint(-900, -50);
+}
+
+QVariantMap QLogicCircuitParameterShape::defaultProperties(const QString & id)
+{
+	QVariantMap p;
+
+	p["textColor"] = "black";
+	QFont f("Arial");
+	f.setPointSizeF(4);
+	p["textFont"] = QDiagramProperty::toMap(f);
+
+	QPen pen(Qt::black);
+	pen.setWidthF(5);
+	p["lineStyle"] = QDiagramProperty::toMap(pen);
+
+    if (id == "parameter.analog"){
+        p["signalType"] = "analog";
+    } else if (id == "parameter.digital"){
+        p["signalType"] = "digital";
+	}
+	return p;
+}
+
 void QLogicCircuitParameterShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
-	//if (m_textItem->textInteractionFlags() == Qt::NoTextInteraction){
-	//	m_textItem->setTextInteractionFlags(Qt::TextEditorInteraction);
-	//}
 	QAbstractDiagramShape::mouseDoubleClickEvent(event);
 }
 
 void QLogicCircuitParameterShape::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setPen(pen());
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+	painter->setPen(qdiagramproperty_cast<QPen>(property("lineStyle")));
     painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
     painter->drawPath(shape());
     if (property("signalType").toString() == "analog"){
         int offset = geometry().height() / 4;
         painter->save();
         QPainterPath p;
-		p.moveTo(1 + offset, 7);
-		p.lineTo(1 + offset, 19);
-		p.moveTo(1 + offset, 13);
-		p.lineTo(19 + offset, 13);
+		p.moveTo(10 + offset, 20);
+		p.lineTo(10 + offset, 80);
+		p.moveTo(10 + offset, 50);
+		p.lineTo(100 + offset, 50);
 
-		p.moveTo(1 + offset, 13);
-		p.lineTo(4 + offset, 9);
-		p.lineTo(7 + offset, 16);
-		p.lineTo(10 + offset, 8);
-		p.lineTo(15 + offset, 18);
-		p.lineTo(19 + offset, 7);
+		p.moveTo(10 + offset, 50);
+		p.lineTo(30 + offset, 30);
+		p.lineTo(60 + offset, 70);
+		p.lineTo(90 + offset, 20);
 
         painter->drawPath(p);
         painter->restore();
@@ -124,30 +145,23 @@ void QLogicCircuitParameterShape::paint(QPainter *painter, const QStyleOptionGra
         int offset = geometry().height() / 4;
         painter->save();
         QPainterPath p;
-        p.moveTo(1 + offset, 19);
-        p.lineTo(5 + offset, 19);
-        p.lineTo(5 + offset, 7);
-        p.lineTo(15 + offset, 7);
-        p.lineTo(15 + offset, 19);
-        p.lineTo(19 + offset, 19);
+        p.moveTo(10 + offset, 80);
+        p.lineTo(30 + offset, 80);
+        p.lineTo(30 + offset, 20);
+        p.lineTo(80 + offset, 20);
+        p.lineTo(80 + offset, 80);
+        p.lineTo(100 + offset, 80);
         painter->drawPath(p);
         painter->restore();
         QFont f;
         f.setFamily("Arial");
-        f.setPixelSize(8);
+        f.setPixelSize(4);
         painter->setFont(f);
 
         QRectF r(boundingRect());
-        r.setWidth(26 + GATE_BASE_SIZE / 2);
-        r.moveTop(3);
+		r.setWidth(15);
         painter->drawText(r, Qt::AlignRight, "1\n0");
     }
-    //QFont f;
-    //f.setFamily("Arial");
-    //f.setPixelSize(10);
-    //painter->setFont(f);
-    //QRectF r(boundingRect().adjusted(26 + GATE_BASE_SIZE, 0, 0, 0));
-    //painter->drawText(r, Qt::AlignLeft | Qt::AlignVCenter, property("name").toString());
 
     if (property("state").toBool()){
         painter->save();
@@ -173,7 +187,7 @@ QVariant QLogicCircuitParameterShape::itemPropertyHasChanged( const QString & na
 
 QPainterPath QLogicCircuitParameterShape::shape() const
 {
-	m_textItem->setPos(26 + GATE_BASE_SIZE, (boundingRect().height() - m_textItem->boundingRect().height()) / 2);
+	m_textItem->setPos(15, (boundingRect().height() - m_textItem->boundingRect().height()) / 2);
 
 	QPainterPath p;
     //p.addRoundedRect(0, 0, geometry().width() - geometry().height(), geometry().height(), geometry().height() / 4, geometry().height() / 4);

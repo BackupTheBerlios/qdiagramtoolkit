@@ -26,7 +26,7 @@ QDiagramInsertShapeCommand::QDiagramInsertShapeCommand(QAbstractDiagram* diagram
 {
     QAbstractDiagramPlugin* p = QDiagramPluginLoader::load(metaData.value("plugin").toString());
     if (p){
-        setText(QObject::tr("Insert %1").arg(p->title(metaData.value("itemClass").toString())));
+        setText(QObject::tr("Insert %1").arg(metaData.value("itemClass").toString()));
     }
 }
 

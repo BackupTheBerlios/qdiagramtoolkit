@@ -42,7 +42,7 @@ QList<QDiagramConnectorStyle> QStandardFormsPlugin::connectors() const
     return l;
 }
 
-QAbstractDiagramGraphicsItem *QStandardFormsPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString, QVariant> &properties, QGraphicsScene *scene)
+QAbstractDiagramGraphicsItem *QStandardFormsPlugin::createItem(const QMap<QString,QVariant> & metaData, const QMap<QString, QVariant> &properties)
 {
     QVariantMap props(properties);
     QAbstractDiagramGraphicsItem* item = 0;
@@ -61,9 +61,9 @@ QAbstractDiagramGraphicsItem *QStandardFormsPlugin::createItem(const QMap<QStrin
     return item;
 }
 
-QDiagram *QStandardFormsPlugin::diagram(const QString &type, QObject *parent) const
+QAbstractDiagram *QStandardFormsPlugin::diagram(const QString &type, QObject *parent) const
 {
-    QDiagram* d = new QDiagram(parent);
+    QAbstractDiagram* d = new QDiagram(parent);
     d->addPlugin(name());
     return d;
 }
@@ -201,6 +201,10 @@ QMap<QString, QVariant> QStandardFormsPlugin::defaultProperties(const QString & 
     if (name == "square.rounded" || name == "rectangle.rounded"){
         properties["radius"] = 10.0;
     }
+	QFont f;
+	f.setFamily("Arial");
+	f.setPixelSize(6);
+	properties["textFont"] = f;
 	properties["zlevel"] = 50;
     return properties;
 }

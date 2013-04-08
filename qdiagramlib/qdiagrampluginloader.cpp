@@ -33,7 +33,7 @@ QDiagramPluginLoader::~QDiagramPluginLoader()
 
 }
 
-QDiagram *QDiagramPluginLoader::diagram(const QString &plugin, const QString & type, QObject *parent, const QString &path)
+QAbstractDiagram *QDiagramPluginLoader::diagram(const QString &plugin, const QString & type, QObject *parent, const QString &path)
 {
     if (plugin == "Standard"){
         return new QDiagram(parent);
@@ -48,9 +48,9 @@ QDiagram *QDiagramPluginLoader::diagram(const QString &plugin, const QString & t
 
 QAbstractDiagramPlugin* QDiagramPluginLoader::load(const QString & name, const QString & path)
 {
-    QAbstractDiagramPlugin* mPlugin = sPlugins.value(name, 0);
-    if (mPlugin != 0){
-        return mPlugin;
+    QAbstractDiagramPlugin* p = sPlugins.value(name, 0);
+    if (p != 0){
+        return p;
     }
 
     QStringList mFilters;
@@ -69,12 +69,13 @@ QAbstractDiagramPlugin* QDiagramPluginLoader::load(const QString & name, const Q
         QPluginLoader mPluginLoader(mDir.absoluteFilePath(mFileName));
         QObject *mObject = mPluginLoader.instance();
         if (mObject){
-            mPlugin = qobject_cast<QAbstractDiagramPlugin*>(mObject);
-            if (mPlugin){
-                if (mPlugin->name() == name){
+            p = qobject_cast<QAbstractDiagramPlugin*>(mObject);
+            if (p){
+                if (p->name() == name){
                     qDebug() << "Plugin" << name << "found in" << mDir.absolutePath();
-                    sPlugins[name] = mPlugin;
-                    return mPlugin;
+                    sPlugins[name] = p;
+					p->initialize();
+                    return p;
                 }
             }
         }

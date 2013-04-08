@@ -64,7 +64,8 @@ void QDiagramShapeToolBox::addShapes(QAbstractDiagramPlugin* plugin, const QStri
         w = new QDiagramShapeListWidget(this);
         Q_FOREACH(QString n, plugin->shapes()){
 			if (!blockedShapes.contains(n)){
-				w->addShape(plugin->icon(n), plugin->title(n), plugin->metaData(n), plugin->defaultProperties(n));
+				//w->addShape(plugin->icon(n), plugin->title(n), plugin->itemClass(n), plugin->defaultProperties(n));
+				w->addShape(plugin->name(), plugin->itemClass(n), plugin->title(n), plugin->defaultProperties(n), plugin->icon(n));
 			}
         }
         ui->toolBox->addItem(w, plugin->name());
@@ -77,7 +78,11 @@ void QDiagramShapeToolBox::addShapes(QAbstractDiagramPlugin* plugin, const QStri
             w = new QDiagramShapeListWidget(this);
             Q_FOREACH(QString n, plugin->shapes(group)){
 				if (!blockedShapes.contains(n)){
-					w->addShape(plugin->icon(n), plugin->title(n), plugin->metaData(n), plugin->defaultProperties(n));
+					// const QString & plugin, const QString & itemClass, const QString & title, const QVariantMap & properties, const QIcon & icon
+					//w->addShape(plugin->name(), plugin->itemClass(n), plugin->title(n), plugin->defaultProperties(n), plugin->icon(n));
+					//w->addShape(plugin->icon(n), plugin->title(n), plugin->itemClass(n), plugin->defaultProperties(n));
+//					w->addShape(plugin->name(), n, plugin->title(n), plugin->icon(n));
+					w->addShape(n, plugin->name(), plugin->title(n), plugin->icon(n));
 				}
             }
             t->addItem(w, group);

@@ -24,7 +24,7 @@
 #include <QWidget>
 
 #include <qabstractdiagramshape.h>
-#include <qdiagram.h>
+#include <qabstractdiagram.h>
 #include <qdiagramconnectorstyle.h>
 #include <qdiagramgraphicsview.h>
 #include <qdiagramshapetoolbox.h>
@@ -51,7 +51,7 @@ class QDIAGRAMLIBSHARED_EXPORT QDiagramView : public QWidget
       */
 	Q_PROPERTY(bool interactive READ isInteractive WRITE setInteractive)
 	//! @property(snapToGrid)
-    Q_PROPERTY(bool snapToGrid READ isSnapToGridEnabled WRITE setSnapToGridEnabled)
+    Q_PROPERTY(bool snap READ isSnapEnabled WRITE setSnapEnabled)
 
     Q_PROPERTY(QSizeF snapSize READ snapSize WRITE setSnapSize)
 public:
@@ -80,7 +80,7 @@ public:
      * Returns a pointer to the diagram that is currently visualized in the view. If no diagram is currently visualized, 0 is returned.
      * @see setDiagram()
 	 */
-	QDiagram* diagram() const;
+	QAbstractDiagram* diagram() const;
 	/**
      * Return true if the view in the current pag allows interaction with the scene.
 	 */
@@ -88,10 +88,10 @@ public:
 
 	bool isGridVisible() const;
     /**
-      * Returns true if snap to grid is enabled. Otherwise false.
-      * @see setSnapToGridEnaled()
+      * Returns true if snap is enabled. Otherwise false.
+      * @see setSnapEnaled()
       */
-    bool isSnapToGridEnabled() const;
+    bool isSnapEnabled() const;
     /**
       * Maps the point @p point, which is in this scene's coordinate system, to the scene's grid coordinate system, and returns the mapped coordinate.
       */
@@ -104,7 +104,7 @@ public:
       * Sets the current diagram to @p diagram. If @p diagram is already being viewed, this function does nothing.
       * @see diagram()
       */
-    void setDiagram(QDiagram* diagram);
+    void setDiagram(QAbstractDiagram* diagram);
 
 	void setInteractive(bool allowed);
     /**
@@ -166,9 +166,9 @@ public slots:
 	 */
     void setMode(QDiagramToolkit::PointerMode mode);
     /**
-      * If @p on is true, snap to grid is enabled.
+      * If @p on is true, the snap mode is enabled.
       */
-    void setSnapToGridEnabled(bool on);
+    void setSnapEnabled(bool on);
 	/**
 	 * sets the zoom factor of the view to the factor specified in @p percent.
 	 */
@@ -184,14 +184,14 @@ protected:
       */
     void insertFromMimeData(const QMimeData* source, const QPointF & scenePos);
 private slots:
-	void currentPageChanged(int index);
+	void currentSheetChanged(int index);
     void graphicsViewContextMenuRequestHandler(const QPoint & pos);
 	void itemRestored(QAbstractDiagramGraphicsItem* item);
     void modeMenuActionTriggered();
 	void pageAdded(int index);
 private:
 	Qt::Alignment m_alignment;
-    QDiagram* m_diagram;
+    QAbstractDiagram* m_diagram;
 	bool m_interactive;
     QSizeF m_snapSize;
 

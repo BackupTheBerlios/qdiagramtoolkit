@@ -26,16 +26,17 @@
 
 #include "qdiagrampluginloader.h"
 #include "qdiagramshape.h"
-#include "qdiagramgraphicsscene.h"
+#include "qdiagramsheet.h"
 
 QDiagramGraphicsView::QDiagramGraphicsView(QWidget* parent) :
     QGraphicsView(parent)
 {
-    m_currentZoom = 100;
+	setBackgroundBrush(Qt::lightGray);
+	setZoom(100);
     m_gridColor = QColor(Qt::lightGray);
 	m_mode = QDiagramToolkit::SelectItemsPointer;
     m_showGrid = true;
-    m_gridSize = QSizeF(13, 13);
+    m_gridSize = QSizeF(50, 50);
     m_shapeUnderCursor = 0;
     m_tempConnector = 0;
     m_tempStartConnectionPoint = 0;
@@ -54,34 +55,54 @@ QAbstractDiagramShapeConnectionPoint* QDiagramGraphicsView::connectionPointAt(co
     return 0;
 }
 
-QDiagram* QDiagramGraphicsView::diagram() const
+QAbstractDiagram* QDiagramGraphicsView::diagram() const
 {
-    return qobject_cast<QDiagram*>(scene()->parent());
+    return qobject_cast<QAbstractDiagram*>(scene()->parent());
 }
 
 void QDiagramGraphicsView::drawBackground(QPainter* painter, const QRectF & rect)
 {
+	QGraphicsView::drawBackground(painter, rect);
+	painter->save();
+	painter->setPen(scene()->backgroundBrush().color());
+	painter->setBrush(scene()->backgroundBrush());
+	painter->drawRect(sceneRect());
+	painter->restore();
     if (!m_showGrid){
         return;
     }
-    const int gridSize = m_gridSize.width();
+    int gridSize = m_gridSize.width();
 
-    const int realLeft = static_cast<int>(std::floor(rect.left()));
-    const int realRight = static_cast<int>(std::ceil(rect.right()));
-    const int realTop = static_cast<int>(std::floor(rect.top()));
-    const int realBottom = static_cast<int>(std::ceil(rect.bottom()));
+    int realLeft = static_cast<int>(std::floor(rect.left()));
+    int realRight = static_cast<int>(std::ceil(rect.right()));
+    int realTop = static_cast<int>(std::floor(rect.top()));
+    int realBottom = static_cast<int>(std::ceil(rect.bottom()));
 
+	if (realLeft < 0){
+		realLeft = 0;
+	}
+	if (realTop < 0){
+		realTop = 0;
+	}
+	if (realRight > sceneRect().right()){
+		realRight = sceneRect().right();
+	}
+	if (realBottom > sceneRect().bottom()){
+		realBottom = sceneRect().bottom();
+	}
     // Draw grid.
-    const int firstLeftGridLine = realLeft - (realLeft % gridSize);
-    const int firstTopGridLine = realTop - (realTop % gridSize);
+	int firstLeftGridLine = realLeft - (realLeft % gridSize) + gridSize;
+	int firstTopGridLine = realTop - (realTop % gridSize) + gridSize;
 
     QVarLengthArray<QLine, 100> lines;
 
-    for (qreal x = firstLeftGridLine; x <= realRight; x += gridSize)
+	for (qreal x = firstLeftGridLine; x < realRight; x += gridSize){
         lines.append(QLine(x, realTop, x, realBottom));
-    for (qreal y = firstTopGridLine; y <= realBottom; y += gridSize)
+	}
+	for (qreal y = firstTopGridLine; y <= realBottom; y += gridSize){
         lines.append(QLine(realLeft, y, realRight, y));
-
+	}
+	
     //painter->setRenderHint(QPainter::Antialiasing);
     QPen p(m_gridColor);
     p.setStyle(Qt::DotLine);
@@ -138,7 +159,7 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
             //
             if (shape == 0){
                 m_tempEndConnectionPoint = 0;
-				m_tempConnector->setTemporaryEnd(diagram()->gridPos(mapToScene(event->pos())));
+				m_tempConnector->setTemporaryEnd(diagram()->snapPos(mapToScene(event->pos())));
                 setCursor(Qt::CrossCursor);
             } else {
                 if (cp == 0 && m_tempEndConnectionPoint == 0){
@@ -173,19 +194,19 @@ void QDiagramGraphicsView::mouseMoveEvent(QMouseEvent* event)
 						// Start temporary connector
 						QMap<QString,QVariant> pm;
 						QVariantMap mm;
-						mm["itemType"] = "connector";
+						mm["itemType"] = "Connector";
 						mm["itemClass"] = m_connectorStyle.shape();
 						mm["plugin"] = plugin->name();
 						pm["uuid"] = "{temp}";
 						pm["style"] = m_connectorStyle.shape();
 						//                        m_tempConnector = mPlugin->createConnector(diagram(), "<temporary>", mProperties);
-						QAbstractDiagramShapeConnector* c = dynamic_cast<QAbstractDiagramShapeConnector*>(plugin->createItem(mm, pm, scene()));
+						QAbstractDiagramShapeConnector* c = dynamic_cast<QAbstractDiagramShapeConnector*>(plugin->createItem(mm, pm));
 						if (c && c->canStartWith(cp)){
 							setCursor(Qt::CrossCursor);
 						} else {
 							setCursor(Qt::ForbiddenCursor);
 						}
-						//                    scene()->addItem(cTempConnector);
+						//                    sheet()->addItem(cTempConnector);
 					} else {
 						setCursor(Qt::CrossCursor);
 					}
@@ -217,19 +238,19 @@ void QDiagramGraphicsView::mousePressEvent( QMouseEvent* event )
                         // Start temporary connector
                         QMap<QString,QVariant> pm;
 						QVariantMap mm;
-                        mm["itemType"] = "connector";
+                        mm["itemType"] = "Connector";
                         mm["itemClass"] = m_connectorStyle.shape();
 						mm["plugin"] = plugin->name();
                         pm["uuid"] = "{temp}";
                         pm["style"] = m_connectorStyle.shape();
 //                        m_tempConnector = mPlugin->createConnector(diagram(), "<temporary>", mProperties);
-                        m_tempConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(plugin->createItem(mm, pm, scene()));
+                        m_tempConnector = dynamic_cast<QAbstractDiagramShapeConnector*>(plugin->createItem(mm, pm));
 						if (m_tempConnector && m_tempConnector->canStartWith(cp)){
-							scene()->addItem(m_tempConnector);
+							m_tempConnector->setConnectionPointAtStart(cp);
                             m_tempConnector->setTemporaryStart(cp->scenePos() + cp->boundingRect().center(), cp->orientation());
                             m_tempConnector->setTemporaryEnd(mapToScene(event->pos()), QDiagramToolkit::ConnectionPointOrientationInvalid);
+							diagram()->currentSheet()->addItem(m_tempConnector);
 		                    m_tempStartConnectionPoint = cp;
-							qDebug() << cp->id();
 						} else {
 							delete m_tempConnector;
 							m_tempConnector = 0;
@@ -313,9 +334,9 @@ void QDiagramGraphicsView::setZoom( int percent )
     if (percent != m_currentZoom){
         if (percent >= 25 && percent <= 800){
             m_currentZoom = percent;
-            qreal mScale = m_currentZoom / 100.0;
-            mScale /= matrix().m11();
-            scale(mScale, mScale);
+            qreal s = (m_currentZoom * 2) / 1000.0;
+            s /= matrix().m11();
+            scale(s, s);
             emit zoomChanged(m_currentZoom);
         }
     }

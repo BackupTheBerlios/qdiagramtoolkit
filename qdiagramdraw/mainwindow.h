@@ -6,7 +6,7 @@
 #include <QMdiSubWindow>
 
 class QAbstractDiagramGraphicsItem;
-class QDiagram;
+class QAbstractDiagram;
 class QSignalMapper;
 
 class DiagramWindow;
@@ -24,7 +24,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    QDiagram* activeDiagram() const;
+    QAbstractDiagram* activeDiagram() const;
 
     DiagramWindow* activeDiagramWindow() const;
 public slots:
@@ -49,6 +49,7 @@ public slots:
 
     void openActionTriggered();
 
+    void pageSetupActionTriggered();
     void pasteActionTriggered();
     void printPreviewActionTriggered();
 
@@ -61,7 +62,6 @@ public slots:
     void selectionChanged();
 	void sendBackwardActionTriggered();
 	void sendToBackActionTriggered();
-    void simulatorActionTriggered();
     void subWindowActivated( QMdiSubWindow* window );
 
 	void textBoldActionTriggered();

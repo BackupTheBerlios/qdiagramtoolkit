@@ -26,21 +26,27 @@
 class QLogicCircuitFunctionShape : public QAbstractDiagramShape
 {
 public:
+	QDIAGRAM_DECLARE_SHAPE(QLogicCircuitFunctionShape, Function);
+
     QLogicCircuitFunctionShape(QGraphicsItem* parent = 0);
     /**
       * Constructs a QLogicCircuitFunctionShape with the given @p properties and @p parent.
       */
     QLogicCircuitFunctionShape(const QMap<QString,QVariant> & properties, QGraphicsItem* parent = 0);
-    /**
-      *
-      */
-//    explicit QLogicCircuitFunctionShape(const QString & uuid, const QString & type, const QString & plugin, QGraphicsItem* parent = 0);
 
 	~QLogicCircuitFunctionShape();
 
     QRectF boundingRect() const;
 
 	QList<QAction*> createActions(QWidget* parent);
+	/**
+	 * Returns the default properties the for shape specified by the given @p id;
+	 */
+	static QVariantMap defaultProperties(const QString & id);
+	/**
+	 * Returns the shape's hot spot.
+	 */
+	static QPointF hotSpot(const QString & id);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     /**

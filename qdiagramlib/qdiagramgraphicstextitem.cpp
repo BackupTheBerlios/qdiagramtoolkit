@@ -19,6 +19,7 @@
 #include "stdafx.h"
 #include "qdiagramgraphicstextitem.h"
 
+#include "qabstractdiagram.h"
 #include "qabstractdiagramgraphicsitem.h"
 #include "qabstractdiagramshape.h"
 #include "qdiagrammetadata.h"
@@ -29,6 +30,7 @@ QDiagramGraphicsTextItem::QDiagramGraphicsTextItem(QGraphicsItem* parent)
 	m_defaultTextAlignment = Qt::AlignCenter;
 	m_textProperty = "text";
 	m_textAlignmentProperty = "textAlignment";
+	m_textFontProperty = "textFont";
 	connect(document(), SIGNAL(contentsChanged()), SLOT(documentContentsChanged()));
 }
 
@@ -38,12 +40,24 @@ QDiagramGraphicsTextItem::QDiagramGraphicsTextItem(const QString & name, QGraphi
 	m_defaultTextAlignment = Qt::AlignCenter;
 	m_textProperty = name;
 	m_textAlignmentProperty = "textAlignment";
+	m_textFontProperty = "textFont";
 	connect(document(), SIGNAL(contentsChanged()), SLOT(documentContentsChanged()));
 	setTextWidth(parent->boundingRect().width());
 }
 
 QDiagramGraphicsTextItem::~QDiagramGraphicsTextItem()
 {
+}
+
+QAbstractDiagram* QDiagramGraphicsTextItem::diagram() const
+{
+	if (parentItem()){
+		QAbstractDiagramGraphicsItem* i = qgraphicsitem_cast<QAbstractDiagramGraphicsItem*>(parentItem());
+		if (i){
+			return i->diagram();
+		}
+	}
+	return 0;
 }
 
 void QDiagramGraphicsTextItem::documentContentsChanged()
@@ -76,6 +90,18 @@ void QDiagramGraphicsTextItem::itemPropertyHasChanged(QAbstractDiagramGraphicsIt
 	}
 	if (name == m_textColorProperty){
 		setDefaultTextColor(qvariant_cast<QColor>(value));
+	} else if (name == m_textFontProperty){
+		QFont f = qdiagramproperty_cast<QFont>(QDiagramProperty(QDiagramToolkit::Font, value));
+		if (parentShape()){
+			f = parentShape()->pointToPixel(f);
+		}
+		setFont(f);
+		QTextCursor c = textCursor();
+		c.setVisualNavigation(false);
+		c.select(QTextCursor::Document);
+		QTextCharFormat cf;
+		cf.setFont(f);
+		c.setCharFormat(cf);
 	} else if (name == m_textProperty){
 		if (textPropertyType() == QDiagramToolkit::Text){
 			setHtml(item->property(m_textProperty).toString());
@@ -89,6 +115,15 @@ void QDiagramGraphicsTextItem::itemPropertyHasChanged(QAbstractDiagramGraphicsIt
 	} else if (name == "geometry"){
 		updatePosition();
 	}
+}
+
+QAbstractDiagramShape* QDiagramGraphicsTextItem::parentShape() const
+{
+	if (parentItem()){
+		return qgraphicsitem_cast<QAbstractDiagramShape*>(parentItem());
+
+	}
+	return 0;
 }
 
 QDiagramToolkit::PropertyType QDiagramGraphicsTextItem::textPropertyType() const
@@ -105,6 +140,14 @@ void QDiagramGraphicsTextItem::restoreProperties(const QVariantMap & properties)
 {
 	if (properties.contains(m_textColorProperty)){
 		setDefaultTextColor(qvariant_cast<QColor>(properties.value(m_textColorProperty)));
+	}
+	if (properties.contains(m_textFontProperty)){
+		QDiagramProperty p(QDiagramToolkit::Font, properties.value(m_textFontProperty));
+		QFont f = qdiagramproperty_cast<QFont>(p);
+		if (parentShape()){
+			f = parentShape()->pointToPixel(f);
+		}
+		setFont(f);
 	}
 	if (textPropertyType() == QDiagramToolkit::Text){
 		setHtml(properties.value(m_textProperty).toString());

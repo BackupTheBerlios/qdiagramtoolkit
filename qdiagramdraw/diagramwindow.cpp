@@ -10,6 +10,7 @@
 #include <QSvgGenerator>
 
 #include <qdiagramwriter.h>
+#include <qdiagramsheet.h>
 
 DiagramWindow::DiagramWindow(QWidget *parent) :
     QWidget(parent),
@@ -24,7 +25,7 @@ DiagramWindow::~DiagramWindow()
     delete ui;
 }
 
-QDiagram* DiagramWindow::diagram() const
+QAbstractDiagram* DiagramWindow::diagram() const
 {
     return cDiagram;
 }
@@ -36,7 +37,7 @@ QDiagramView *DiagramWindow::diagramView() const
 
 void DiagramWindow::group()
 {
-	QGraphicsItemGroup* g = cDiagram->scene()->createItemGroup(cDiagram->scene()->selectedItems());
+	QGraphicsItemGroup* g = cDiagram->currentSheet()->createItemGroup(cDiagram->currentSheet()->selectedItems());
 	g->setFlag(QGraphicsItem::ItemIsMovable);
 	g->setFlag(QGraphicsItem::ItemIsSelectable);
 }
@@ -100,19 +101,19 @@ void DiagramWindow::saveAsImage()
 			QSvgGenerator generator;
 			generator.setFileName(fileName);
 			QPainter p(&generator);
-			diagram()->scene()->render(&p);
+			diagram()->currentSheet()->render(&p);
 			p.end();
 		} else {
-			QImage image(diagram()->scene()->sceneRect().size().toSize(), QImage::Format_ARGB32_Premultiplied);
+			QImage image(diagram()->currentSheet()->sceneRect().size().toSize(), QImage::Format_ARGB32_Premultiplied);
 			QPainter p(&image);
-			diagram()->scene()->render(&p);
+			diagram()->currentSheet()->render(&p);
 			p.end();
 			image.save(fileName);
 		}
 	}
 }
 
-void DiagramWindow::setDiagram(QDiagram* diagram)
+void DiagramWindow::setDiagram(QAbstractDiagram* diagram)
 {
     delete cDiagram;
     cDiagram = diagram;

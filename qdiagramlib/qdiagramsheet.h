@@ -1,5 +1,5 @@
 /******************************************************************************
-** Copyright (C) 2011 Martin Hoppe martin@2x2hoppe.de
+** Copyright (C) 2013 Martin Hoppe martin@2x2hoppe.de
 **
 ** This file is part of the QDiagram Toolkit (qdiagramlib)
 **
@@ -16,40 +16,42 @@
 ** You should have received a copy of the GNU Lesser General Public License
 ** along with qdialgramlib.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-
-#ifndef QABSTRACTDIAGRAMSCENE_H
-#define QABSTRACTDIAGRAMSCENE_H
+#ifndef QDIAGRAMSHEET_H
+#define QDIAGRAMSHEET_H
 
 #include "qdiagramlib_global.h"
 
 #include <QGraphicsScene>
 
+#include <qdiagramtoolkit.h>
+
 class QAbstractDiagram;
 class QAbstractDiagramGraphicsItem;
 class QAbstractDiagramShape;
 
-class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramScene : public QGraphicsScene
+class QDIAGRAMLIBSHARED_EXPORT QDiagramSheet : public QGraphicsScene
 {
     Q_OBJECT
-    Q_PROPERTY(QSize gridSize READ gridSize WRITE setGridSize)
+    Q_PROPERTY(QSize snapSize READ snapSize WRITE setSnapSize)
 	Q_PROPERTY(QString name READ name WRITE setName)
+	Q_PROPERTY(QDiagramToolkit::PaperOrientation paperOrientation READ paperOrientation WRITE setPaperOrientation)
     Q_PROPERTY(QColor selectionColor READ selectionColor WRITE setSelectionColor)
 public:
-    explicit QAbstractDiagramScene(QAbstractDiagram* diagram = 0);
+    explicit QDiagramSheet(QAbstractDiagram* diagram = 0);
     /**
       * Returns the diagram associated with the scene.
       */
     QAbstractDiagram* diagram() const;
-    /**
-      * Returns the diagram's grid size.
-      */
-    QSize gridSize() const;
 
     QColor selectionColor() const;
+	/**
+	 *
+	 */
+	int index() const;
     /**
       * Returns true if snap to grid is enabled. Otherwise false.
       */
-    bool isSnapToGridEnabled() const;
+    bool isSnapEnabled() const;
     /**
       * Returns the item speicified by the given @p uuid or 0 if @p uuid cannot be retrieved.
       */
@@ -59,21 +61,48 @@ public:
 	 * @see setName()
 	 */
 	QString name() const;
+
+	QDiagramToolkit::PaperSize paperSize() const;
+
+	QSizeF paperSize(QDiagramToolkit::Unit unit) const;
+	/**
+	 * Returns the current paper orientation.
+	 */
+	QDiagramToolkit::PaperOrientation paperOrientation() const;
     /**
-      * Sets the grid @p size.
+      * Sets the snap @p size.
       */
-    void setGridSize( const QSize & size );
+    void setSnapSize( const QSize & size );
 	/**
 	 * Sets the page's name to @p name.
 	 * @name()
 	 */
 	void setName(const QString & name);
+	/**
+	 * Sets the paper orientation to @p orientation.
+	 */
+	void setPaperOrientation(QDiagramToolkit::PaperOrientation orientation);
+	/**
+	 * Sets the scene's paper size.
+	 */
+	void setPaperSize(QDiagramToolkit::PaperSize paperSize);
+	/**
+	 *
+	 */
+	void setPaperSize(const QSizeF & paperSize, QDiagramToolkit::Unit unit);
     /**
       * Sets the selection @p color.
       */
     void setSelectionColor(const QColor & color);
-
-	void setSnapToGridEnabled(bool on);
+	/**
+	 * If @p on is true the snap mode is enabled.
+	 * @see isSnapEnabled()
+	 */
+	void setSnapEnabled(bool on);
+    /**
+      * Returns the diagram's snap size.
+      */
+    QSize snapSize() const;
 signals:
     void handleConnectItemsEvent(QAbstractDiagramShape* from, QAbstractDiagramShape* to, const QMap<QString,QVariant> & properties);
     void handleDragEnterEvent(QGraphicsSceneDragDropEvent *event);
@@ -82,6 +111,9 @@ signals:
     void handleDropEvent(QGraphicsSceneDragDropEvent *event);
 
     void itemMoved(QGraphicsItem* item, const QPointF & oldPos, const QPointF & newPos);
+	void itemPropertyChanged(QAbstractDiagramGraphicsItem* item, const QString & name);
+
+	void propertiesChanged();
 public slots:
 
 protected:
@@ -89,17 +121,22 @@ protected:
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event);
     void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
     void dragMoveEvent(QGraphicsSceneDragDropEvent* event);
+	void drawForeground(QPainter* painter, const QRectF & rect);
     void dropEvent(QGraphicsSceneDragDropEvent* event);
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 private:
+	friend QAbstractDiagramGraphicsItem;
+	void emitItemPropertyChanged(QAbstractDiagramGraphicsItem* item, const QString & name);
 	QString m_name;
     QGraphicsItem* m_movingItem;
+	QDiagramToolkit::PaperSize m_paperSize;
     QPointF m_oldPos;
+	QDiagramToolkit::PaperOrientation m_paperOrientation;
     QColor m_selectionColor;
-    bool m_snapToGrid;
-    QSize m_gridSize;
+    bool m_snapEnabled;
+    QSize m_snapSize;
 };
 
-#endif // QABSTRACTDIAGRAMSCENE_H
+#endif // QABSTRACTDIAGRAMSHEET_H

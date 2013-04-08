@@ -59,7 +59,7 @@ public:
       * Read a diagram from the device, and returns a new instance of QAbstractDiagram. Returns a null pointer if the read fails.
       * @see canRead()
       */
-    virtual QDiagram* read(QObject* parent = 0) = 0;
+    virtual QAbstractDiagram* read(QObject* parent = 0) = 0;
     /**
       * Sets the device of the QDiagramIOHandler to device. The diagram handler will use this device when reading and writing diagramss.
       * @see device()

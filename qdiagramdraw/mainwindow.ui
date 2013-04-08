@@ -74,7 +74,7 @@
     <property name="title">
      <string>&amp;Diagram</string>
     </property>
-    <addaction name="simulatorAction"/>
+    <addaction name="pageSetupAction"/>
    </widget>
    <widget class="QMenu" name="toolsMenu">
     <property name="title">
@@ -346,9 +346,9 @@
     <string>Refresh</string>
    </property>
   </action>
-  <action name="simulatorAction">
+  <action name="pageSetupAction">
    <property name="text">
-    <string>Simulator</string>
+    <string>Page Setup</string>
    </property>
   </action>
   <action name="openAction">
@@ -677,7 +677,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>simulatorAction</sender>
+   <sender>pageSetupAction</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>simulatorActionTriggered()</slot>
@@ -996,6 +996,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pageSetupAction</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>pageSetupActionTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>382</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>saveActionTriggered()</slot>
@@ -1006,7 +1022,7 @@
   <slot>exitActionTriggered()</slot>
   <slot>newActionTriggered()</slot>
   <slot>cutActionTriggered()</slot>
-  <slot>simulatorActionTriggered()</slot>
+  <slot>pageSetupActionTriggered()</slot>
   <slot>copyActionTriggered()</slot>
   <slot>pasteActionTriggered()</slot>
   <slot>openActionTriggered()</slot>

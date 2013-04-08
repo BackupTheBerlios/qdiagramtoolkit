@@ -22,6 +22,7 @@
 
 #include <qabstractdiagramplugin.h>
 #include <qdiagrampluginloader.h>
+#include <qdiagramsheet.h>
 
 #include <json.h>
 
@@ -32,7 +33,7 @@ QDiagramView::QDiagramView(QWidget *parent) :
     ui->setupUi(this);
     m_diagram = 0;
 	m_interactive = true;
-    m_snapSize = QSizeF(13, 13);
+    m_snapSize = QSizeF(15, 15);
 	connect(ui->tabWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SIGNAL(diagramTabContextMenuRequested(QPoint)));
 }
 
@@ -78,7 +79,7 @@ void QDiagramView::copy()
     }
 }
 
-void QDiagramView::currentPageChanged(int index)
+void QDiagramView::currentSheetChanged(int index)
 {
 	ui->tabWidget->setCurrentIndex(index);
 }
@@ -96,7 +97,7 @@ void QDiagramView::cut()
     }
 }
 
-QDiagram* QDiagramView::diagram() const
+QAbstractDiagram* QDiagramView::diagram() const
 {
 	return m_diagram;
 }
@@ -132,14 +133,15 @@ void QDiagramView::insertFromMimeData(const QMimeData *source, const QPointF &sc
             p = itemPos - firstItemPos + scenePos;
 
         }
-        uuid = m_diagram->addShape(it.value().toMap().value("shape").toString(), p, it.value().toMap(), it.value().toMap().value("plugin").toString());
+		// TODO
+//        uuid = m_diagram->addShape(it.value().toMap().value("shape").toString(), p, it.value().toMap(), it.value().toMap().value("plugin").toString());
         uuidMap[it.value().toMap().value("uuid").toString()] = uuid;
     }
 }
 
 void QDiagramView::insertPage()
 {
-	diagram()->addPage(tr("Diagram%1").arg(diagram()->pageCount() + 1));
+	diagram()->addSheet(tr("Diagram%1").arg(diagram()->sheetCount() + 1));
 }
 
 bool QDiagramView::isInteractive() const
@@ -156,10 +158,10 @@ bool QDiagramView::isGridVisible() const
 	return false;
 }
 
-bool QDiagramView::isSnapToGridEnabled() const
+bool QDiagramView::isSnapEnabled() const
 {
 	if (m_diagram){
-		return m_diagram->isSnapToGridEnabled();
+		return m_diagram->isSnapEnabled();
 	}
 	return false;
 }
@@ -217,8 +219,8 @@ void QDiagramView::pageAdded(int index)
 	connect(v, SIGNAL(mouseScenePositionChanged(QPointF)), this, SIGNAL(mousePositionChanged(QPointF)));
 	connect(v, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
 
-	ui->tabWidget->addTab(p, m_diagram->page(index)->name());
-	v->setScene(m_diagram->page(index));
+	ui->tabWidget->addTab(p, m_diagram->sheet(index)->name());
+	v->setScene(m_diagram->sheet(index));
 	v->setAlignment(m_alignment);
 	v->ensureVisible(0, 0, 1, 1);
 }
@@ -245,7 +247,7 @@ void QDiagramView::setAlignment(Qt::Alignment alignment)
 	m_alignment = alignment;
 }
 
-void QDiagramView::setDiagram(QDiagram *diagram)
+void QDiagramView::setDiagram(QAbstractDiagram *diagram)
 {
     if (m_diagram == diagram){
         return;
@@ -259,13 +261,13 @@ void QDiagramView::setDiagram(QDiagram *diagram)
 	}
     m_diagram = diagram;
 
-	connect(m_diagram, SIGNAL(currentPageChanged(int)), this, SLOT(currentPageChanged(int)));
+	connect(m_diagram, SIGNAL(currentSheetChanged(int)), this, SLOT(currentSheetChanged(int)));
 	connect(m_diagram, SIGNAL(pageAdded(int)), this, SLOT(pageAdded(int)));
 	connect(m_diagram, SIGNAL(itemRestored(QAbstractDiagramGraphicsItem*)), this, SLOT(itemRestored(QAbstractDiagramGraphicsItem*)));
 	while(ui->tabWidget->count() > 0){
 		delete ui->tabWidget->widget(0);
 	}
-	for (int i = 0; i < m_diagram->pageCount(); i++){
+	for (int i = 0; i < m_diagram->sheetCount(); i++){
 		QWidget* p = new QWidget();
 		p->setObjectName(QString::fromUtf8("page%1").arg(i));
         QVBoxLayout* l = new QVBoxLayout(p);
@@ -284,8 +286,8 @@ void QDiagramView::setDiagram(QDiagram *diagram)
 	    connect(v, SIGNAL(mouseScenePositionChanged(QPointF)), this, SIGNAL(mousePositionChanged(QPointF)));
 	    connect(v, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
 
-		ui->tabWidget->addTab(p, m_diagram->page(i)->name());
-		v->setScene(m_diagram->page(i));
+		ui->tabWidget->addTab(p, m_diagram->sheet(i)->name());
+		v->setScene(m_diagram->sheet(i));
         v->setAlignment(m_alignment);
 		v->ensureVisible(0, 0, 1, 1);
 	}
@@ -342,10 +344,10 @@ void QDiagramView::setMode(QDiagramToolkit::PointerMode mode)
 	}
 }
 
-void QDiagramView::setSnapToGridEnabled(bool on)
+void QDiagramView::setSnapEnabled(bool on)
 {
 	if (m_diagram){
-	    m_diagram->setSnapToGridEnabled(on);
+	    m_diagram->setSnapEnabled(on);
 	}
 }
 

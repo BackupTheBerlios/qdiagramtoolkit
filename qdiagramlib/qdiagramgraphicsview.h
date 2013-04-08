@@ -52,7 +52,7 @@ public:
       * Returns a pointer to the diagram that is currently visualized in the view. If no diagram is currently visualized, 0 is returned.
       * @see setDiagram()
       */
-    QDiagram* diagram() const;
+    QAbstractDiagram* diagram() const;
     /**
       Returns the grid color.
       * @see setGridColor()

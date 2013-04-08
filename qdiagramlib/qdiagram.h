@@ -30,7 +30,6 @@
 #include <qdiagramconnectorstyle.h>
 #include <qdiagramlinestyle.h>
 #include <qdiagramshape.h>
-#include <qdiagramgraphicsscene.h>
 
 class QAbstractDiagramShapeConnectionPoint;
 
@@ -53,90 +52,21 @@ public:
     /**
       *
       */
-	QString addShape(const QString & name, qreal x, qreal y, const QMap<QString,QVariant> & properties, const QString & plugin);
-    /**
-      *
-      */
-    QString addShape(const QString & name, const QPointF & pos, const QMap<QString,QVariant> & properties, const QString & plugin);
+	//QString addShape(const QString & name, qreal x, qreal y, const QMap<QString,QVariant> & properties, const QString & plugin);
 
-    void addConnection(QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style);
+    //QString addShape(const QString & name, const QPointF & pos, const QMap<QString,QVariant> & properties, const QString & plugin);
 
-	QString connectShapes(const QString & fromShape, const QString & fromCP, const QString & toShape, const QString & toCP, const QDiagramConnectorStyle & style);
-
-    static QDiagramLineStyle lineStyle(const QString & id);
-    /**
-      *
-      */
-    static QList<QDiagramLineStyle> linesStyles();
     /**
       * Returns the name of the plugin providing this diagram.
       */
-    virtual QString plugin() const;
-    /**
-      * Removes the item specified by the given @uuid.
-      */
-    virtual bool removeItem( const QString & uuid );
-    /**
-      * Restores an item from the given set of @p properties.
-      */
-    virtual QAbstractDiagramGraphicsItem* restoreItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties);
-    /**
-      * Begins a restore operation.
-      *
-      * When a diagram is restored it means that any previous data reported from the diagram is now invalid and has to be queried for again.
-      */
-    virtual void beginRestoreDiagram();
-    virtual void endRestoreDiagram();
+    //virtual QString plugin() const;
     /**
       * Returns the diagram type.
       */
     virtual QString type() const;
-signals:
-    void itemAdded(QDiagramShape* item);
-    void itemRestored(QAbstractDiagramGraphicsItem* item);
 protected:
 
-    /**
-      * This event handler, for event event, can be reimplemented to receive drag enter events for this diagram.
-      * Drag enter events are generated as the cursor enters the item's area.
-      *
-      * The default implementation does nothing.
-      */
-    virtual void contextMenuEventHandler(QGraphicsSceneContextMenuEvent* event);
-    /**
-      * This event handler, for event event, can be reimplemented to receive drag enter events for this diagram.
-      * Drag enter events are generated as the cursor enters the item's area.
-      *
-      * The default implementation does nothing.
-      */
-    virtual void dragEnterEventHandler(QGraphicsSceneDragDropEvent* event);
-    /**
-      * This event handler, for event event, can be reimplemented to receive drag leave events for this diagram.
-      * Drag leave events are generated as the cursor leaves the diagram's area.
-      * Most often you will not need to reimplement this function, but it can be useful for resetting state in your item (e.g., highlighting).
-      *
-      * The default implementation does nothing.
-      * @see dragEnterEventHandler() dragMoveEventHandler() dropEventHandler()
-      */
-    virtual void dragLeaveEventHandler( QGraphicsSceneDragDropEvent* event );
-    /**
-      * This event handler, for event event, can be reimplemented to receive drag move events for this diagram.
-      * Drag move events are generated as the cursor moves around inside the diagram's area.
-      * Most often you will not need to reimplement this function; it is used to indicate that only parts of the item can accept drops.
-      *
-      * The default implementation does nothing.
-      */
-    virtual void dragMoveEventHandler( QGraphicsSceneDragDropEvent* event );
-    /**
-      * This event handler, for event event, can be reimplemented in a subclass to receive drop events for the diagram.
-      *
-      * The default implementation does nothing.
-      */
-    virtual void dropEventHandler( QGraphicsSceneDragDropEvent* event );
 protected slots:
-    virtual void connectItemsEventHandler( QDiagramShape* from, QDiagramShape* to, const QMap<QString,QVariant> & properties);
-    virtual void itemMoved(QGraphicsItem* findItemByUuid, const QPointF & oldPos, const QPointF & newPos);
-    virtual void itemRestoredHandler(QAbstractDiagramGraphicsItem* findItemByUuid);
 private:
 };
 

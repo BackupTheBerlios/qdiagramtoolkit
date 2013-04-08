@@ -51,7 +51,7 @@ QDiagramScriptExtensionPlugin::~QDiagramScriptExtensionPlugin()
 
 void QDiagramScriptExtensionPlugin::initialize(const QString & key, QScriptEngine* engine)
 {
-	if (key != "qdmf"){
+	if (key != "qdiagramtoolkit"){
 		return;
 	}
 	//QAbstractDiagramShapeClass* adsc = new QAbstractDiagramShapeClass(engine);

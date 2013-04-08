@@ -2,14 +2,14 @@
 #include "qdiagramconnectshapescommand.h"
 
 QDiagramConnectShapesCommand::QDiagramConnectShapesCommand(QAbstractDiagram* diagram, QAbstractDiagramShapeConnector* connector, const QString & plugin, QUndoCommand* parent) :
-    QDiagramUndoCommand(diagram, connector->uuid(), "connector", connector->properties(), plugin, parent)
+    QDiagramUndoCommand(diagram, connector->uuid(), "Connector", connector->properties(), plugin, parent)
 {
     setText(QObject::tr("Connect Shape (%1)").arg(connector->property("style").toString()));
 }
 
 
 QDiagramConnectShapesCommand::QDiagramConnectShapesCommand(QAbstractDiagram* diagram, const QString & uuid, QAbstractDiagramShapeConnectionPoint* from, QAbstractDiagramShapeConnectionPoint* to, const QDiagramConnectorStyle & style, const QString & plugin, QUndoCommand* parent) :
-    QDiagramUndoCommand(diagram, uuid, "connector", plugin, parent)
+    QDiagramUndoCommand(diagram, uuid, "Connector", plugin, parent)
 {
     QMap<QString,QVariant> mProperties(properties());
 
@@ -19,7 +19,7 @@ QDiagramConnectShapesCommand::QDiagramConnectShapesCommand(QAbstractDiagram* dia
     mProperties["pointAtEnd"] = to->id();
     mProperties["plugin"] = style.plugin();
     mProperties["style"] = style.shape();
-    mProperties["itemType"] = "connector";
+    mProperties["itemType"] = "Connector";
     mProperties["uuid"] = uuid;
 
     setProperties(mProperties);

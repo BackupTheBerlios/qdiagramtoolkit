@@ -35,7 +35,7 @@ QDiagramPluginLoaderPrototype::~QDiagramPluginLoaderPrototype()
 {
 }
 
-QDiagram* QDiagramPluginLoaderPrototype::diagram(const QString & plugin, const QString & type)
+QAbstractDiagram* QDiagramPluginLoaderPrototype::diagram(const QString & plugin, const QString & type)
 {
 	return QDiagramPluginLoader::diagram(plugin, type);
 }

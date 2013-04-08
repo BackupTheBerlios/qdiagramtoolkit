@@ -30,33 +30,13 @@ class QSysMLPlugin : public QObject, public QAbstractDiagramPlugin
     Q_OBJECT
     Q_INTERFACES(QAbstractDiagramPlugin)
 public:
-    QList<QDiagramConnectorStyle> connectors() const;
-
-    QAbstractDiagramGraphicsItem* createItem(const QMap<QString,QVariant> & metaData, const QMap<QString,QVariant> & properties, QGraphicsScene* scene);
-
-    QDiagram* diagram(const QString & type = "default", QObject* parent = 0) const;
-
-    QStringList diagrams() const;
+	QDIAGRAM_DECLARE_PLUGIN(QSysMLPlugin, "SysML")
 
     QList<QDiagramEndOfLineStyle> endOfLineStyles() const;
 
-    QStringList groups(QAbstractDiagram* diagram = 0) const;
-
-    QIcon icon(const QString & name) const;
+	void initialize();
 
     QList<QDiagramLineStyle> lineStyles() const;
-
-	QVariantMap metaData(const QString & name) const;
-
-    QString name() const;
-
-    QMap<QString,QVariant> defaultProperties(const QString & name) const;
-
-    QStringList shapes(const QString & group = QString::null, QAbstractDiagram* diagram = 0) const;
-
-	static QString staticName();
-
-    QString title(const QString & name) const;
 
     QString toolTip(const QString & shape) const;
 };

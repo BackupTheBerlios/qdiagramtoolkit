@@ -35,7 +35,7 @@ class QDIAGRAMLIBSHARED_EXPORT QDiagramViewControlPanel : public QWidget
 	/**
 	 * This property holds whether the snap to grid is enabled.
 	 */
-	Q_PROPERTY(bool snapToGrid READ snapToGridEnabled WRITE setSnapToGridEnabled)
+	Q_PROPERTY(bool snap READ snapEnabled WRITE setSnapEnabled)
 public:
 	/**
 	 * Constructs a QDiagramViewControlPanel with the specified @p parent.
@@ -48,7 +48,7 @@ public:
 	/**
 	 * Returns the if snap to grid is enabled.
 	 */
-	bool snapToGridEnabled() const;
+	bool snapEnabled() const;
 public slots:
 	void setGridVisible(bool visible);
 	/**
@@ -56,7 +56,7 @@ public slots:
 	 */
 	void setMousePosition(const QPointF & pos);
 	
-	void setSnapToGridEnabled(bool on);
+	void setSnapEnabled(bool on);
 	void setZoom(int percent);
 signals:
 	void showGridToogled(bool visible);
@@ -64,7 +64,7 @@ signals:
 	 * This signal is emitted whenever the snap to grid button has changed it's status. This can be the result of a user interaction, 
 	 * or because setSnapToGrid() was called.
 	 */
-	void snapToGridToogled(bool on);
+	void snapToogled(bool on);
 	/**
 	 * This signal is emitted whenever the zoom level has changed. This can be the result of a user interaction (moving the slider or
 	 * pressing zoom in/out) or because setZoom() was called.

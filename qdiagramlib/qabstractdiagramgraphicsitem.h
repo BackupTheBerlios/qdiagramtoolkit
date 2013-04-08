@@ -33,14 +33,16 @@
 class QAbstractDiagramShapeConnector;
 class QAbstractDiagram;
 
+class QDiagramSheet;
 class QDiagramMetaData;
 
 //! The QAbstractDiagramGraphicsItem class is the base of all diagram graphics item.
 /**
  * The class defines the functions for the functionality shared by all diagram graphics item.
  */
-class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramGraphicsItem : public QGraphicsItem
+class QDIAGRAMLIBSHARED_EXPORT QAbstractDiagramGraphicsItem : public QGraphicsObject
 {
+	Q_OBJECT
 public:
     enum {
         Type = QGraphicsItem::UserType + 4200
@@ -108,6 +110,10 @@ public:
       * Returns a pointer to the meta-data of this object.
       */
     QDiagramMetaData* metaData() const;
+	/**
+	 * Returns the sheet containing this item.
+	 */
+	QDiagramSheet* sheet() const;
     /**
       *
       */

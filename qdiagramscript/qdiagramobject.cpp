@@ -40,14 +40,13 @@ static QScriptValue addPlugin(QScriptContext* context, QScriptEngine* engine)
 static QScriptValue addShape(QScriptContext* context, QScriptEngine* engine)
 {
 	DECLARE_SELF(QDiagram, addShape);
-	CHECK_ARG_COUNT(5);
-	QString n = context->argument(0).toString();
-	qreal x = context->argument(1).toNumber();
-	qreal y = context->argument(2).toNumber();
-	QVariantMap m = context->argument(3).toVariant().toMap();
-	QString p = context->argument(4).toString();
+	CHECK_ARG_COUNT(4);
+	QString p = context->argument(0).toString();
+	QString i = context->argument(1).toString();
+	qreal x = context->argument(2).toNumber();
+	qreal y = context->argument(3).toNumber();
 
-	return qScriptValueFromValue(engine, self->addShape(n, x, y, m, p));
+	return qScriptValueFromValue(engine, self->addShape(p, i, QPointF(x, y)));
 }
 
 static QScriptValue clearSelection(QScriptContext* context, QScriptEngine* engine)
@@ -105,8 +104,8 @@ DEF_PROPERTY_SETTER_READONLY(QDiagram, modified)
 DEF_PROPERTY_GETTER(QDiagram, items, items)
 DEF_PROPERTY_SETTER_READONLY(QDiagram, items)
 
-DEF_PROPERTY_GETTER(QDiagram, plugin, plugin)
-DEF_PROPERTY_SETTER_READONLY(QDiagram, plugin)
+DEF_PROPERTY_GETTER(QDiagram, pluginName, pluginName)
+DEF_PROPERTY_SETTER_READONLY(QDiagram, pluginName)
 
 DEF_PROPERTY_GETTER(QDiagram, plugins, plugins)
 DEF_PROPERTY_SETTER_READONLY(QDiagram, plugins)
@@ -137,15 +136,15 @@ void initDiagram(QScriptEngine* engine)
 	ADD_PROPERTY(proto, author);
 	ADD_PROPERTY(proto, items);
 	ADD_PROPERTY(proto, modified);
-	ADD_PROPERTY(proto, plugin);
+	ADD_PROPERTY(proto, pluginName);
 	ADD_PROPERTY(proto, plugins);
 	ADD_PROPERTY(proto, selectedItems);
 	ADD_PROPERTY(proto, shapes);
 	ADD_PROPERTY(proto, styleSheet);
 	ADD_PROPERTY(proto, title);
 
-	engine->setDefaultPrototype(qMetaTypeId<QDiagram*>(), proto);
+	engine->setDefaultPrototype(qMetaTypeId<QAbstractDiagram*>(), proto);
 
 	QScriptValue f = engine->newFunction(ctor);
-	engine->globalObject().setProperty("QDiagram", f);
+	engine->globalObject().setProperty("QAbstractDiagram", f);
 }

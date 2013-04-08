@@ -27,7 +27,7 @@ public:
 	QDiagramPluginLoaderPrototype(QObject *parent = 0);
 	~QDiagramPluginLoaderPrototype();
 public slots:
-	QDiagram* diagram(const QString & plugin, const QString & type);
+	QAbstractDiagram* diagram(const QString & plugin, const QString & type);
 	QStringList plugins() const;
 private:
 	QDiagramPluginLoader *thisClass() const;

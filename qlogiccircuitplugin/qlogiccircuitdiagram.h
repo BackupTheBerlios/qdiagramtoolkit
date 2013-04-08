@@ -1,27 +1,35 @@
+/******************************************************************************
+** Copyright (C) 2011 Martin Hoppe martin@2x2hoppe.de
+**
+** This file is part of the QDiagram Toolkit (qdiagramlib)
+**
+** qdiagramlib is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as
+** published by the Free Software Foundation, either version 3 of the
+** License, or (at your option) any later version.
+**
+** qdiagramlib is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Leser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with qdialgramlib.  If not, see <http://www.gnu.org/licenses/>.
+******************************************************************************/
 #ifndef QLOGICCIRCUITDIAGRAM_H
 #define QLOGICCIRCUITDIAGRAM_H
 
-#include <qdiagram.h>
+#include <qabstractdiagram.h>
 
-class QAbstractDiagramShape;
-
-class QLogicCircuitDiagram : public QDiagram
+class QLogicCircuitDiagram : public QAbstractDiagram
 {
 	Q_OBJECT
 
 public:
-	QLogicCircuitDiagram(QObject *parent);
+	QDIAGRAM_DECLARE_DIAGRAM(QLogicCircuitDiagram, "logiccircuit.default");
+
+	QLogicCircuitDiagram(const QString & pluginName, QObject *parent);
 	~QLogicCircuitDiagram();
-
-    QString plugin() const;
-
-    QString type() const;
-
-	QString toText() const;
-private slots:
-	void render();
-private:
-	QString toText(QAbstractDiagramShape* i) const;
 };
 
 #endif // QLOGICCIRCUITDIAGRAM_H

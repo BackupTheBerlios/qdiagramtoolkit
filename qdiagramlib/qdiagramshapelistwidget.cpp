@@ -34,11 +34,32 @@ QDiagramShapeListWidget::QDiagramShapeListWidget(QWidget *parent) :
     setDropIndicatorShown(true);
 }
 
-void QDiagramShapeListWidget::addShape(const QIcon & icon, const QString & title, const QVariantMap & metaData, const QVariantMap & properties)
+//void QDiagramShapeListWidget::addShape(const QString & plugin, const QString & id, const QString & title, const QIcon & icon)
+//{
+//    QListWidgetItem* i = new QListWidgetItem(icon, title);
+//    i->setData(Qt::UserRole, "Shape");
+//    i->setData(Qt::UserRole + 1, plugin);
+//    i->setData(Qt::UserRole + 2, id);
+//    addItem(i);
+//}
+
+void QDiagramShapeListWidget::addShape(const QString & plugin, const QString & itemClass, const QString & title, const QVariantMap & properties, const QIcon & icon)
+{
+	QVariantMap m;
+	m["itemType"] = "Shape";
+	m["itemClass"] = itemClass;
+	m["plugin"] = plugin;
+    QListWidgetItem* i = new QListWidgetItem(icon, title);
+    i->setData(Qt::UserRole, m);
+    i->setData(Qt::UserRole + 1, properties);
+    addItem(i);
+}
+
+void QDiagramShapeListWidget::addShape(const QString & id, const QString & plugin, const QString & title, const QIcon & icon)
 {
     QListWidgetItem* i = new QListWidgetItem(icon, title);
-    i->setData(Qt::UserRole, metaData);
-    i->setData(Qt::UserRole + 1, properties);
+    i->setData(Qt::UserRole, plugin);
+    i->setData(Qt::UserRole + 1, id);
     addItem(i);
 }
 
@@ -53,23 +74,25 @@ void QDiagramShapeListWidget::removeShape(const QString & itemClass, const QStri
 
 void QDiagramShapeListWidget::startDrag(Qt::DropActions /*supportedActions*/)
 {
-    QListWidgetItem* mItem = currentItem();
+    QListWidgetItem* i = currentItem();
 
-    QByteArray mItemData;
-    QDataStream mDataStream(&mItemData, QIODevice::WriteOnly);
+    QByteArray d;
+    QDataStream s(&d, QIODevice::WriteOnly);
 
-    mDataStream << mItem->data(Qt::UserRole) << mItem->data(Qt::UserRole + 1) << mItem->data(Qt::UserRole + 2) << mItem->data(Qt::UserRole + 3);
+//    s << i->data(Qt::UserRole) << i->data(Qt::UserRole + 1) << i->data(Qt::UserRole + 2) << i->data(Qt::UserRole + 3);
+//    s << i->data(Qt::UserRole) << i->data(Qt::UserRole + 1) << i->data(Qt::UserRole + 2);
+	s << i->data(Qt::UserRole) << i->data(Qt::UserRole + 1);
 
-    QMimeData* mMimeData = new QMimeData;
-    mMimeData->setData("application/qdiagram.shape", mItemData);
+    QMimeData* md = new QMimeData;
+    md->setData("application/qdiagram.shape", d);
 
-    QDrag* mDrag = new QDrag(this);
-    mDrag->setMimeData(mMimeData);
+    QDrag* drag = new QDrag(this);
+    drag->setMimeData(md);
 
-    QPixmap mPixmap(mItem->icon().pixmap(48,48));
+    QPixmap pm(i->icon().pixmap(48,48));
 //    mDrag->setHotSpot(QPoint(mPixmap.width()/2, mPixmap.height()/2));
-    mDrag->setPixmap(mPixmap);
+    drag->setPixmap(pm);
 
-    mDrag->exec(Qt::MoveAction);
+    drag->exec(Qt::MoveAction);
 }
 

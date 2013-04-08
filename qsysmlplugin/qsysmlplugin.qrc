@@ -15,5 +15,7 @@
         <file alias="flow.control">resources/flow_control.ico</file>
         <file alias="flow.data">resources/flow_data.ico</file>
         <file alias="node.transition">resources/transition_node.ico</file>
+        <file alias="port.input">resources/inputport.ico</file>
+        <file alias="port.output">resources/outputport.ico</file>
     </qresource>
 </RCC>

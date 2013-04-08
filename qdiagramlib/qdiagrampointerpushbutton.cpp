@@ -40,11 +40,15 @@ void QDiagramPointerPushButton::addConnector(const QDiagramConnectorStyle & styl
         QMenu* m = new QMenu(this);
         setMenu(m);
         a = m->addAction(QIcon(":/qdiagram/cursor.default"), tr("Selection"), this, SLOT(pointerModeActionTriggered()));
+		//a->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_1));
         a->setData("invalid");
 	    connect(a, SIGNAL(triggered()), SLOT(menuActionTriggered()));
     }
     a = menu()->addAction(style.icon(), style.name());
     a->setData(qVariantFromValue(style));
+	//if (menu()->findChildren<QAction*>().size() < 9){
+	//	a->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_1 + (menu()->findChildren<QAction*>().size())));
+	//}
     connect(a, SIGNAL(triggered()), SLOT(menuActionTriggered()));
 }
 
