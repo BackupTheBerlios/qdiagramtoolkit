@@ -200,7 +200,9 @@ void QAbstractDiagramShapeConnector::reconnect()
 		QDiagramConnectionPoint cp(m_connectionPointAtEnd->parentShape()->uuid(), m_connectionPointAtEnd->id());
 		setProperty("end", qVariantFromValue(cp));
     }
-    updatePosition();
+	if (m_connectionPointAtStart && m_connectionPointAtEnd){
+		updatePosition();
+	}
 }
 
 void QAbstractDiagramShapeConnector::remove(QAbstractDiagramShapeConnectionPoint* point)

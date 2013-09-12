@@ -353,6 +353,17 @@ QAbstractDiagramShape* QDiagramGraphicsView::shapeAt(const QPoint & pos) const
     return 0;
 }
 
+QList<QAbstractDiagramShape*> QDiagramGraphicsView::shapes(const QPoint & pos) const
+{
+	QList<QAbstractDiagramShape*> l;
+    Q_FOREACH(QGraphicsItem* i, items(pos)){
+        if (i->type() == QAbstractDiagramShape::Type){
+            l << dynamic_cast<QAbstractDiagramShape*>(i);
+        }
+    }
+	return l;
+}
+
 void QDiagramGraphicsView::showGrid( bool on )
 {
     m_showGrid = on;

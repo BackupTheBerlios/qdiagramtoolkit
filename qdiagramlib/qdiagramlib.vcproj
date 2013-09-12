@@ -219,6 +219,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qdiagramconnectorsizegriphandle.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\qdiagramconnectorstyle.cpp"
 				>
 			</File>
@@ -584,6 +588,10 @@
 			</File>
 			<File
 				RelativePath=".\qdiagramconnectorpolyline_p.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qdiagramconnectorsizegriphandle.h"
 				>
 			</File>
 			<File
@@ -2412,7 +2420,7 @@
 		/>
 		<Global
 			Name="QtVersion Win32"
-			Value="4.8.2"
+			Value="$(DefaultQtVersion)"
 		/>
 		<Global
 			Name="RccDir"

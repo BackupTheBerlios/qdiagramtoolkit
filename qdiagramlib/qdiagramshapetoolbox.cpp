@@ -65,7 +65,8 @@ void QDiagramShapeToolBox::addShapes(QAbstractDiagramPlugin* plugin, const QStri
         Q_FOREACH(QString n, plugin->shapes()){
 			if (!blockedShapes.contains(n)){
 				//w->addShape(plugin->icon(n), plugin->title(n), plugin->itemClass(n), plugin->defaultProperties(n));
-				w->addShape(plugin->name(), plugin->itemClass(n), plugin->title(n), plugin->defaultProperties(n), plugin->icon(n));
+				//w->addShape(plugin->name(), plugin->itemClass(n), plugin->title(n), plugin->defaultProperties(n), plugin->icon(n));
+				w->addShape(n, plugin->name(), plugin->title(n), plugin->icon(n));
 			}
         }
         ui->toolBox->addItem(w, plugin->name());

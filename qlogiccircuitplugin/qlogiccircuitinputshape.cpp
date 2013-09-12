@@ -72,7 +72,7 @@ QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitInputShape
 	initGeometry(900, 100);
     addProperty("name", QDiagramToolkit::String, false, properties.value("name", "<input>"));
     addProperty("signalType", QDiagramToolkit::String, true, properties.value("signalType").toString());
-	addProperty("textColor", QDiagramToolkit::Color, true, properties.value("textColor"));
+	addProperty("textColor", QDiagramToolkit::Color, false, properties.value("textColor"));
 	addProperty("textFont", QDiagramToolkit::Font, true, properties.value("textFont"));
 	addProperty("lineStyle", QDiagramToolkit::Pen, true, properties.value("lineStyle"));
     addProperty("state", QDiagramToolkit::Bool, false, properties.value("state", false).toBool());
@@ -96,7 +96,7 @@ QVariantMap QLogicCircuitInputShape::defaultProperties(const QString & id)
 {
 	QVariantMap p;
 
-	p["textColor"] = "black";
+	p["textColor"] = QDiagramProperty::toMap(QColor("black"));
 	QFont f("Arial");
 	f.setPointSizeF(4);
 	p["textFont"] = QDiagramProperty::toMap(f);
@@ -109,6 +109,9 @@ QVariantMap QLogicCircuitInputShape::defaultProperties(const QString & id)
         p["signalType"] = "analog";
     } else if (id == "input.digital"){
         p["signalType"] = "digital";
+    } else if (id == "input.flag"){
+        p["signalType"] = "flag";
+		p["name"] = "<flag>";
 	}
 	return p;
 }
@@ -124,7 +127,13 @@ void QLogicCircuitInputShape::paint(QPainter *painter, const QStyleOptionGraphic
     Q_UNUSED(widget);
 
 	painter->setPen(qdiagramproperty_cast<QPen>(property("lineStyle")));
-
+	if (hasProperty("ghost")){
+		if (property("ghost").toBool()){
+			QPen p = painter->pen();
+			p.setColor(QColor("firebrick"));
+			painter->setPen(p);
+		}
+	}
     painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
     painter->drawPath(shape());
     if (property("signalType").toString() == "analog"){
@@ -161,8 +170,14 @@ void QLogicCircuitInputShape::paint(QPainter *painter, const QStyleOptionGraphic
         r.setWidth(200);
 		r.adjust(0, 7, 0, 0);
         painter->drawText(r, Qt::AlignRight, "1\n0");
+	} else if (property("signalType").toString() == "flag"){
+		painter->drawLine(geometry().width() - (geometry().height() * 2), 0, geometry().width() - (geometry().height() * 2), geometry().height());
+		if (property("inverted").toBool()){
+		   painter->drawEllipse(geometry().width() - geometry().height(), geometry().height() / 2 - GATE_CP_SIZE / 2, GATE_CP_SIZE, GATE_CP_SIZE);
+		} 
     }
 
+	painter->setPen(qdiagramproperty_cast<QColor>(property("textColor")));
 	painter->setFont(pointToPixel(qdiagramproperty_cast<QFont>(property("textFont"))));
 	QRectF r(boundingRect().adjusted(200, 0, 0, 0));
     painter->drawText(r, Qt::AlignLeft | Qt::AlignVCenter, property("name").toString());
@@ -184,7 +199,11 @@ void QLogicCircuitInputShape::paint(QPainter *painter, const QStyleOptionGraphic
 QPainterPath QLogicCircuitInputShape::shape() const
 {
     QPainterPath p;
-    p.addRoundedRect(0, 0, geometry().width() - geometry().height(), geometry().height(), geometry().height() / 4, geometry().height() / 4);
+	if (property("signalType") == "flag"){
+		p.addRect(0, 0, geometry().width() - geometry().height(), geometry().height());
+	} else {
+	    p.addRoundedRect(0, 0, geometry().width() - geometry().height(), geometry().height(), geometry().height() / 4, geometry().height() / 4);
+	}
     p.moveTo(geometry().width() - geometry().height(), geometry().height() / 2);
     p.lineTo(geometry().width(), geometry().height() / 2);
     return p;

@@ -282,14 +282,15 @@ void QDiagramView::setDiagram(QAbstractDiagram *diagram)
         v->setRubberBandSelectionMode(Qt::ContainsItemShape);
         l->addWidget(v);
 		
-		connect(v, SIGNAL(zoomChanged(int)), this, SIGNAL(zoomChanged(int)));
-	    connect(v, SIGNAL(mouseScenePositionChanged(QPointF)), this, SIGNAL(mousePositionChanged(QPointF)));
-	    connect(v, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
-
 		ui->tabWidget->addTab(p, m_diagram->sheet(i)->name());
 		v->setScene(m_diagram->sheet(i));
         v->setAlignment(m_alignment);
 		v->ensureVisible(0, 0, 1, 1);
+		v->setZoom(100);
+		
+		connect(v, SIGNAL(zoomChanged(int)), this, SIGNAL(zoomChanged(int)));
+	    connect(v, SIGNAL(mouseScenePositionChanged(QPointF)), this, SIGNAL(mousePositionChanged(QPointF)));
+	    connect(v, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(graphicsViewContextMenuRequestHandler(QPoint)));
 	}
 }
 

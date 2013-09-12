@@ -168,16 +168,22 @@ void QLogicCircuitPlugin::initialize()
 	registerShape<QLogicCircuitGateShape>("gate.nand", tr("Gates"), tr("NAND"),QIcon(":/logiccircuit/gate.nand"));
 	registerShape<QLogicCircuitGateShape>("gate.nor", tr("Gates"), tr("NOR"),QIcon(":/logiccircuit/gate.nor"));
 	registerShape<QLogicCircuitGateShape>("gate.not", tr("Gates"), tr("NOT"),QIcon(":/logiccircuit/gate.not"));
+	registerShape<QLogicCircuitGateShape>("gate.or", tr("Gates"), tr("OR"),QIcon(":/logiccircuit/gate.or"));
 	registerShape<QLogicCircuitGateShape>("gate.xnor", tr("Gates"), tr("XNOR"),QIcon(":/logiccircuit/gate.xnor"));
 	registerShape<QLogicCircuitGateShape>("gate.xor", tr("Gates"), tr("XOR"),QIcon(":/logiccircuit/gate.xor"));
 
 	registerShape<QLogicCircuitFunctionShape>("function.timer", tr("Functions"), tr("Timer"),QIcon(":/logiccircuit/function.timer"));
 	registerShape<QLogicCircuitFunctionShape>("function.comparator", tr("Functions"), tr("Comparator"),QIcon(":/logiccircuit/function.comparator"));
+	registerShape<QLogicCircuitFunctionShape>("function.computation", tr("Functions"), tr("Computation"),QIcon(":/logiccircuit/function.summation"));
 	registerShape<QLogicCircuitFunctionShape>("function.counter", tr("Functions"), tr("Counter"),QIcon(":/logiccircuit/function.counter"));
 	registerShape<QLogicCircuitFunctionShape>("function.counter.oph", tr("Functions"), tr("Operating Hours Counter"),QIcon(":/logiccircuit/function.counter.operating_hours"));
+	registerShape<QLogicCircuitFlipFlopShape>("flipflop.jk", tr("Functions"), tr("JK-Flip Flop"),QIcon(":/logiccircuit/flipflop.jk"));
+	registerShape<QLogicCircuitFlipFlopShape>("flipflop.sr.basic", tr("Functions"), tr("SR-Flip Flop"),QIcon(":/logiccircuit/flipflop.asyncron"));
+	registerShape<QLogicCircuitFlipFlopShape>("flipflop.sr.gated", tr("Functions"), tr("SR-Flip Flop (gated)"),QIcon(":/logiccircuit/flipflop.sr.gated"));
 
 	registerShape<QLogicCircuitInputShape>("input.analog", tr("Inputs / Outputs"), tr("Input (analog)"),QIcon(":/logiccircuit/input.analog"));
 	registerShape<QLogicCircuitInputShape>("input.digital", tr("Inputs / Outputs"), tr("Input (digital)"),QIcon(":/logiccircuit/input.digital"));
+	registerShape<QLogicCircuitInputShape>("input.flag", tr("Inputs / Outputs"), tr("Flag"),QIcon(":/logiccircuit/input.flag"));
 
 	registerShape<QLogicCircuitOutputShape>("output.analog", tr("Inputs / Outputs"), tr("Output (analog)"),QIcon(":/logiccircuit/output.analog"));
 	registerShape<QLogicCircuitOutputShape>("output.digital", tr("Inputs / Outputs"), tr("Output (digital)"),QIcon(":/logiccircuit/output.digital"));

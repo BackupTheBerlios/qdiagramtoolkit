@@ -218,6 +218,11 @@ QBrush QAbstractDiagramGraphicsItem::brush(const QString & attrs)
     return mBrush;
 }
 
+QVariant QAbstractDiagramGraphicsItem::data() const
+{
+	return m_data;
+}
+
 QAbstractDiagram* QAbstractDiagramGraphicsItem::diagram() const
 {
     QDiagramSheet* s = qobject_cast<QDiagramSheet*>(sheet());
@@ -480,9 +485,7 @@ void QAbstractDiagramGraphicsItem::restoreProperties(const QVariantMap & p)
 		it.next();
 		index = metaData()->indexOfProperty(it.key());
 		if (index > -1){
-			if (metaData()->property(index).type() == QDiagramToolkit::Color){
-				m_properties[it.key()] = QColor(it.value().toString());
-			} else if (metaData()->property(index).type() == QDiagramToolkit::Rect){
+			if (metaData()->property(index).type() == QDiagramToolkit::Rect){
 				if (it.value().canConvert(QVariant::Map)){
 					if (it.key() == "geometry"){
 						QVariantMap m = m_properties.value("geometry").toMap();
@@ -496,6 +499,8 @@ void QAbstractDiagramGraphicsItem::restoreProperties(const QVariantMap & p)
 						m_properties[it.key()] = it.value().toMap();
 					}
 				}
+			} else if (metaData()->property(index).type() == QDiagramToolkit::String){
+				m_properties[it.key()] = QString::fromUtf8(it.value().toByteArray());
 			} else {
 				m_properties[it.key()] = it.value();
 			}
@@ -653,6 +658,11 @@ void QAbstractDiagramGraphicsItem::setBrush( const QBrush & brush )
         mAttrs << "style:solid";
     }
     setProperty("brush", mAttrs.join(";"));
+}
+
+void QAbstractDiagramGraphicsItem::setData(const QVariant & data)
+{
+	m_data = data;
 }
 
 void QAbstractDiagramGraphicsItem::triggerAction(QAction* action)

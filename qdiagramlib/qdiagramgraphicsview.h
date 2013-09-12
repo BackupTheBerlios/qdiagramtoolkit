@@ -80,7 +80,10 @@ public:
       * Returns the shape at the given @p pos or 0 if no shape is found.
       */
     QAbstractDiagramShape* shapeAt(const QPoint & pos) const;
-
+	/**
+	 * Returns a list of all the shapes at the position @p pos in the view.
+	 */
+	QList<QAbstractDiagramShape*> shapes(const QPoint & pos) const;
 	int zoom() const;
 public slots:
     /**

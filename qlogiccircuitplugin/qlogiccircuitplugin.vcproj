@@ -280,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qlogiccircuitflipflopshape_p.h"
+				>
+			</File>
+			<File
 				RelativePath=".\qlogiccircuitfunctionshape.h"
 				>
 			</File>
@@ -1100,7 +1104,7 @@
 		/>
 		<Global
 			Name="QtVersion Win32"
-			Value="4.8.2"
+			Value="$(DefaultQtVersion)"
 		/>
 		<Global
 			Name="RccDir"

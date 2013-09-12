@@ -140,11 +140,8 @@ void QLogicCircuitValueShape::paint(QPainter *painter, const QStyleOptionGraphic
 		r.setWidth(15);
         painter->drawText(r, Qt::AlignRight, "1\n0");
     }
-    QFont f;
-    f.setFamily("Arial");
-    f.setPixelSize(6);
-    painter->setFont(f);
-    QRectF r(boundingRect().adjusted(20, 0, 0, 0));
+	painter->setFont(pointToPixel(qdiagramproperty_cast<QFont>(property("textFont"))));
+    QRectF r(boundingRect().adjusted(200, 0, 0, 0));
 	QString t = QString("%1%2").arg(property("value").toString()).arg(property("unit").toString());
     painter->drawText(r, Qt::AlignLeft | Qt::AlignVCenter, t);
 

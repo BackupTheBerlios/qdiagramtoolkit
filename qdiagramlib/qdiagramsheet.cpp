@@ -145,8 +145,11 @@ QDiagramToolkit::PaperSize QDiagramSheet::paperSize() const
 
 QSizeF QDiagramSheet::paperSize(QDiagramToolkit::Unit unit) const
 {
-	QSizeF s(sceneRect().size());
-
+	QSizeF s;
+	if (unit == QDiagramToolkit::Millimeter){
+		s.setHeight(sceneRect().size().height() / 10);
+		s.setWidth(sceneRect().size().width() / 10);
+	}
 	return s;
 }
 

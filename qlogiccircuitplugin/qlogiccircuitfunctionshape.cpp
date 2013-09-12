@@ -55,6 +55,8 @@ void QLogicCircuitFunctionInputConnectionPoint::updatePosition()
     int offset = 0;
     if (parentShape()->property("function").toString() == "comparator"){
         offset = parentShape()->geometry().height() / 4;
+	} else if (parentShape()->property("function").toString() == "computation"){
+        offset = parentShape()->geometry().height() / 4;
 	} else if (parentShape()->property("function").toString() == "timer"){
         offset = parentShape()->geometry().height() / 4;
     }
@@ -111,6 +113,10 @@ QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitFunctionSh
         pairs[0] = "equal";
         pairs[1] = "less";
         pairs[2] = "greater";
+        pairs[3] = "lessOrEqual";
+        pairs[4] = "greaterOrEqual";
+        pairs[5] = "notEqual";
+
         addProperty("mode", QDiagramToolkit::Enumeration, pairs, properties.value("mode", 0));
 
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "x", 0, 1));
@@ -123,9 +129,10 @@ QAbstractDiagramShape(QLogicCircuitPlugin::staticName(), QLogicCircuitFunctionSh
         addConnectionPoint(new QLogicCircuitFunctionOutputConnectionPoint(this, "out"));
     } else if (properties.value("function").toString() == "computation"){
         QMap<int,QString> pairs;
-        pairs[0] = "addtion";
+        pairs[0] = "addition";
         pairs[1] = "subtraction";
         pairs[2] = "division";
+        pairs[3] = "multiplication";
         addProperty("mode", QDiagramToolkit::Enumeration, pairs, properties.value("mode", 0));
 
         addConnectionPoint(new QLogicCircuitFunctionInputConnectionPoint(this, "x", 0, 1));
@@ -193,9 +200,7 @@ QVariantMap QLogicCircuitFunctionShape::defaultProperties(const QString & id)
 	QBrush brush(Qt::white);
 	p["background"] = QDiagramProperty::toMap(brush);
 
-    if (id == "flipflop.asyncron"){
-        p["function"] = "comparator";
-    } else if (id == "function.comparator"){
+    if (id == "function.comparator"){
         p["function"] = "comparator";
     } else if (id == "function.computation"){
         p["function"] = "computation";
@@ -235,6 +240,12 @@ void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGrap
             painter->drawText(boundingRect(), Qt::AlignHCenter, "<");
         } else if (property("mode").toInt() == 2){
             painter->drawText(boundingRect(), Qt::AlignHCenter, ">");
+        } else if (property("mode").toInt() == 3){
+            painter->drawText(boundingRect(), Qt::AlignHCenter, "<=");
+        } else if (property("mode").toInt() == 4){
+            painter->drawText(boundingRect(), Qt::AlignHCenter, ">=");
+        } else if (property("mode").toInt() == 5){
+            painter->drawText(boundingRect(), Qt::AlignHCenter, "<>");
         }
     } else if (property("function").toString() == "counter"){
         QRectF mRect(2 + BASE_SIZE, 2, BASE_SIZE * 4 - 4, BASE_SIZE);
@@ -243,7 +254,15 @@ void QLogicCircuitFunctionShape::paint(QPainter* painter, const QStyleOptionGrap
         QRectF mRect(2 + BASE_SIZE, 2, BASE_SIZE * 3 - 4, BASE_SIZE);
         painter->drawRect(mRect);
     } else if (property("function").toString() == "computation"){
-        painter->drawText(boundingRect(), Qt::AlignHCenter, "S");
+        if (property("mode").toInt() == 0){
+			painter->drawText(boundingRect(), Qt::AlignHCenter, "X + Y");
+		} else if (property("mode").toInt() == 1){
+			painter->drawText(boundingRect(), Qt::AlignHCenter, "X - Y");
+		} else if (property("mode").toInt() == 2){
+			painter->drawText(boundingRect(), Qt::AlignHCenter, "X / Y");
+		} else if (property("mode").toInt() == 3){
+			painter->drawText(boundingRect(), Qt::AlignHCenter, "X * Y");
+		}
     } else if (property("function").toString() == "timer"){
 		QString t = QString("T%1\n%2s").arg(property("mode").toString()).arg(property("time").toString());
         painter->drawText(boundingRect(), Qt::AlignHCenter, t);

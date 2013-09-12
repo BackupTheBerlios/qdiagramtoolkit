@@ -189,7 +189,8 @@ QWidget* QPropertiesModelItem::createEditor(QWidget* parent, const QStyleOptionV
 			return ce;
 		} else if (type() == QDiagramToolkit::Double){
 			QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
-			sb->setMaximum(99999.99);
+			sb->setMaximum(9999999.99);
+			sb->setMinimum(-9999999.99);
 			QObject::connect(sb, SIGNAL(editingFinished()), receiver, SLOT(commitAndClose()));
 			return sb;
 		} else if (type() == QDiagramToolkit::EndOfLineStyle){
@@ -394,7 +395,7 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 			if (type() == QDiagramToolkit::Brush){
 				return qdiagramproperty_cast<QBrush>(property()).color();
 			} else if (type() == QDiagramToolkit::Color){
-				return QColor(value().toString());
+				return qdiagramproperty_cast<QColor>(value());
 			} else if(type() == QDiagramToolkit::LineStyle){
 				if (property().toPenStyle() == Qt::SolidLine){
 					return QIcon(":/qdiagram/line.solid");
@@ -461,7 +462,7 @@ QVariant QPropertiesModelItem::data(const QModelIndex & index, int role) const
 			} else if (type() == QDiagramToolkit::Bool){
 				return value().toBool();
 			} else if (type() == QDiagramToolkit::Color){
-				return qvariant_cast<QColor>(value());
+				return qdiagramproperty_cast<QColor>(value());
 			} else if (type() == QDiagramToolkit::Dynamic){
 				return value();
 			} else if (type() == QDiagramToolkit::Int){
@@ -740,7 +741,7 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
 			return true;
 		} else if (type() == QDiagramToolkit::Color){
 			QDiagramColorEditor* ce = qobject_cast<QDiagramColorEditor*>(editor);
-			ce->setColor(qvariant_cast<QColor>(value()));
+			ce->setColor(qdiagramproperty_cast<QColor>(value()));
 			return true;
 		} else if (type() == QDiagramToolkit::Double){
 			QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
@@ -760,6 +761,8 @@ bool QPropertiesModelItem::setEditorData(QWidget* editor, const QModelIndex & in
 		} else if (type() == QDiagramToolkit::Int){
 			QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
 			sb->setValue(value().toInt());
+			sb->setMinimum(-99999);
+			sb->setMaximum(99999);
 			return true;
 		} else if (index.data(QPropertiesModel::MetaTypeRole).toInt() == QDiagramToolkit::Angle){
 			QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);

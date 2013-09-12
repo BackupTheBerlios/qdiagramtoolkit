@@ -47,6 +47,8 @@ public:
       * Removes the shape specified by the given @p name from the tool box.
       */
     void removeShape(const QString & name, const QString & plugin);
+public slots:
+	//void clear()		;
 private:
     Ui::QDiagramShapeToolBox *ui;
 };

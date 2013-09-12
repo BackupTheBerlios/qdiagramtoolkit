@@ -370,8 +370,8 @@ QPointF QAbstractDiagram::snapPos(const QPointF & point) const
 {
     QPointF p(point);
 	if (m_sheets.at(m_index).sheet->isSnapEnabled()){
-        p.setX(m_sheets.at(m_index).sheet->snapSize().width() * (int)(p.x() / m_sheets.at(m_index).sheet->snapSize().width()));
-        p.setY(m_sheets.at(m_index).sheet->snapSize().height() * (int)(p.y() / m_sheets.at(m_index).sheet->snapSize().height()));
+        p.setX((m_sheets.at(m_index).sheet->snapSize().width() / 2) * (int)(p.x() / (m_sheets.at(m_index).sheet->snapSize().width() / 2)));
+        p.setY((m_sheets.at(m_index).sheet->snapSize().height() / 2) * (int)(p.y() / (m_sheets.at(m_index).sheet->snapSize().height() / 2)));
     }
     return p;
 }
@@ -439,6 +439,18 @@ QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::items(int page) const
 			}
 		}
     }
+    return items;
+}
+
+QList<QAbstractDiagramGraphicsItem*> QAbstractDiagram::itemsByProperty(const QString & name, const QVariant & value) const
+{
+    QList<QAbstractDiagramGraphicsItem*> items;
+	Q_FOREACH(QGraphicsItem* i, currentSheet()->items()){
+		QAbstractDiagramGraphicsItem* item = dynamic_cast<QAbstractDiagramGraphicsItem*>(i);
+		if (item && item->property(name).value() == value){
+			items << item;
+		}
+	}
     return items;
 }
 

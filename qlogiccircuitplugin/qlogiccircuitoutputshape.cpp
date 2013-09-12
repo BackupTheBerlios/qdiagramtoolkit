@@ -48,12 +48,11 @@ void QLogicCircuitOutputShapeConnectionPoint::paint(QPainter *painter, const QSt
 
 void QLogicCircuitOutputShapeConnectionPoint::updatePosition()
 {
-//    setRect(QRectF(0, GATE_BASE_SIZE - GATE_CP_SIZE / 2, GATE_CP_SIZE, GATE_CP_SIZE));
-    QRectF r;
-    r.setLeft(0);
-    r.setTop(parentShape()->geometry().height() / 2 - parentShape()->geometry().height() / 8);
-    r.setWidth(parentShape()->geometry().height() / 4);
-    r.setHeight(parentShape()->geometry().height() / 4);
+	QRectF r;
+	r.setLeft(0);
+	r.setTop(parentShape()->geometry().height() / 2 - GATE_CP_SIZE / 2);
+	r.setWidth(GATE_CP_SIZE);
+	r.setHeight(GATE_CP_SIZE);
     setRect(r);
 }
 
@@ -123,7 +122,11 @@ void QLogicCircuitOutputShape::paint(QPainter *painter, const QStyleOptionGraphi
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-	painter->setPen(qdiagramproperty_cast<QPen>(property("lineStyle")));
+	QPen pen = qdiagramproperty_cast<QPen>(property("lineStyle"));
+	if (hasProperty("ghost") && property("ghost").toBool()){
+		pen.setColor(QColor("firebrick"));
+	}
+	painter->setPen(pen);
     painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
     painter->drawPath(shape());
     if (property("signalType").toString() == "analog"){

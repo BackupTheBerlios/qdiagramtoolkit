@@ -99,6 +99,7 @@ QLogicCircuitGateShape::QLogicCircuitGateShape(const QMap<QString, QVariant> & p
     setAcceptHoverEvents(true);
 	initGeometry(300, 200);
 
+	addProperty("background", QDiagramToolkit::Brush, false, properties.value("background").toString());
     addProperty("gateType", QDiagramToolkit::String, true, properties.value("gateType").toString());
 	addProperty("textFont", QDiagramToolkit::Font, true, properties.value("textFont"));
     addProperty("showState", QDiagramToolkit::Bool, false, false);

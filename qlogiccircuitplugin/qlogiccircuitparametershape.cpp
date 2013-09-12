@@ -159,9 +159,13 @@ void QLogicCircuitParameterShape::paint(QPainter *painter, const QStyleOptionGra
         painter->setFont(f);
 
         QRectF r(boundingRect());
-		r.setWidth(15);
+		r.setWidth(150);
         painter->drawText(r, Qt::AlignRight, "1\n0");
     }
+
+	painter->setFont(pointToPixel(qdiagramproperty_cast<QFont>(property("textFont"))));
+	QRectF r(boundingRect().adjusted(250, 0, 0, 0));
+    painter->drawText(r, Qt::AlignLeft | Qt::AlignVCenter, property("name").toString());
 
     if (property("state").toBool()){
         painter->save();

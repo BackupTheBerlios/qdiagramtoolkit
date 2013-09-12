@@ -94,6 +94,11 @@ public:
 	void bringToFront();
 
 	virtual QList<QAction*> createActions(QWidget* parent);
+	/**
+	 * Returns the user data as set in QAbstractDiagramGraphicsItem::setData.
+	 * @see setData()
+	 */
+	QVariant data() const;
     /**
       * Returns the diagram containing this item.
       */
@@ -143,6 +148,11 @@ public:
       * @see QDiagram::selectionColor()
       */
     QColor selectionColor() const;
+	/**
+	 * Sets the item's internal data to the given @p data.
+	 * @see data()
+	 */
+	void setData(const QVariant & data);
     /**
       * Sets the item's pen to pen. If no pen is set, the line will be painted using a black solid 1-width pen.
       */
@@ -256,6 +266,7 @@ private:
 
     QList<QAction*> m_actions;
     bool m_blockUndoCommands;
+	QVariant m_data;
 	int m_index;
     QDiagramMetaData* m_metadata;
 

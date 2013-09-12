@@ -23,11 +23,14 @@
         <file alias="function.compare.less">resources/compare_less.ico</file>
         <file alias="function.compare.less_or_equal">resources/compare_less_or_equal.ico</file>
         <file alias="function.compare.greator_or_equal">resources/compare_greater_or_equal.ico</file>
+        <file alias="flipflop.jk">resources/flipflop.jk.ico</file>
         <file alias="flipflop.asyncron">resources/flipflop.asyncron.ico</file>
+        <file alias="flipflop.sr.gated">resources/flipflop.sr.gated.ico</file>
         <file alias="function.counter.operating_hours">resources/operating_hours_counter.ico</file>
         <file alias="parameter.analog">resources/parameter_analog.ico</file>
         <file alias="parameter.digital">resources/parameter_digital.ico</file>
         <file alias="function.timer">resources/timer.ico</file>
         <file alias="value.analog">resources/value_analog.ico</file>
+        <file alias="input.flag">Resources/input.flag.ico</file>
     </qresource>
 </RCC>

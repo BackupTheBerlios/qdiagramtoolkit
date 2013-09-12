@@ -21,11 +21,13 @@
 
 #include "qlogiccircuitplugin.h"
 
+#include "qlogiccircuitflipflopshape.h"
 #include "qlogiccircuitfunctionshape.h"
 #include "qlogiccircuitgateshape.h"
 #include "qlogiccircuitinputshape.h"
 #include "qlogiccircuitoutputshape.h"
 #include "qlogiccircuitparametershape.h"
+#include "qlogiccircuitvalueshape.h"
 //												Shape at End
 // Shape Start	Property Name	Property Value
 // Input		Signal Type		Analog
@@ -70,7 +72,21 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
     }
     //
     //
-	if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
+	if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFlipFlopShape::staticItemClass()){
+		if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFlipFlopShape::staticItemClass()){
+			return true;
+		} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+			if (endPoint->parentShape()->property("function") == "timer"){
+				if (endPoint->id() == "trigger"){
+					return true;
+				}
+			}
+		} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
+			return true;
+		} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
+			return true;
+		}
+	} else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
 		if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass() && endPoint->connections().size() < endPoint->maxConnections()){
 			return true;
 		} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitInputShape::staticItemClass()){
@@ -100,6 +116,18 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
                     return true;
                 }
             }
+		} else if (startPoint->parentShape()->property("function") == "computation"){
+            if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+				if (endPoint->parentShape()->property("function") == "comparator"){
+                    return true;
+				} else if (endPoint->parentShape()->property("function") == "computation"){
+                    return true;
+                }
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
+                if (endPoint->parentShape()->property("signalType") == "analog"){
+                    return true;
+                }
+            }
         } else if (startPoint->parentShape()->property("function") == "operatingHoursCounter"){
             if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
                 if (endPoint->parentShape()->property("signalType") == "analog"){
@@ -118,27 +146,51 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
     } else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitInputShape::staticItemClass()){
         if (startPoint->parentShape()->property("signalType").toString() == "analog"){
             if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
-                if (endPoint->parentShape()->property("Function") == "comparator"){
+                if (endPoint->parentShape()->property("function") == "comparator"){
+                    return true;
+				} else if (endPoint->parentShape()->property("function") == "computation"){
                     return true;
                 }
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
+		        if (endPoint->parentShape()->property("signalType").toString() == "analog"){
+					return true;
+				}
             }
         } else if (startPoint->parentShape()->property("signalType").toString() == "digital"){
-            if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
-				if (endPoint->parentShape()->property("Function") == "timer"){
+			if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFlipFlopShape::staticItemClass()){
+				return true;
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+				if (endPoint->parentShape()->property("function") == "timer"){
 					if (endPoint->id() == "trigger"){
 						return true;
 					}
 				}
 			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
                 return true;
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitOutputShape::staticItemClass()){
+		        if (endPoint->parentShape()->property("signalType").toString() == "digital"){
+					return true;
+				}
             }
+		} else if (startPoint->parentShape()->property("signalType").toString() == "flag"){
+			if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
+				if (endPoint->parentShape()->property("function") == "timer"){
+					if (endPoint->id() == "trigger"){
+						return true;
+					}
+				}
+			} else if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitGateShape::staticItemClass()){
+				return true;
+			}
         }
 	} else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitParameterShape::staticItemClass()){
         if (startPoint->parentShape()->property("signalType").toString() == "analog"){
 			if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
-				if (endPoint->parentShape()->property("Function") == "comparator"){
+				if (endPoint->parentShape()->property("function") == "comparator"){
 					return true;
-				} else if (endPoint->parentShape()->property("Function").toString() == "timer"){
+				} else if (endPoint->parentShape()->property("function") == "computation"){
+					return true;
+				} else if (endPoint->parentShape()->property("function").toString() == "timer"){
 					if (endPoint->id() == "parameter"){
 						return true;
 					}
@@ -149,11 +201,13 @@ bool QLogicCircuitShapeConnector::canConnect(QAbstractDiagramShapeConnectionPoin
 				return true;
 			}
 		}
-	} else if (startPoint->parentShape()->metaData()->itemClass() == "value"){
+	} else if (startPoint->parentShape()->metaData()->itemClass() == QLogicCircuitValueShape::staticItemClass()){
 		if (endPoint->parentShape()->metaData()->itemClass() == QLogicCircuitFunctionShape::staticItemClass()){
-			if (endPoint->parentShape()->property("Function") == "comparator"){
+			if (endPoint->parentShape()->property("function") == "comparator"){
 				return true;
-			} else if (endPoint->parentShape()->property("Function") == "timer"){
+			} else if (endPoint->parentShape()->property("function") == "computation"){
+				return true;
+			} else if (endPoint->parentShape()->property("function") == "timer"){
 				if (endPoint->id() == "parameter"){
 					return true;
 				}

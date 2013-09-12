@@ -168,6 +168,8 @@ public:
       * Returns a list of diagram items.
       */
     QList<QAbstractDiagramGraphicsItem*> items(int page = -1) const;
+
+	QList<QAbstractDiagramGraphicsItem*> itemsByProperty(const QString & name, const QVariant & value) const;
 	/**
 	 *
 	 */
